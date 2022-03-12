@@ -1,0 +1,11 @@
+{
+  "name": "vkn-server",
+  "version": "1.0.0",
+  "description": "RESTful API server using NodeJS. ExpressJS framework to create web application  and Socket.io framework to realtime communications",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
