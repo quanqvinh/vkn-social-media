@@ -1,0 +1,16 @@
+@import "../../../assets/styles/variables";
+
+.commentContainer {
+   display: flex;
+   padding-left: 1.3em;
+   font-size: 13px;
+   margin-bottom: 0.4em;
+
+   .accountName {
+      font-weight: 500;
+   }
+
+   .comment {
+      margin-left: 0.5em;
+   }
+}
