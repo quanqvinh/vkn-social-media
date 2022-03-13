@@ -19,4 +19,5 @@ const getUserById = async (userId) => {
    }
 };
 
+const kien = "1";
 export { getAllUsers, getUserById };
