@@ -1,16 +1,19 @@
 import "./home.scss";
 import Posts from "../Posts/Posts";
 import Sidebar from "../SideBar/SideBar";
-import Footer from "../Footer/Footer";
+import Header from "../Header/Header";
 
 const Home = () => {
    return (
-      <main>
-         <div className="container">
-            <Posts />
-            <Sidebar />
-         </div>
-      </main>
+      <>
+         <Header />
+         <main>
+            <div className="container">
+               <Posts />
+               <Sidebar />
+            </div>
+         </main>
+      </>
    );
 };
 

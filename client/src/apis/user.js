@@ -19,14 +19,4 @@ const getUserById = async (userId) => {
    }
 };
 
-const getUserById1 = async (userId) => {
-   try {
-      let res = await axios.get(`${url}/${userId}`);
-      return res.data;
-   } catch (error) {
-      console.log(error.message);
-   }
-};
-
-const kien = "1";
 export { getAllUsers, getUserById };

@@ -9,7 +9,7 @@
    border-bottom: 1px solid $border-color-grey;
 
    .container {
-      padding: 1em 0px 0.9em 20px;
+      padding: 0.8em 0px 0.8em 20px;
       display: flex;
       align-content: center;
       justify-content: space-between;
@@ -18,7 +18,7 @@
 
       .logo {
          padding: 0 1em;
-         width: 100px;
+         width: 110px;
 
          &:hover {
             cursor: pointer;
