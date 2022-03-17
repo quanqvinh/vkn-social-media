@@ -1,5 +1,6 @@
 import axios from "axios";
 import queryString from "query-string";
+import Qs from 'qs';
 
 const axiosClient = axios.create({
    baseURL: process.env.REACT_APP_API_URL,
@@ -13,6 +14,14 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async (config) => {
    // Handle token here ...
+   window.console.log(config);
+   config.paramsSerializer = params => {
+    // Qs is already included in the Axios package
+    return Qs.stringify(params, {
+      arrayFormat: "brackets",
+      encode: false
+    });
+  };
    return config;
 });
 
