@@ -12,5 +12,5 @@ route(app);
 const port = process.env.PORT;
 const host = process.env.HOST;
 app.listen(port, host, () => {
-	console.log(`Server is listening at http://${host}:${port}`);
+	console.log(`Server is listening at http://${host}:${port}/api`);
 });

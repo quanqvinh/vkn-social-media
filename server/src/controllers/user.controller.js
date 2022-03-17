@@ -1,6 +1,16 @@
 module.exports = {
-	// [GET] /api/user
-	index(req, res, next) {
-		res.json(req.query);
-	}
+	// 
+	getUserInformation(req, res, next) {
+		res.send('getUser');
+	},
+
+	// 
+	updateUserInformation(req, res, next) {
+		res.send('updateUser');
+	},
+
+	// 
+	deleteUserInformation(req, res, next) {
+		res.send('deleteUser');
+	},
 }
