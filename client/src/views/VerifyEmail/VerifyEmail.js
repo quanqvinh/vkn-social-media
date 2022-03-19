@@ -84,7 +84,9 @@ const VerifyEmail = () => {
 
             console.log(res);
          } catch (error) {
-            console.log("Can't find params user_id and token to verify");
+            console.log(
+               "Can't find params user_id and token to verify kien dep trai 108 ahihi"
+            );
          }
       };
       fetchVerify();
