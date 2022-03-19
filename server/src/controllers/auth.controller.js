@@ -7,57 +7,61 @@ const secretKey = process.env.SECRET_KEY;
 module.exports = {
    // [POST] /api/signup
    async signup(req, res, next) {
-      const params = req.query;
-      console.log(params);
-      // Check username exists
-      let user = await User.findOne({
-         username: params.username,
-      });
-      if (user)
-         return res.status(400).json({
-            status: "error",
-            message: "Username already exists!",
-         });
-
-      // Check email is used ?
-      user = await User.findOne({
-         email: params.email,
-      });
-      if (user)
-         return res.status(400).json({
-            status: "error",
-            message: "User with given email already exist!",
-         });
-
-      // Save account to database
-      let token = jwt.sign(
-         {
+      try {
+         const params = req.body;
+         console.log(params);
+         // Check username exists
+         let user = await User.findOne({
             username: params.username,
-            ext: Math.floor(Date.now() / 1000) + 3600,
-            sub: "verify_account",
-         },
-         secretKey
-      );
+         });
+         if (user)
+            return res.status(400).json({
+               status: "error",
+               message: "Username already exists!",
+            });
 
-      user = await new User({
-         username: params.username,
-         email: params.email,
-         auth: {
-            password: crypto.hash(params.password),
-         },
-         name: params.name,
-      }).save();
+         // Check email is used ?
+         user = await User.findOne({
+            email: params.email,
+         });
+         if (user)
+            return res.status(400).json({
+               status: "error",
+               message: "User with given email already exist!",
+            });
 
-      // Send mail
-      mail.verify({
-         to: params.email,
-         user_id: user._id,
-         token,
-      });
-      res.status(201).json({
-         status: "success",
-         message: "Account is created",
-      });
+         // Save account to database
+         let token = jwt.sign(
+            {
+               username: params.username,
+               ext: Math.floor(Date.now() / 1000) + 3600,
+               sub: "verify_account",
+            },
+            secretKey
+         );
+
+         user = await new User({
+            username: params.username,
+            email: params.email,
+            auth: {
+               password: crypto.hash(params.password),
+            },
+            name: params.name,
+         }).save();
+
+         // Send mail
+         mail.verify({
+            to: params.email,
+            user_id: user._id,
+            token,
+         });
+         res.status(201).json({
+            status: "success",
+            message: "Account is created",
+         });
+      } catch (error) {
+         console.log(error.message);
+      }
    },
 
    // [GET] /api/login
