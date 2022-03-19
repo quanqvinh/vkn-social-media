@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const engine = require('express-handlebars');
+const hbs = engine.create({ extname: '.hbs' });
 
 const transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -8,13 +10,15 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-function sendMail({to, subject, text, html}) {
+async function verify({to, user_id, token}) {
 	let mailOptions = {
 		from: process.env.OUR_EMAIL,
 		to,
-		subject,
-		text, 
-		html
+		subject: 'VKN verification email',
+		html: await hbs.render('./src/templates/verify.mail.hbs', { 
+			user_id, 
+			token 
+		})
 	};
 	transporter.sendMail(mailOptions, (err, info) => {
 		if (err)
@@ -24,4 +28,22 @@ function sendMail({to, subject, text, html}) {
 	})
 };
 
-module.exports = { sendMail };
+async function resetPassword({ to, user_id, token }) {
+	let mailOptions = {
+		from: process.env.OUR_EMAIL,
+		to,
+		subject: 'VKN reset password email',
+		html: await hbs.render('./src/templates/resetPassword.mail.hbs', { 
+			user_id, 
+			token 
+		})
+	};
+	transporter.sendMail(mailOptions, (err, info) => {
+		if (err)
+			console.log(err);
+		else 
+			console.log('Email send:', info.response);
+	})
+}
+
+module.exports = { verify, resetPassword };

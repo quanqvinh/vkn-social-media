@@ -1,14 +1,14 @@
 const User = require('../models/user.model');
 const crypto = require('../utils/crypto');
-const jwt = require('jsonwebtoken');
 const mail = require('../utils/nodemailer');
-const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const secretKey = process.env.SECRET_KEY;
 
 module.exports = {
 	// [POST] /api/signup
 	async signup(req, res, next) {
-		const params = req.body;
+		const params = req.query;
+		console.log(params);
 		// Check username exists 
 		let user = await User.findOne({
 			username: params.username
@@ -46,13 +46,10 @@ module.exports = {
 		}).save();
 
 		// Send mail
-		mail.sendMail({
+		mail.verify({
 			to: params.email,
-			subject: 'VKN verification email',
-			text: `Hi ${params.name}`,
-			// html: await fs.readFileSync('../templates/verify.mail.html')
-			// html: `<a href='http://localhost:3000/auth/verify-email/${user._doc._id}/${token}'>Click here to verify</a>`
-			html: `<a href='http://localhost:7070/api/verify/${user._doc._id}/${token}'>Click here to verify</a>`
+			user_id: user._id,
+			token
 		});
 		res.status(201).json({
 			status: 'success',
