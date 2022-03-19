@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
+const authSchema = require('./schemas/auth.schema');
 const ObjectId = mongoose.Types.ObjectId;
 
 const UserSchema = new mongoose.Schema({
@@ -8,26 +9,20 @@ const UserSchema = new mongoose.Schema({
 		unique: true,
 		required: true
 	},
-	password: {
-		type: String,
-		required: true
-	},
 	email: {
 		type: String,
 		unique: true,
 		required: true
 	},
+	auth: authSchema,
 	name: {
-		type: String,
-		required: true
+		type: String
 	},
 	gender: {
-		type: String,
-		required: true
+		type: String
 	},
 	dob: {
-		type: Date,
-		required: true
+		type: Date
 	},
 	bio: {
 		type: String
@@ -52,7 +47,7 @@ const UserSchema = new mongoose.Schema({
 	versionKey: false
 });
 
-UserSchema.plugins(mongooseDelete, {
+UserSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: 'all'
 })

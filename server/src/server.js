@@ -2,10 +2,15 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
-const db = require('./config/db');
+const db = require('./config/database');
 const route = require('./routes');
 
 db.connect(process.env.STRING_CONNECTION);
+
+// Test
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+//
 
 route(app);
 
