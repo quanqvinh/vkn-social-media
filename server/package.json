@@ -13,6 +13,7 @@
     "cors": "2.8.5",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.0",
+    "email-existence": "^0.1.6",
     "express": "^4.17.3",
     "express-handlebars": "^6.0.3",
     "jsonwebtoken": "^8.5.1",

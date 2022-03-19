@@ -111,12 +111,12 @@ module.exports = {
    async verifyEmail(req, res, next) {
       // Find user with id
       let user = await User.findOne({
-         _id: req.params.id,
+         _id: req.query.user_id,
       });
       if (!user)
          return res.status(404).json({
             status: "error",
-            message: "Username is not found",
+            message: "Invalid link",
          });
 
       // Check token is valid
@@ -126,7 +126,7 @@ module.exports = {
             message: "Invalid link",
          });
       let errorMessage;
-      jwt.verify(req.params.token, secretKey, (err, decoded) => {
+      jwt.verify(req.query.token, secretKey, (err, decoded) => {
          if (err) {
             if (err.name === "TokenExpiredError") errorMessage = "Expired link";
             else errorMessage = "Invalid link";
@@ -148,7 +148,7 @@ module.exports = {
       await user.save();
       res.status(200).json({
          status: "success",
-         status: "Email is verified!",
+         message: "Email is verified!",
       });
    },
 };
