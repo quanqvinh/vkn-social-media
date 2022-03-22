@@ -10,15 +10,19 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-async function verify({to, user_id, token}) {
+async function verify({to, username, token}) {
 	let mailOptions = {
 		from: process.env.OUR_EMAIL,
 		to,
 		subject: 'VKN verification email',
-		html: await hbs.render('./src/templates/verify.mail.hbs', { 
-			user_id, 
-			token 
-		})
+		html: await hbs.render('./src/templates/verify.mail.hbs', { token, username }),
+		attachments: [
+			{
+				filename: 'logo_vkn.png',
+				path: './src/templates/images/logo_vkn.png',
+				cid: 'logo_image'
+			}
+		]
 	};
 	transporter.sendMail(mailOptions, (err, info) => {
 		if (err)
@@ -28,15 +32,19 @@ async function verify({to, user_id, token}) {
 	})
 };
 
-async function resetPassword({ to, user_id, token }) {
+async function resetPassword({ to, username, token }) {
 	let mailOptions = {
 		from: process.env.OUR_EMAIL,
 		to,
 		subject: 'VKN reset password email',
-		html: await hbs.render('./src/templates/resetPassword.mail.hbs', { 
-			user_id, 
-			token 
-		})
+		html: await hbs.render('./src/templates/resetPassword.mail.hbs', { token, username }),
+		attachments: [
+			{
+				filename: 'logo_vkn.png',
+				path: './src/templates/images/logo_vkn.png',
+				cid: 'logo_image'
+			}
+		]
 	};
 	transporter.sendMail(mailOptions, (err, info) => {
 		if (err)

@@ -5,5 +5,5 @@ const authRouter = require('./auth.router');
 module.exports = (app) => {
 	app.use('/api/user', userRouter);
 	app.use('/api/post', postRouter);
-	app.use('/api', authRouter);
+	app.use('/api/auth', authRouter);
 };
