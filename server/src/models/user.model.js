@@ -16,19 +16,19 @@ const UserSchema = new mongoose.Schema({
 	},
 	auth: authSchema,
 	name: {
-		type: String
+		type: String, default: null
 	},
 	gender: {
-		type: String
+		type: String, default: null
 	},
 	dob: {
-		type: Date
+		type: Date, default: null
 	},
 	bio: {
-		type: String
+		type: String, default: null
 	},
 	avatar: {
-		type: String
+		type: String, default: null
 	},
 	posts: [{
 		type: ObjectId,

@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-async function verify({to, username, token}) {
+async function sendVerify({to, username, token}) {
 	let mailOptions = {
 		from: process.env.OUR_EMAIL,
 		to,
@@ -32,7 +32,7 @@ async function verify({to, username, token}) {
 	})
 };
 
-async function resetPassword({ to, username, token }) {
+async function sendResetPassword({ to, username, token }) {
 	let mailOptions = {
 		from: process.env.OUR_EMAIL,
 		to,
@@ -54,4 +54,4 @@ async function resetPassword({ to, username, token }) {
 	})
 }
 
-module.exports = { verify, resetPassword };
+module.exports = { sendVerify, sendResetPassword };
