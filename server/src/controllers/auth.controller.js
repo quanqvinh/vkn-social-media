@@ -291,14 +291,8 @@ module.exports = {
             }
             else {
                let user = await User.findOne({ username: decoded.username });
-               // console.log(user);
-               if (crypto.match(user.auth.password, params.oldPassword)) {
-                  console.log('match');
-                  user.auth.password = crypto.hash(params.newPassword);
-                  await user.save({ session });
-               }
-               else 
-                  errorMessage = "Old password is incorrect";
+               user.auth.password = crypto.hash(params.newPassword);
+               await user.save({ session });
             }
          });
          if (errorMessage) 
