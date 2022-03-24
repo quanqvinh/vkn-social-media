@@ -1,12 +1,23 @@
+const mongoose = require('mongoose');
 const User = require("../models/user.model");
+const Token = require("../models/token.model");
 const crypto = require("../utils/crypto");
 const mail = require("../utils/nodemailer");
 const jwt = require("jsonwebtoken");
+
 const secretKey = process.env.SECRET_KEY;
+const refreshSecretKey = process.env.REFRESH_SECRET_KEY;
+
+const requestVerifyTokenLife = process.env.REQUEST_VERIFY_TOKEN_LIFE;
+const requestResetTokenLife = process.env.REQUEST_RESET_TOKEN_LIFE;
+const tokenLife = process.env.ACCESS_TOKEN_LIFE;
+const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
 
 module.exports = {
    // [POST] /api/auth/signup
    async signup(req, res, next) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
       try {
          const params = req.body;
          console.log(params);
@@ -38,34 +49,37 @@ module.exports = {
                password: crypto.hash(params.password),
             },
             name: params.name,
-         }).save();
+         }).save({ session });
          
          let token = jwt.sign(
             {
-               email: params.email,
-               ext: Math.floor(Date.now() / 1000) + 15 * 60,
-               sub: "verify_account",
+               username: params.username,
+               email: params.email
             },
-            secretKey
+            secretKey, { expiresIn: requestVerifyTokenLife }
          );
 
          // Send mail
-         mail.verify({
+         mail.sendVerify({
             to: params.email,
+            username: params.username,
             token,
          });
+         await session.commitTransaction();
          res.status(201).json({
             status: "success",
             message: "Account is created",
          });
       } 
       catch (error) {
+         await session.abortTransaction();
          console.log(error.message);
          res.status(500).json({
             status: "error",
             message: error.message
          });
       }
+      session.endSession();
    },
 
    // [POST] /api/auth/request/verify-email
@@ -75,15 +89,13 @@ module.exports = {
          let token = jwt.sign(
             {
                username: params.username,
-               email: params.email,
-               ext: Math.floor(Date.now() / 1000) + 3600,
-               sub: "verify_account",
+               email: params.email
             },
-            secretKey
+            secretKey, { expiresIn: requestVerifyTokenLife }
          );
 
          // Send mail
-         mail.verify({
+         mail.sendVerify({
             to: params.email,
             username: params.username,
             token,
@@ -104,6 +116,8 @@ module.exports = {
 
    // [PATCH] /api/auth/verify-email
    async verifyEmail(req, res, next) {
+      const session = await User.startSession();
+      session.startTransaction();
       try {
          const params = req.body;
          console.log(params);
@@ -122,7 +136,7 @@ module.exports = {
                   errorMessage = "Invalid link";
                else {
                   user.auth.verified = true;
-                  await user.save();
+                  await user.save({ session });
                }
             }
          });
@@ -131,38 +145,37 @@ module.exports = {
                status: "error",
                message: errorMessage,
             });
-
+         await session.commitTransaction();
          res.status(200).json({
             status: "success",
             message: "Email is verified",
          });
       }
       catch (error) {
+         await session.abortTransaction();
          console.log(error.message);
          res.status(500).json({
             status: "error",
             message: error.message
          });
       }
+      session.endSession();
    },
 
-   // [GET] /api/auth/login
+   // [POST] /api/auth/login
    async login(req, res, next) {
+      const session = await Token.startSession();
+      session.startTransaction();
       try {
          // Find user with id or email
-         const { username, password } = req.query;
-         console.log(req.query);
-         // console.log(username, password);
-         let user = username.includes("@")
-            ? await User.findOne({
-               email: username,
-            })
-            : await User.findOne({
-               username,
-            });
+         const { username, password } = req.body;
+         console.log(req.body);
+         let user = await User.findOne({ $or: [
+            { username }, { email: username }
+         ]});
 
          if (!user || user.auth.isAdmin)
-            return res.status(404).json({
+            return res.status(401).json({
                status: "error",
                message: "Username or email is not found",
             });
@@ -181,28 +194,35 @@ module.exports = {
                email: user.auth.email
             });
 
-         let token = jwt.sign({
-               username,
-               isAdmin: user.auth.isAdmin,
-               sub: "access_token",
-            },
-            secretKey
-         );
+         let payload = {
+            username,
+            isAdmin: user.auth.isAdmin
+         };
 
+         let accessToken = jwt.sign(payload, secretKey, { expiresIn: tokenLife });
+         console.log(typeof refreshTokenLife);
+         console.log(refreshTokenLife);
+         let refreshToken = jwt.sign(payload, refreshSecretKey, { expiresIn: refreshTokenLife });
+
+         await Token.create({ refreshToken, payload }, { session });
+         await session.commitTransaction();
          res.status(200).json({
             status: "success",
             message: "Login successful",
-            accessToken: token,
+            accessToken,
+            refreshToken,
             data: user,
          });
       }
       catch (error) {
+         await session.abortTransaction();
          console.log(error.message);
          res.status(500).json({
             status: "error",
             message: error.message
          });
       }
+      session.endSession();
    },
 
    // [POST] /api/auth/request/reset-password
@@ -229,11 +249,10 @@ module.exports = {
          let token = jwt.sign({
             username: user.username,
             email: user.email,
-            ext: Math.floor(Date.now() / 1000) + 5 * 60,
-            sub: "reset_password",
+            ext: Math.floor(Date.now() / 1000) + requestResetTokenLife,
          }, secretKey);
 
-         mail.resetPassword({
+         mail.sendResetPassword({
             to: user.email,
             username: user.username,
             token
@@ -256,6 +275,8 @@ module.exports = {
 
    // [PATCH] /api/auth/reset-password
    async resetPassword(req, res, next) {
+      const session = await User.startSession();
+      session.startTransaction();
       try {
          let params = req.body;
          console.log(params);
@@ -274,7 +295,7 @@ module.exports = {
                if (crypto.match(user.auth.password, params.oldPassword)) {
                   console.log('match');
                   user.auth.password = crypto.hash(params.newPassword);
-                  await user.save();
+                  await user.save({ session });
                }
                else 
                   errorMessage = "Old password is incorrect";
@@ -285,10 +306,62 @@ module.exports = {
                status: "error",
                message: errorMessage
             });
-         
+         await session.commitTransaction()
          res.status(200).json({
             status: "success",
             message: "Password is updated",
+         });
+      }
+      catch (error) {
+         console.log(error.message);
+         res.status(500).json({
+            status: "error",
+            message: error.message
+         });
+      }
+      session.endSession();
+   },
+
+   // [POST] /api/auth/refresh-token
+   async refreshToken(req, res, next) { 
+      try {
+         let { refreshToken } = req.body;
+         if (!refreshToken)
+            return res.status(400).json({
+               status: 'error',
+               message: 'Refresh token is invalid'
+            });
+         
+         let token = await Token.findOne({refreshToken});
+         if (!token)
+            return res.status(400).json({
+               status: 'error',
+               message: 'Refresh token does not exist'
+            });
+         
+         let errorMessage;
+         jwt.verify(refreshToken, refreshSecretKey, (err, decoded) => {
+            if (err) {
+               if (err.name === "TokenExpiredError") 
+                  errorMessage = "Expired refresh token. Login again to create new one";
+               else 
+                  errorMessage = "Invalid refresh token. Login again";
+            }
+         });
+         if (errorMessage) {
+            Token.deleteOne({refreshToken});
+            return res.status(401).json({
+               status: 'error',
+               message: errorMessage
+            });
+         }
+         
+         let newAccessToken = jwt.sign(token.payload, secretKey, { expiresIn: tokenLife });
+
+         res.status(201).json({
+            status: 'success',
+            accessToken: newAccessToken,
+            refreshToken
          });
       }
       catch (error) {

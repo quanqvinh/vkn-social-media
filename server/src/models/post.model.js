@@ -9,7 +9,7 @@ const PostSchema = new mongoose.Schema({
 	comments: [{ type: ObjectId, ref: 'Comment' }]
 }, {
 	timestamps: true,
-	versionKeys: false
+	versionKey: false
 });
 
 module.exports = mongoose.model('Post', PostSchema);

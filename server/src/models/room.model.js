@@ -6,7 +6,7 @@ const RoomSchema = new mongoose.Schema({
 	messages: [ MessageSchema ]
 }, {
 	timestamps: true,
-	versionKeys: false
+	versionKey: false
 });
 
 module.exports = mongoose.model('Room', RoomSchema);

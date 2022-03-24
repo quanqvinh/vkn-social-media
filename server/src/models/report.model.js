@@ -12,7 +12,7 @@ const ReportSchema = new mongoose.Schema({
 	}
 }, {
 	timestamps: true,
-	versionKeys: false
+	versionKey: false
 });
 
 module.exports = mongoose.model('Report', ReportSchema);
