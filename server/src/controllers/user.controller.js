@@ -1,14 +1,10 @@
 module.exports = {
-	// [GET] /api/user
-	getUserInformation(req, res, next) {
-		res.send('getUser');
+	// [GET] /api/user/me/profile
+	getMyProfile(req, res, next) {
+		res.send('profile');
 	},
-	// [PATCH] /api/user
-	updateUserInformation(req, res, next) {
-		res.send('updateUser');
-	},
-	// [DELETE] /api/user
-	deleteUserInformation(req, res, next) {
-		res.send('deleteUser');
+	// [GET] /api/user/
+	getUserProfile(req, res, next) {
+		res.send('user profile');
 	},
 };

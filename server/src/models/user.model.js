@@ -9,6 +9,10 @@ const UserSchema = new mongoose.Schema({
 		unique: true,
 		required: true
 	},
+	usernameUpdatedAt: {
+		type: Date,
+		default: new Date(Date.now())
+	},
 	email: {
 		type: String,
 		unique: true,
@@ -16,19 +20,24 @@ const UserSchema = new mongoose.Schema({
 	},
 	auth: authSchema,
 	name: {
-		type: String, default: null
+		type: String,
+		default: null
 	},
 	gender: {
-		type: String, default: null
+		type: String,
+		default: null
 	},
 	dob: {
-		type: Date, default: null
+		type: Date,
+		default: null
 	},
 	bio: {
-		type: String, default: null
+		type: String,
+		default: null
 	},
 	avatar: {
-		type: String, default: null
+		type: String,
+		default: null
 	},
 	posts: [{
 		type: ObjectId,
@@ -41,7 +50,11 @@ const UserSchema = new mongoose.Schema({
 	rooms: [{
 		type: ObjectId,
 		ref: 'Room'
-	}]
+	}],
+	deletedAt: {
+		type: Date,
+		index: { expireAfterSeconds: 60*60*24*30 }
+	}
 }, {
 	timestamps: true,
 	versionKey: false

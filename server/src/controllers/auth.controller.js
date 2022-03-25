@@ -26,7 +26,7 @@ module.exports = {
             username: params.username,
          });
          if (user)
-            return res.status(400).json({
+            return res.status(406).json({
                status: "error",
                message: "Username already exists",
             });
@@ -36,7 +36,7 @@ module.exports = {
             email: params.email,
          });
          if (user)
-            return res.status(400).json({
+            return res.status(406).json({
                status: "error",
                message: "User with given email already exist",
             });
@@ -195,7 +195,7 @@ module.exports = {
             });
 
          let payload = {
-            username,
+            user_id: user._id,
             isAdmin: user.auth.isAdmin
          };
 
@@ -291,14 +291,8 @@ module.exports = {
             }
             else {
                let user = await User.findOne({ username: decoded.username });
-               // console.log(user);
-               if (crypto.match(user.auth.password, params.oldPassword)) {
-                  console.log('match');
-                  user.auth.password = crypto.hash(params.newPassword);
-                  await user.save({ session });
-               }
-               else 
-                  errorMessage = "Old password is incorrect";
+               user.auth.password = crypto.hash(params.newPassword);
+               await user.save({ session });
             }
          });
          if (errorMessage) 
