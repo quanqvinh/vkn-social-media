@@ -7,4 +7,5 @@ module.exports = {
 	getUserProfile(req, res, next) {
 		res.send('user profile');
 	},
+	// [PATCH]
 };
