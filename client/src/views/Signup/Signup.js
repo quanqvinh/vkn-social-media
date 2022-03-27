@@ -3,6 +3,7 @@ import "./signup.scss";
 import { Link } from "react-router-dom";
 import logo from "../../assets/images/instagramLogo.png";
 import Footer from "../Footer/Footer";
+import ResMessage from "../Global/ResMessage";
 import authApi from "../../apis/authApi";
 
 import axios from "axios";
@@ -14,6 +15,7 @@ export default function Signup() {
    const [username, setUsername] = useState("");
    const [password, setPassword] = useState("");
    const [isSignUp, setIsSignUp] = useState(false);
+   const [resMessage, setResMessage] = useState("");
 
    const handelCheckSignUp = () => {
       if (!email || !fullname || !username || !password) return false;
@@ -24,7 +26,7 @@ export default function Signup() {
    const handelSignUp = (e) => {
       e.preventDefault();
 
-      let data1 = {
+      let data = {
          email,
          name: fullname,
          username,
@@ -33,26 +35,21 @@ export default function Signup() {
 
       const signUp = async () => {
          try {
-            // authApi.signUp(data);
-            let res = await axios.post(
-               "http://localhost:7070/api/signup",
-               data1
-            );
+            let res = await authApi.signUp(data);
 
             console.log(res);
          } catch (error) {
             if (error.response) {
-               // The request was made and the server responded with a status code
-               // that falls out of the range of 2xx
-               console.log("if", error.response.data);
-               console.log(error.response.status);
-               console.log(error.response.headers);
-            } else if (error.request) {
-               console.log("else if", error.request);
-            } else {
-               // Something happened in setting up the request that triggered an Error
-               console.log("Error", error.message);
+               let data = error.response.data;
+               setResMessage(data.message);
             }
+
+            // } else if (error.request) {
+            //    console.log("else if", error.request);
+            // } else {
+            //    // Something happened in setting up the request that triggered an Error
+            //    console.log("Error", error.message);
+            // }
          }
       };
 
@@ -73,6 +70,12 @@ export default function Signup() {
                      </h4>
                      <form onSubmit={handelSignUp}>
                         <div className="form__field">
+                           {resMessage && (
+                              <ResMessage
+                                 resMessage={resMessage}
+                                 callBy="Signup"
+                              />
+                           )}
                            <input
                               type="email"
                               id="Email"
