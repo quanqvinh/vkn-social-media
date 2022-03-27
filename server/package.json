@@ -19,7 +19,8 @@
     "method-override": "^3.0.0",
     "mongoose": "^6.2.7",
     "mongoose-delete": "^0.5.4",
-    "nodemailer": "^6.7.2"
+    "nodemailer": "6.7.2",
+    "nodemailer-smtp-transport": "^2.7.4"
   },
   "devDependencies": {
     "morgan": "^1.10.0",

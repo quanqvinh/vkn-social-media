@@ -37,7 +37,7 @@ export default function Signup() {
          try {
             let res = await authApi.signUp(data);
 
-            console.log(res);
+            setResMessage(res.message);
          } catch (error) {
             if (error.response) {
                let data = error.response.data;
