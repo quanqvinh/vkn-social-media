@@ -133,8 +133,23 @@
    width: 85%;
    margin: 0 auto;
 
+   @include small {
+      width: 95%;
+   }
+
    .form__field {
       margin: 0.5rem 0;
+
+      .res-message {
+         font-size: 16px;
+         font-weight: 500;
+         color: red;
+         margin-bottom: 5px;
+
+         @include medium {
+            font-size: 15px;
+         }
+      }
 
       input {
          display: block;

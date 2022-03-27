@@ -3,7 +3,6 @@ import axiosClient from "./axiosClient";
 const authApi = {
    signUp: (data) => {
       const url = "/auth/signup";
-      console.log(axiosClient.post(url, data));
       return axiosClient.post(url, data);
    },
 
