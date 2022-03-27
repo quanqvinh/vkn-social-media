@@ -5,20 +5,20 @@ const ResMessage = (props) => {
    const { resMessage, callBy } = props;
    const [noti, setNoti] = useState("");
 
-   const listKeys = ["Username", "User with", "Account"];
-   const listNoties = [
+   const listKeysSignup = ["Username", "User with", "Account"];
+   const listNotiesSignup = [
       "Username already exists",
       "User with given email already exist",
-      "Account is created",
+      "Verification has been sent to your email",
    ];
 
    useEffect(() => {
       if (callBy === "Signup") {
-         listKeys.every((key, index) => {
+         listKeysSignup.every((key, index) => {
             if (resMessage.includes(key)) {
                console.log(index);
-               setNoti(listNoties[index]);
-               console.log(listNoties[index]);
+               setNoti(listNotiesSignup[index]);
+               console.log(listNotiesSignup[index]);
                return false;
             }
             return true;

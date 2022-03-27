@@ -12,8 +12,8 @@ const authApi = {
    },
 
    verify: (data) => {
-      const url = "/auth/verify";
-      return axiosClient.post(url, data);
+      const url = "/auth/verify-email";
+      return axiosClient.patch(url, data);
    },
 };
 
