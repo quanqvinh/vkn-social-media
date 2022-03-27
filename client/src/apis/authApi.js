@@ -1,20 +1,19 @@
-import axios from "axios";
 import axiosClient from "./axiosClient";
 
 const authApi = {
    signUp: (data) => {
-      const url = "/signup";
+      const url = "/auth/signup";
       console.log(axiosClient.post(url, data));
       return axiosClient.post(url, data);
    },
 
-   login: (params) => {
-      const url = "/login";
-      return axiosClient.get(url, { params });
+   login: (data) => {
+      const url = "/auth/login";
+      return axiosClient.post(url, data);
    },
 
    verify: (data) => {
-      const url = "/verify";
+      const url = "/auth/verify";
       return axiosClient.post(url, data);
    },
 };
