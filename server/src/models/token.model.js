@@ -1,8 +1,17 @@
 const mongoose = require('mongoose');
 
 const TokenSchema = new mongoose.Schema({
-	refreshToken: {type: String},
-	payload: {type: Object}
+	refreshToken: {
+		type: String
+	},
+	payload: {
+		type: Object
+	},
+	expireIn: {
+		type: Date,
+		default: new Date(Date.now()),
+		index: { expireAfterSeconds: 60*60*24*8 }
+	}
 }, {
 	versionKey: false
 });
