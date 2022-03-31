@@ -22,9 +22,7 @@ module.exports = {
          const params = req.body;
          console.log(params);
          // Check username exists
-         let user = await User.findOne({
-            username: params.username,
-         });
+         let user = await User.findOne({ username: params.username }).lean();
          if (user)
             return res.status(406).json({
                status: "error",
@@ -32,9 +30,7 @@ module.exports = {
             });
 
          // Check email is used ?
-         user = await User.findOne({
-            email: params.email,
-         });
+         user = await User.findOne({ email: params.email }).lean();
          if (user)
             return res.status(406).json({
                status: "error",
@@ -127,15 +123,16 @@ module.exports = {
          await jwt.verify(params.token, secretKey, async (err, decoded) => {
             if (err) {
                if (err.name === "TokenExpiredError") 
-                  errorMessage = "Expired link";
+                  errorMessage = "Expired token";
                else 
-                  errorMessage = "Invalid link";
+                  errorMessage = "Invalid token";
             } else {
                let user = await User.findOne({email: decoded.email});
                if (!user || user.auth.verified)
-                  errorMessage = "Invalid link";
+                  errorMessage = "Invalid token";
                else {
                   user.auth.verified = true;
+                  user.auth.remainingTime = undefined;
                   await user.save({ session });
                }
             }
@@ -172,7 +169,7 @@ module.exports = {
          console.log(req.body);
          let user = await User.findOne({ $or: [
             { username }, { email: username }
-         ]});
+         ]}).lean();
 
          if (!user || user.auth.isAdmin)
             return res.status(401).json({
@@ -234,16 +231,16 @@ module.exports = {
          if (params.username)
             user = await User.findOne({
                username: params.username
-            });
+            }).lean();
          else
             user = await User.findOne({
                email: params.email
-            });
+            }).lean();
          
          if (!user) 
-            return res.status(400).json({
+            return res.status(200).json({
                status: "error",
-               message: "Not found an account with this username (or email)"
+               message: "Not found an account with this username (or email)"                               
             });
 
          let token = jwt.sign({
@@ -285,9 +282,9 @@ module.exports = {
          await jwt.verify(params.token, secretKey, async (err, decoded) => {
             if (err) {
                if (err.name === "TokenExpiredError")
-                  errorMessage = "Expired link";
+                  errorMessage = "Expired token";
                else 
-                  errorMessage = "Invalid link";
+                  errorMessage = "Invalid token";
             }
             else {
                let user = await User.findOne({ username: decoded.username });
@@ -316,19 +313,19 @@ module.exports = {
       session.endSession();
    },
 
-   // [POST] /api/auth/refresh-token
+   // [POST] /api/v1/auth/refresh-token
    async refreshToken(req, res, next) { 
       try {
          let { refreshToken } = req.body;
          if (!refreshToken)
-            return res.status(400).json({
+            return res.status(200).json({
                status: 'error',
                message: 'Refresh token is invalid'
             });
          
-         let token = await Token.findOne({refreshToken});
+         let token = await Token.findOne({refreshToken}).lean();
          if (!token)
-            return res.status(400).json({
+            return res.status(200).json({
                status: 'error',
                message: 'Refresh token does not exist'
             });

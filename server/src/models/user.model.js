@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const authSchema = require('./schemas/auth.schema');
+const notificationSchema = require('./notification.model');
 const ObjectId = mongoose.Types.ObjectId;
 
 const UserSchema = new mongoose.Schema({
@@ -50,6 +51,10 @@ const UserSchema = new mongoose.Schema({
 	rooms: [{
 		type: ObjectId,
 		ref: 'Room'
+	}],
+	notifications: [{
+		type: ObjectId,
+		ref: 'Notification'
 	}],
 	deletedAt: {
 		type: Date,

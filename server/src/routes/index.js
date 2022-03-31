@@ -4,7 +4,7 @@ const authRouter = require('./auth.router');
 const authenJwtMiddleware = require('../middlewares/authenJwt.middleware');
 
 module.exports = (app) => {
-	app.use('/api/auth', authRouter);
-	app.use('/api/user', authenJwtMiddleware, userRouter);
-	// app.use('/api/post', postRouter);
+	app.use('/api/v1/auth', authRouter);
+	app.use('/api/v1/user', authenJwtMiddleware, userRouter);
+	app.use('/api/v1/post', authenJwtMiddleware, postRouter);
 };

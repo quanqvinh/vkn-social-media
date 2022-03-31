@@ -15,11 +15,11 @@ async function sendVerify({to, username, token}) {
 		from: process.env.OUR_EMAIL,
 		to,
 		subject: 'VKN verification email',
-		html: await hbs.render('./src/templates/verify.mail.hbs', { token, username }),
+		html: await hbs.render('./src/mail_templates/verify.mail.hbs', { token, username }),
 		attachments: [
 			{
 				filename: 'logo_vkn.png',
-				path: './src/templates/images/logo_vkn.png',
+				path: './src/mail_templates/images/logo_vkn.png',
 				cid: 'logo_image'
 			}
 		]
