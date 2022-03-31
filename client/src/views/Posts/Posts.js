@@ -1,7 +1,6 @@
 import "./posts.scss";
 import Post from "./Post/Post";
 import { useEffect, useState } from "react";
-import { getUserById } from "../../apis/user";
 import postApi from "../../apis/postApi";
 
 function Posts() {
@@ -25,38 +24,31 @@ function Posts() {
 
    const [posts, setPosts] = useState([]);
 
-   useEffect(() => {
-      const fetchPostList = async () => {
-         try {
-            const post = {
-               name: "kien",
-               email: "aihi",
-            };
-            // truyền params theo header
-            const params = {
-               _page: 1,
-               _limit: 10,
-               array: post,
-            };
+   // useEffect(() => {
+   //    const fetchPostList = async () => {
+   //       try {
+   //          const post = {
+   //             name: "kien",
+   //             email: "aihi",
+   //          };
+   //          // truyền params theo header
+   //          const params = {
+   //             _page: 1,
+   //             _limit: 10,
+   //             array: post,
+   //          };
 
-            const res = await postApi.getAll(params);
-            if (res?.length > 0) {
-               setPosts(res);
-            }
-         } catch (error) {
-            console.log("failed to fetch post list", error.message);
-         }
-      };
+   //          const res = await postApi.getAll(params);
+   //          if (res?.length > 0) {
+   //             setPosts(res);
+   //          }
+   //       } catch (error) {
+   //          console.log("failed to fetch post list", error.message);
+   //       }
+   //    };
 
-      fetchPostList();
-   }, []);
-
-   const handelGetUserById = (userId) => {
-      let user = getUserById(userId);
-
-      if (!user) return;
-      return user.username;
-   };
+   //    fetchPostList();
+   // }, []);
 
    return (
       <div className="cards">
