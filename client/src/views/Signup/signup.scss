@@ -8,12 +8,24 @@
 
    .form__area {
       flex-basis: 470px;
+
+      .input__error {
+         color: red;
+         font-size: 13px;
+         text-align: start;
+         padding-left: 8px;
+         transition: 0.2s ease-in-out;
+      }
+
+      .input--error {
+         border-color: red;
+      }
    }
 
    h4 {
       color: $font-color-secondary;
       font-weight: bold;
-      margin: 0 40px 30px;
+      margin: 0 40px 10px;
    }
 
    .primary-insta-btn {
