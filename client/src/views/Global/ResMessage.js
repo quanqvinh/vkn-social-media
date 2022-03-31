@@ -12,6 +12,11 @@ const ResMessage = (props) => {
       "Verification has been sent to your email",
    ];
 
+   const listKeysLogin = ["Username", "Password"];
+   const listNotiesLogin = [
+      "Username or email was incorrect",
+      "Your password was incorrect",
+   ];
    useEffect(() => {
       if (callBy === "Signup") {
          listKeysSignup.every((key, index) => {
@@ -24,6 +29,15 @@ const ResMessage = (props) => {
             return true;
          });
       } else {
+         listKeysLogin.every((key, index) => {
+            if (resMessage.includes(key)) {
+               console.log(index);
+               setNoti(listNotiesLogin[index]);
+               console.log(listNotiesLogin[index]);
+               return false;
+            }
+            return true;
+         });
       }
    }, [resMessage]);
 
