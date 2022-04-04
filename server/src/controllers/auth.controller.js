@@ -52,7 +52,10 @@ module.exports = {
                username: params.username,
                email: params.email
             },
-            secretKey, { expiresIn: requestVerifyTokenLife }
+            secretKey, { 
+               expiresIn: requestVerifyTokenLife,
+               subject: 'verify-email'
+            }
          );
 
          // Send mail
@@ -87,7 +90,10 @@ module.exports = {
                username: params.username,
                email: params.email
             },
-            secretKey, { expiresIn: requestVerifyTokenLife }
+            secretKey, { 
+               expiresIn: requestVerifyTokenLife,
+               subject: 'verify-email'
+            }
          );
 
          // Send mail
@@ -112,51 +118,48 @@ module.exports = {
 
    // [PATCH] /api/auth/verify-email
    async verifyEmail(req, res, next) {
-      const session = await User.startSession();
-      session.startTransaction();
       try {
          const params = req.body;
          console.log(params);
 
          // Check token is valid
-         let errorMessage;
-         await jwt.verify(params.token, secretKey, async (err, decoded) => {
-            if (err) {
-               if (err.name === "TokenExpiredError") 
-                  errorMessage = "Expired token";
-               else 
-                  errorMessage = "Invalid token";
-            } else {
-               let user = await User.findOne({email: decoded.email});
-               if (!user || user.auth.verified)
-                  errorMessage = "Invalid token";
+         let tokenErr;
+         await jwt.verify(params.token, secretKey, { subject: 'verify-email' }, async (err, decoded) => {
+            console.log(err);
+            console.log(decoded);
+            if (err) 
+               tokenErr = err;
+            else {
+               let user = await User.findOne({username: decoded.username});
+               if (!user || user.auth.verified) 
+                  tokenErr = { 
+                     name: 'AccountError',
+                     message: 'Account is not found or is verified' 
+                  };
                else {
                   user.auth.verified = true;
                   user.auth.remainingTime = undefined;
-                  await user.save({ session });
+                  await user.save();
                }
             }
          });
-         if (errorMessage)
+         if (tokenErr)
             return res.status(400).json({
                status: "error",
-               message: errorMessage,
+               ...tokenErr
             });
-         await session.commitTransaction();
          res.status(200).json({
             status: "success",
             message: "Email is verified",
          });
       }
       catch (error) {
-         await session.abortTransaction();
          console.log(error.message);
          res.status(500).json({
             status: "error",
             message: error.message
          });
       }
-      session.endSession();
    },
 
    // [POST] /api/auth/login
@@ -197,11 +200,9 @@ module.exports = {
          };
 
          let accessToken = jwt.sign(payload, secretKey, { expiresIn: tokenLife });
-         console.log(typeof refreshTokenLife);
-         console.log(refreshTokenLife);
          let refreshToken = jwt.sign(payload, refreshSecretKey, { expiresIn: refreshTokenLife });
 
-         await Token.create({ refreshToken, payload }, { session });
+         await Token.create([{ refreshToken, payload }], { session });
          await session.commitTransaction();
          res.status(200).json({
             status: "success",
@@ -246,8 +247,10 @@ module.exports = {
          let token = jwt.sign({
             username: user.username,
             email: user.email,
-            ext: Math.floor(Date.now() / 1000) + requestResetTokenLife,
-         }, secretKey);
+         }, secretKey, { 
+            expiresIn: requestResetTokenLife,
+            subject: 'reset-password' 
+         });
 
          mail.sendResetPassword({
             to: user.email,
@@ -278,24 +281,20 @@ module.exports = {
          let params = req.body;
          console.log(params);
 
-         let errorMessage;
-         await jwt.verify(params.token, secretKey, async (err, decoded) => {
-            if (err) {
-               if (err.name === "TokenExpiredError")
-                  errorMessage = "Expired token";
-               else 
-                  errorMessage = "Invalid token";
-            }
+         let tokenErr;
+         await jwt.verify(params.token, secretKey, { subject: 'reset-password' }, async (err, decoded) => {
+            if (err)
+               tokenErr = err;
             else {
                let user = await User.findOne({ username: decoded.username });
                user.auth.password = crypto.hash(params.newPassword);
                await user.save({ session });
             }
          });
-         if (errorMessage) 
+         if (tokenErr) 
             return res.status(400).json({
                status: "error",
-               message: errorMessage
+               ...tokenErr
             });
          await session.commitTransaction()
          res.status(200).json({
@@ -323,7 +322,7 @@ module.exports = {
                message: 'Refresh token is invalid'
             });
          
-         let token = await Token.findOne({refreshToken}).lean();
+         let token = await Token.findOne({ refreshToken }).lean();
          if (!token)
             return res.status(200).json({
                status: 'error',
