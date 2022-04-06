@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const authSchema = require('./schemas/auth.schema');
-const notificationSchema = require('./notification.model');
 const ObjectId = mongoose.Types.ObjectId;
 
 const UserSchema = new mongoose.Schema({
@@ -33,10 +32,6 @@ const UserSchema = new mongoose.Schema({
 		default: null
 	},
 	bio: {
-		type: String,
-		default: null
-	},
-	avatar: {
 		type: String,
 		default: null
 	},

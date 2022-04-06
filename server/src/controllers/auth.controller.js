@@ -15,7 +15,7 @@ const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
 
 module.exports = {
    // [POST] /api/auth/signup
-   async signup(req, res, next) {
+   async signup(req, res) {
       const session = await mongoose.startSession();
       session.startTransaction();
       try {
@@ -82,7 +82,7 @@ module.exports = {
    },
 
    // [POST] /api/auth/request/verify-email
-   async requestVerifyEmail(req, res, next) {
+   async requestVerifyEmail(req, res) {
       try {
          let params = req.body;
          let token = jwt.sign(
@@ -117,7 +117,7 @@ module.exports = {
    },
 
    // [PATCH] /api/auth/verify-email
-   async verifyEmail(req, res, next) {
+   async verifyEmail(req, res) {
       try {
          const params = req.body;
          console.log(params);
@@ -163,7 +163,7 @@ module.exports = {
    },
 
    // [POST] /api/auth/login
-   async login(req, res, next) {
+   async login(req, res) {
       const session = await Token.startSession();
       session.startTransaction();
       try {
@@ -195,7 +195,7 @@ module.exports = {
             });
 
          let payload = {
-            user_id: user._id,
+            userId: user._id,
             isAdmin: user.auth.isAdmin
          };
 
@@ -224,7 +224,7 @@ module.exports = {
    },
 
    // [POST] /api/auth/request/reset-password
-   async requestResetPassword(req, res, next) {
+   async requestResetPassword(req, res) {
       try {
          const params = req.body;
          console.log(params);
@@ -274,7 +274,7 @@ module.exports = {
    },
 
    // [PATCH] /api/auth/reset-password
-   async resetPassword(req, res, next) {
+   async resetPassword(req, res) {
       const session = await User.startSession();
       session.startTransaction();
       try {
@@ -313,7 +313,7 @@ module.exports = {
    },
 
    // [POST] /api/v1/auth/refresh-token
-   async refreshToken(req, res, next) { 
+   async refreshToken(req, res) { 
       try {
          let { refreshToken } = req.body;
          if (!refreshToken)
