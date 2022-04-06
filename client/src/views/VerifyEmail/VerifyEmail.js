@@ -1,4 +1,5 @@
 import * as React from "react";
+import "./verify.scss";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -6,13 +7,18 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import authApi from "../../apis/authApi";
 
 import { useLocation, useHistory } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const VerifyEmail = () => {
+   const [isLoading, setIsLoading] = useState(true);
+   const [isVerified, setIsVerified] = useState(false);
+
    const search = useLocation().search;
    let history = useHistory();
 
@@ -28,12 +34,21 @@ const VerifyEmail = () => {
             }}
          >
             <Box>
-               <CheckCircleIcon
-                  sx={{
-                     fontSize: 70,
-                     fill: "#5a9cff",
-                  }}
-               />
+               {isVerified ? (
+                  <CheckCircleIcon
+                     sx={{
+                        fontSize: 70,
+                        fill: "#5a9cff",
+                     }}
+                  />
+               ) : (
+                  <CancelIcon
+                     sx={{
+                        fontSize: 70,
+                        fill: "red",
+                     }}
+                  />
+               )}
             </Box>
             <Typography
                sx={{ fontSize: 25 }}
@@ -41,10 +56,12 @@ const VerifyEmail = () => {
                fontWeight={600}
                gutterBottom
             >
-               Verified
+               {isVerified ? "Verified" : "Verify Failed"}
             </Typography>
             <Typography color="text.secondary">
-               You have been successfully verified email.
+               {isVerified
+                  ? "Your email have been verified successfully"
+                  : "This link has been expired"}
             </Typography>
          </CardContent>
          <CardActions
@@ -53,6 +70,7 @@ const VerifyEmail = () => {
             }}
          >
             <Button
+               style={{ display: `${isVerified ? "" : "none"}` }}
                onClick={handelRedirect}
                variant="contained"
                sx={{
@@ -72,41 +90,57 @@ const VerifyEmail = () => {
    useEffect(() => {
       const fetchVerify = async () => {
          try {
-            const user_id = new URLSearchParams(search).get("user_id");
             const token = new URLSearchParams(search).get("token");
+
             const data = {
-               user_id,
-               token,
+               token: token,
             };
-
-            console.log(data);
-            let res = await authApi.verify(data);
-
-            console.log(res);
+            console.log(token);
+            let res = await authApi.verify(data); // res.message
+            setIsVerified(true);
          } catch (error) {
-            console.log(
-               "Can't find params user_id and token to verify kien dep trai 108 ahihi"
-            );
+            console.log(error.response.data.message);
+            console.log("Can't find params user_id and token to verify");
          }
       };
       fetchVerify();
+
+      let timeLoading = setTimeout(() => {
+         setIsLoading(false);
+      }, 3000);
+
+      return () => {
+         clearTimeout(timeLoading);
+      };
    }, []);
 
    return (
-      <Box
-         sx={{
-            minWidth: 275,
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgb(90, 156, 255, 0.3)",
-         }}
-      >
-         <Card sx={{ borderRadius: "6px" }} variant="outlined">
-            {card}
-         </Card>
-      </Box>
+      <>
+         {isLoading ? (
+            <div className="loading-container">
+               <CircularProgress
+                  color="secondary"
+                  style={{ width: "50px", height: "50px" }}
+               />
+               <p>Loading...</p>
+            </div>
+         ) : (
+            <Box
+               sx={{
+                  minWidth: 275,
+                  height: "100vh",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#0a1929",
+               }}
+            >
+               <Card sx={{ borderRadius: "6px" }} variant="outlined">
+                  {card}
+               </Card>
+            </Box>
+         )}
+      </>
    );
 };
 

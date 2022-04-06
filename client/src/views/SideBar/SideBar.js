@@ -5,13 +5,15 @@ import ListsOnline from "./ListsOnline/ListsOnline";
 import Footer from "../Footer/Footer";
 import image from "../../assets/images/profile.jpg";
 
-function Sidebar() {
+function Sidebar(props) {
+   const { user } = props;
+
    return (
       <Sticky topOffset={-80}>
          <div className="sidebar">
             <ProfilePreview
-               username="kien108"
-               name="Le Trung Kien"
+               username={user.username}
+               name={user.name || "null"}
                urlText="Switch"
                iconSize="big"
                image={image}
