@@ -51,6 +51,11 @@ module.exports = {
   requestEditUserEmail(req, res, next) {
     return Auth.requestVerifyEmail(req, res, next);
   },
+  // [POST] /api/v1/user/edit/email
+  async editUserEmail(req, res, next) {
+    let responseData = await Auth.verifyEmail(req, res);
+    console.log(responseData);
+  },
 
   // [DELETE] /api/v1/user/delete
   softDeleteUser(req, res, next) {
