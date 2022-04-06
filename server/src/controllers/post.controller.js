@@ -2,7 +2,6 @@ const User = require('../models/user.model');
 const Comment = require('../models/comment.model');
 const Post = require('../models/post.model');
 const Report = require('../models/report.model');
-const upload = require('../middlewares/upload.middleware');
 const fs = require('fs');
 const fse = require('fs-extra');
 
@@ -87,6 +86,7 @@ module.exports = {
 			});
 		}
 		catch(err) {
+			console.log(err);
 			res.status(500).json({
 				status: 'error',
 				message: err.message
@@ -169,19 +169,20 @@ module.exports = {
 				}, { session })
 			]);
 
-			session.commitTransaction();
+			await session.commitTransaction();
 			res.status(200).json({
 				status: 'success'
 			});
 		}
 		catch(err) {
 			console.log(err);
-			session.abortTransaction();
+			await session.abortTransaction();
 			res.status(500).json({
 				status: 'error',
 				message: err.message
 			});
 		}
+		session.endSession();
 	},
 
 	// [PUT] /api/v1/post
@@ -194,10 +195,10 @@ module.exports = {
 				fse.emptyDirSync(imageDir);
 				fse.copySync(imageDir + '-new', imageDir);
 				fs.rmSync(imageDir + '-new', { recursive: true, force: true });
-				console.log('Update image successfully');
+				console.log('Update image successful');
 			}
-			await Post.findByIdAndUpdate(postId, { caption });
-			console.log('Update caption successfully');
+			await Post.updateOne({ _id: postId }, { caption });
+			console.log('Update caption successful');
 			res.status(200).json({
 				status: 'success'
 			});
@@ -212,27 +213,43 @@ module.exports = {
 
 	// [DELETE] /api/v1/post
 	async deletePost(req, res) {
+		let session = await require('mongoose').startSession();
+		session.startTransaction();
 		try {
 			let { postId } = req.query;
 			fs.rmSync(postResource + postId.toString(), { force: true, recursive: true });
-			console.log('Delete image resource successfully');
+			console.log('Deleted image resource');
 			let [ post, user ] = await Promise.all([
-				Post.findByIdAndDelete(postId),
-				User.findByIdAndUpdate(req.decoded.userId, {
+				Post.findByIdAndDelete(postId, { session })
+				.select('reports comments -_id').lean(),
+				User.updateOne({ _id: req.decoded.userId }, {
 					$pull: { posts: postId }
-				})
+				}, { session })
 			]);
-			console.log(post);
-			console.log('Delete post successfully');
+			let [ reports, comments ] = await Promise.all([
+				Report.deleteMany({ 
+					_id: { $in: post.reports }
+				}, { session }),
+				Comment.deleteMany({ 
+					_id: { $in: post.comments }
+				}, { session })
+			]);
+			console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
+			console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
+			console.log('Delete post successful');
+			await session.commitTransaction();
 			res.status(200).json({
 				status: 'success'
 			});
 		}
 		catch(err) {
+			await session.abortTransaction();
+			console.log(err);
 			res.status(500).json({
 				status: 'error',
 				message: err.message
 			});
 		}
+		session.endSession();
 	}
 };
