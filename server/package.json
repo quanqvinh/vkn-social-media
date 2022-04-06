@@ -18,6 +18,7 @@
     "fs-extra": "^10.0.1",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
+    "mkdirp": "^1.0.4",
     "mongoose": "^6.2.7",
     "mongoose-delete": "^0.5.4",
     "multer": "^1.4.4",
