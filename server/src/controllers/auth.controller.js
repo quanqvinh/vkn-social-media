@@ -125,8 +125,8 @@ module.exports = {
          // Check token is valid
          let tokenErr;
          await jwt.verify(params.token, secretKey, { subject: 'verify-email' }, async (err, decoded) => {
-            console.log(err);
-            console.log(decoded);
+            console.log('error: ',err);
+            console.log('decoded ' ,decoded);
             if (err) 
                tokenErr = err;
             else {
@@ -148,14 +148,14 @@ module.exports = {
                status: "error",
                ...tokenErr
             });
-         res.status(200).json({
+         return res.status(200).json({
             status: "success",
             message: "Email is verified",
          });
       }
       catch (error) {
          console.log(error.message);
-         res.status(500).json({
+         return res.status(500).json({
             status: "error",
             message: error.message
          });

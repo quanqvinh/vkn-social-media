@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const User = require("../models/user.model");
-const Auth = require('../controllers/auth.controller');
+const Auth = require("../controllers/auth.controller");
 
 module.exports = {
   // [GET] /api/v1/user/me/profile
   getMyProfile(req, res, next) {
-    let id = req.decoded.user_id;
+    let id = req.decoded.userId;
     User.findOne({ _id: id }, { rooms: 0, auth: 0 })
       .lean()
       .then((data) => {
@@ -35,7 +35,7 @@ module.exports = {
   },
   // [PATCH] /api/v1/user/edit/info
   editUserProfile(req, res, next) {
-    let id = req.decoded.user_id;
+    let id = req.decoded.userId;
     let reqData = req.body;
     User.findOneAndUpdate({ _id: id }, reqData)
       .then((data) => {
@@ -53,23 +53,37 @@ module.exports = {
   },
   // [POST] /api/v1/user/edit/email
   async editUserEmail(req, res, next) {
-    let responseData = await Auth.verifyEmail(req, res);
-    console.log(responseData);
+    try {
+      let id = req.decoded.userId;
+
+      let user = await User.findOne({ _id: id });
+      user.auth.verified = false;
+      await user.save();
+
+      let responseData = await Auth.verifyEmail(req, res);
+      if (responseData.statusCode === 200) {
+        // THÊM EMAIL TẠI ĐÂY
+
+        await user.save();
+      }
+      // res.json({ok:'ok'});
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message});
+    }
+    
   },
 
   // [DELETE] /api/v1/user/delete
   softDeleteUser(req, res, next) {
-    let id = req.decoded.user_id;
+    let id = req.decoded.userId;
     console.log(id);
     if (id) {
       User.delete({ _id: id })
         .then((data) => {
-          res
-            .status(200)
-            .json({
-              status: "success",
-              message: "User account has been moved to recycle bin.",
-            });
+          res.status(200).json({
+            status: "success",
+            message: "User account has been moved to recycle bin.",
+          });
         })
         .catch((err) => {
           res
