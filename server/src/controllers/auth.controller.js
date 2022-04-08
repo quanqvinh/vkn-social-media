@@ -125,8 +125,8 @@ module.exports = {
          // Check token is valid
          let tokenErr;
          await jwt.verify(params.token, secretKey, { subject: 'verify-email' }, async (err, decoded) => {
-            console.log('error: ',err);
-            console.log('decoded ' ,decoded);
+            console.log('error:', err);
+            console.log('decoded:' ,decoded);
             if (err) 
                tokenErr = err;
             else {
@@ -141,6 +141,7 @@ module.exports = {
                   user.auth.remainingTime = undefined;
                   await user.save();
                }
+               req.body.email = decoded.email;
             }
          });
          if (tokenErr)
@@ -154,7 +155,7 @@ module.exports = {
          });
       }
       catch (error) {
-         console.log(error.message);
+         console.log(error);
          return res.status(500).json({
             status: "error",
             message: error.message

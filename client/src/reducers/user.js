@@ -1,5 +1,7 @@
 import userApi from "../apis/userApi";
-import { getCookie } from "../views/Global/cookie";
+import {
+   getCookie
+} from "../views/Global/cookie";
 
 let initState = {};
 
@@ -8,13 +10,13 @@ const params = {
    accessToken,
 };
 
-const fetchUser = async () => {
-   const res = await userApi.get(params);
-   console.log(res.data);
+// const fetchUser = async () => {
+//    const res = await userApi.get(params);
+//    console.log(res.data);
 
-   initState = { ...res.data };
-};
-fetchUser();
+//    initState = { ...res.data };
+// };
+// fetchUser();
 
 const userReducer = (state = initState, action) => {
    switch (action.type) {
