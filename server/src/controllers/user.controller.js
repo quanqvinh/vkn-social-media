@@ -51,6 +51,7 @@ module.exports = {
   requestEditUserEmail(req, res, next) {
     return Auth.requestVerifyEmail(req, res, next);
   },
+
   // [POST] /api/v1/user/edit/email
   async editUserEmail(req, res, next) {
     try {
@@ -62,11 +63,14 @@ module.exports = {
 
       let responseData = await Auth.verifyEmail(req, res);
       if (responseData.statusCode === 200) {
-        // THÊM EMAIL TẠI ĐÂY
-
-        await user.save();
+        if (responseData.req.body.email){
+          user.email = responseData.req.body.email;
+          await user.save();
+        }
+        else {
+          res.status(500).json({ status: "error", message: "Error at server." });
+        }
       }
-      // res.json({ok:'ok'});
     } catch (error) {
       res.status(500).json({ status: "error", message: error.message});
     }

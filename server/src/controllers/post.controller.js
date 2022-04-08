@@ -97,8 +97,8 @@ module.exports = {
 	// [GET] /api/v1/post/detail
 	async detailPost(req, res) {
 		try {
-			let { posterId, postId } = req.query;
-			if (!posterId || !postId) 
+			let { username, postId } = req.params;
+			if (!username || !postId) 
 				return res.status(400).json({
 					status: 'error',
 					message: 'Parameters problem'
@@ -110,7 +110,7 @@ module.exports = {
 						path: 'friends',
 						select: 'username'
 					}).lean(),
-				User.findById(posterId)
+				User.findById(username)
 					.select('_id username').lean(),
 				Post.findById(postId)
 					.populate([
@@ -216,14 +216,14 @@ module.exports = {
 		let session = await require('mongoose').startSession();
 		session.startTransaction();
 		try {
-			let { postId } = req.query;
-			fs.rmSync(postResource + postId.toString(), { force: true, recursive: true });
+			let { id } = req.params;
+			fs.rmSync(postResource + id.toString(), { force: true, recursive: true });
 			console.log('Deleted image resource');
 			let [ post, user ] = await Promise.all([
-				Post.findByIdAndDelete(postId, { session })
+				Post.findByIdAndDelete(id, { session })
 				.select('reports comments -_id').lean(),
 				User.updateOne({ _id: req.decoded.userId }, {
-					$pull: { posts: postId }
+					$pull: { posts: id }
 				}, { session })
 			]);
 			let [ reports, comments ] = await Promise.all([
