@@ -44,6 +44,7 @@ const storageAvatar = multer.diskStorage({
 		let filename = req.decoded.userId.toString() + ext;
 		if (fs.existsSync(dest + '/' + filename))
 			filename = 'new-' + filename;
+		req.filename = filename;
 		cb(null, filename);
 	}
 })

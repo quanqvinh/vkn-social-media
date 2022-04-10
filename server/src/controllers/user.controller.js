@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const Auth = require("../controllers/auth.controller");
+const Crypto = require("../utils/crypto");
+const { unlink } = require('fs/promises');
+const fs = require("fs");
+const path = require('path');
+
+const avatarFolder = __dirname + '/../../../resources/images/avatars/';
 
 module.exports = {
   // [GET] /api/v1/user/me/profile
@@ -52,7 +58,7 @@ module.exports = {
     return Auth.requestVerifyEmail(req, res, next);
   },
 
-  // [POST] /api/v1/user/edit/email
+  // [PATCH] /api/v1/user/edit/email
   async editUserEmail(req, res, next) {
     try {
       let id = req.decoded.userId;
@@ -66,6 +72,7 @@ module.exports = {
         if (responseData.req.body.email){
           user.email = responseData.req.body.email;
           await user.save();
+          res.status(200).json({ status: "success", message: "Email has been updated." });
         }
         else {
           res.status(500).json({ status: "error", message: "Error at server." });
@@ -75,6 +82,21 @@ module.exports = {
       res.status(500).json({ status: "error", message: error.message});
     }
     
+  },
+  changePassword(req, res, next) {
+    let password = req.body.password;
+    let id = req.decoded.userId;
+    
+    if (password) {
+      let hashedPassword = Crypto.hash(password);
+      User.findByIdAndUpdate({_id: id}, {$set:{"auth.password":hashedPassword}})
+          .then(() => {
+            res.status(200).json({ status: "success", message: "Password has been updated." });
+          })
+          .catch((err) => {
+            res.status(500).json({ status: "error", message: error.message});
+          });
+    }
   },
 
   // [DELETE] /api/v1/user/delete
@@ -100,4 +122,40 @@ module.exports = {
         .json({ status: "error", message: "Bad request. User id is needed." });
     }
   },
+
+  async uploadProfilePicture(req, res, next) {
+    let file = avatarFolder + req.filename;
+    let deleteFileFunction = (async function(filepath) {
+      try {
+        await unlink(filepath);
+        console.log("delete");
+      } catch (error) {
+        console.error('there was an error when deleting file:', error.message);
+      }
+    });
+    // check whether file exists
+    fs.access(file, fs.constants.F_OK, (err) => {
+      if (err){
+        console.log("avatar does not exist in folder");
+      }
+      else {
+        if (file.includes('new-')){ // check whether there is a new avatar, then delete the old one
+          deleteFileFunction(avatarFolder + req.decoded.userId + path.extname(file));
+          fs.rename(file, file.replace('new-', ''), (err) => {
+            if (err) {
+              console.log("error when changing name:", err.message);
+            }
+          })
+        }
+      }
+    });
+    let filenameDB = req.decoded.userId + path.extname(req.filename);
+    User.findByIdAndUpdate({_id: req.decoded.userId}, {$set: {avatar: filenameDB}})
+              .then(() => {
+                res.status(200).json({ status: "success", message: "Avatar has been uploaded." });
+              })
+              .catch(() => {
+                res.status(500).json({ status: "error", message: "Error at the server." });
+              });
+  }
 };

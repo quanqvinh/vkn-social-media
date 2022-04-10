@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		default: null
 	},
+	avatar: {
+		type: String,
+		default: null
+	},
 	gender: {
 		type: String,
 		default: null
