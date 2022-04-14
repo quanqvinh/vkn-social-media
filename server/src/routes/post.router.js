@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express();
 const controller = require('../controllers/post.controller');
-const { uploadPost } = require('../utils/multer');
+const { uploadPost } = require('../middlewares/upload.middleware');
 
 router.get('/new-feed', controller.newFeed);
-router.get('/detail', controller.detailPost);
-router.post('/report', controller.reportPost);
 router.post('/new', uploadPost.array('images', 10), controller.newPost);
+router.get('/:username/:postId', controller.detailPost);
+router.post('/report', controller.reportPost);
 router.put('/', uploadPost.array('images', 10), controller.updatePost);
-router.delete('/', controller.deletePost);
+router.delete('/:id', controller.deletePost);
+router.patch('/:id/like', controller.likePost);
 
 module.exports = router;

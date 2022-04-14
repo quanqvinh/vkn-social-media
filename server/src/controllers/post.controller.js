@@ -1,15 +1,16 @@
 const User = require('../models/user.model');
+const Comment = require('../models/comment.model');
 const Post = require('../models/post.model');
 const Report = require('../models/report.model');
-const upload = require('../utils/multer');
 const fs = require('fs');
+const fse = require('fs-extra');
 
 const ObjectId = require('mongoose').Types.ObjectId;
 const postResource = __dirname + '/../../../resources/images/posts/';
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
-	async newFeed(req, res, next) {
+	async newFeed(req, res) {
 		try {
 			let populatePost = { 
 				path: 'posts',
@@ -26,7 +27,7 @@ module.exports = {
 					select: '-replies'
 				}
 			};
-			let user = await User.findById(req.decoded.user_id)
+			let user = await User.findById(req.decoded.userId)
 				.select('username avatar friends posts notifications')
 				.populate([
 					{
@@ -67,39 +68,73 @@ module.exports = {
 		}
 	},
 
-	// [GET] /api/v1/post/detail
-	async detailPost(req, res, next) {
+	// [POST] /api/v1/post/new
+	async newPost(req, res) {
 		try {
-			let { posterId, postId } = req.query;
-			if (!posterId || !postId) 
+			let { postId, caption } = req.body;
+			await Promise.all([
+				Post.create({
+					_id: postId,
+					caption
+				}),
+				User.updateOne({ _id: req.decoded.userId }, {
+					$push: { posts: postId }
+				})
+			]);
+			res.status(201).json({
+				status: 'success'
+			});
+		}
+		catch(err) {
+			console.log(err);
+			res.status(500).json({
+				status: 'error',
+				message: err.message
+			});
+		}
+	},
+
+	// [GET] /api/v1/post/:username/:postId
+	async detailPost(req, res) {
+		try {
+			let { username, postId } = req.params;
+			if (!username || !postId) 
 				return res.status(400).json({
 					status: 'error',
 					message: 'Parameters problem'
 				});
-
 			let [user, poster, post] = await Promise.all([
-				User.findById(req.decoded.user_id)
+				User.findById(req.decoded.userId)
 					.select('username avatar friends')
 					.populate({
 						path: 'friends',
-						select: 'username avatar'
+						select: 'username'
 					}).lean(),
-				User.findById(posterId)
-					.select('_id username avatar').lean(),
+				User.findById(username)
+					.select('_id username').lean(),
 				Post.findById(postId)
-					.populate({
-						path: 'comments',
-						populate: {
-							path: 'replies.replyBy',
-							select: 'username avatar'
+					.populate([
+						{
+							path: 'likes',
+							select: 'username'
+						},
+						{
+							path: 'comments',
+							populate: {
+								path: 'commentBy',
+								select: 'username -_id'
+							},
+							select: 'commentBy content'
 						}
-					}).lean()
+					])
+					.select('-reports').lean()
 			]);
+			
 			poster.isFriend = user.friends.includes(poster._id);
 			res.status(200).json({
 				status: 'success',
-				posterData: posterData,
-				...post
+				posterData: poster,
+				postData: post
 			});
 		}
 		catch(err) {
@@ -111,7 +146,7 @@ module.exports = {
 	},
 
 	// [POST] /api/v1/post/report
-	async reportPost(req, res, next) {
+	async reportPost(req, res) {
 		let session = await require('mongoose').startSession();
 		session.startTransaction();
 		try {
@@ -126,7 +161,7 @@ module.exports = {
 			 await Promise.all([
 				Report.create([{
 					_id,
-					userId: req.decoded.user_id,
+					userId: req.decoded.userId,
 					content
 				}], { session }),
 				Post.findByIdAndUpdate(postId, {
@@ -134,85 +169,41 @@ module.exports = {
 				}, { session })
 			]);
 
-			session.commitTransaction();
+			await session.commitTransaction();
 			res.status(200).json({
 				status: 'success'
 			});
 		}
 		catch(err) {
 			console.log(err);
-			session.abortTransaction();
+			await session.abortTransaction();
 			res.status(500).json({
 				status: 'error',
 				message: err.message
 			});
 		}
-	},
-
-	// [POST] /api/v1/post/new
-	async newPost(req, res, next) {
-		console.log(req.body);
-		console.log(req.file);
-		try {
-			let _id = new ObjectId();
-			let { caption } = req.body;
-			await Promise.all([
-				Post.create({
-					_id,
-					caption
-				}),
-				User.findByIdAndUpdate(req.decoded.user_id, {
-					$push: { posts: _id }
-				})
-			]);
-			res.status(200).json({
-				status: 'success'
-			});
-		}
-		catch(err) {
-			res.status(500).json({
-				status: 'error',
-				message: err.message
-			});
-		}
+		session.endSession();
 	},
 
 	// [PUT] /api/v1/post
-	async updatePost(req, res, next) {
+	async updatePost(req, res) {
 		console.log(req.body);
-		let { postId, caption } = req.body;
 		try {
-			fs.mkdirSync(postResource + postId.toString() + '-new');
-			upload.array('images', 10)(req, res, (error) => {
-				if (error) {
-					fs.rmSync(postResource + postId.toString() + '-new', {
-						force: true,
-						recursive: true
-					});
-					return res.status(500).json({
-						status: 'error',
-						message: `Upload error: ${error}`
-					});
-				}
-			});
-			await Post.findByIdAndUpdate(postId, {
-				caption
-			});
-			fs.rmSync(postResource + postId.toString(), {
-				force: true,
-				recursive: true
-			});
-			fs.renameSync(postResource + postId.toString() + '-new', postResource + postId.toString());
-
+			let { postId, caption } = req.body;
+			let imageDir = postResource + postId.toString();
+			if (fs.existsSync(imageDir + '-new')) {
+				fse.emptyDirSync(imageDir);
+				fse.copySync(imageDir + '-new', imageDir);
+				fs.rmSync(imageDir + '-new', { recursive: true, force: true });
+				console.log('Update image successful');
+			}
+			await Post.updateOne({ _id: postId }, { caption });
+			console.log('Update caption successful');
 			res.status(200).json({
 				status: 'success'
 			});
 		}
 		catch(err) {
-			fs.rmSync(postResource + postId.toString() + '-new', {
-				force: true,
-				recursive: true
-			});
 			res.status(500).json({
 				status: 'error',
 				message: err.message
@@ -221,24 +212,63 @@ module.exports = {
 	},
 
 	// [DELETE] /api/v1/post
-	async deletePost(req, res, next) {
+	async deletePost(req, res) {
+		let session = await require('mongoose').startSession();
+		session.startTransaction();
 		try {
-			let { postId } = req.query;
-			fs.rmSync(postResource + postId, {
-				force: true,
-				recursive: true
-			});
-			await Promise.all([
-				Post.findByIdAndDelete(postId),
-				User.findByIdAndUpdate(req.decoded.user_id, {
-					$pull: { posts: postId }
-				})
+			let { id } = req.params;
+			fs.rmSync(postResource + id.toString(), { force: true, recursive: true });
+			console.log('Deleted image resource');
+			let [ post, user ] = await Promise.all([
+				Post.findByIdAndDelete(id, { session })
+				.select('reports comments -_id').lean(),
+				User.updateOne({ _id: req.decoded.userId }, {
+					$pull: { posts: id }
+				}, { session })
 			]);
+			let [ reports, comments ] = await Promise.all([
+				Report.deleteMany({ 
+					_id: { $in: post.reports }
+				}, { session }),
+				Comment.deleteMany({ 
+					_id: { $in: post.comments }
+				}, { session })
+			]);
+			console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
+			console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
+			console.log('Delete post successful');
+			await session.commitTransaction();
 			res.status(200).json({
 				status: 'success'
 			});
 		}
 		catch(err) {
+			await session.abortTransaction();
+			console.log(err);
+			res.status(500).json({
+				status: 'error',
+				message: err.message
+			});
+		}
+		session.endSession();
+	},
+	async likePost(req, res) {
+		try {
+			const { id } = req.params, userId = req.decoded.userId;
+			let post = await Post.findById(id);
+			let index = post.likes.findIndex((id) => id.toString() === userId);
+			if (index === -1)
+				post.likes.push(userId);
+			else
+				post.likes.splice(index, 1);
+			post.save();
+			res.status(200).json({ 
+				status: 'success',
+				message: index === -1 ? 'liked post' : 'unliked post'
+			});
+		}
+		catch(err) {
+			console.log(err);
 			res.status(500).json({
 				status: 'error',
 				message: err.message

@@ -1,6 +1,3 @@
-import userApi from "../apis/userApi";
-import { getCookie } from "../views/Global/cookie";
-
 let initState = {};
 
 const userReducer = (state = initState, action) => {
