@@ -9,5 +9,6 @@ router.get('/:username/:postId', controller.detailPost);
 router.post('/report', controller.reportPost);
 router.put('/', uploadPost.array('images', 10), controller.updatePost);
 router.delete('/:id', controller.deletePost);
+router.patch('/:id/like', controller.likePost);
 
 module.exports = router;

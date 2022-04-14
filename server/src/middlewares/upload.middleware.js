@@ -13,7 +13,9 @@ const storagePost = multer.diskStorage({
 		if (fs.existsSync(dest) && req.url !== '/new' && req.method === 'PUT')
 			dest += '-new';
 
-		fs.mkdirSync(dest, { recursive: true });
+		fs.mkdirSync(dest, {
+			recursive: true
+		});
 		cb(null, dest);
 	},
 	fileFilter: (req, file, cb) => {
@@ -24,7 +26,7 @@ const storagePost = multer.diskStorage({
 	},
 	filename: (req, file, cb) => {
 		let ext = path.extname(file.originalname);
-		cb(null, Date.now() + ext);
+		cb(null, Date.now() + '.png');
 	}
 });
 
@@ -41,7 +43,7 @@ const storageAvatar = multer.diskStorage({
 	filename: (req, file, cb) => {
 		let dest = __dirname + '/../../../resources/images/avatars';
 		let ext = path.extname(file.originalname);
-		let filename = req.decoded.userId.toString() + ext;
+		let filename = req.decoded.userId.toString() + '.png';
 		if (fs.existsSync(dest + '/' + filename))
 			filename = 'new-' + filename;
 		req.filename = filename;
@@ -50,6 +52,10 @@ const storageAvatar = multer.diskStorage({
 })
 
 module.exports = {
-	uploadPost: multer({ storage: storagePost }),
-	uploadAvatar: multer({ storage: storageAvatar }),
+	uploadPost: multer({
+		storage: storagePost
+	}),
+	uploadAvatar: multer({
+		storage: storageAvatar
+	}),
 }

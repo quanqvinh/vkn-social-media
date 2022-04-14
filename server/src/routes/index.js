@@ -5,20 +5,17 @@ const authenJwtMiddleware = require('../middlewares/authenJwt.middleware');
 
 module.exports = (app) => {
 	app.get('/test', async (req, res) => {
-		try {
-			const Comment = require('../models/comment.model');
-			const Post = require('../models/post.model');
-			let [post, comments] = await Promise.all([
-				Post.findOne({}),
-				Comment.find({}).select('_id').lean()
-			]);
-			comments.forEach(cmt => post.comments.push(cmt._id));
-			await post.save();
-			res.send('OK');
-		}
-		catch(err) { 
-			res.json({...err});
-		}
+		const Post = require('../models/post.model');
+		const Comment = require('../models/comment.model');
+		let post = await Post.findById('624fabdf6f55d01afe3eb4a0')
+			.populate({
+				path: 'comments', 
+				populate: { 
+					path: 'commentBy', 
+					select: 'username -_id'
+				}
+			}).lean();
+		res.json(post);
 	});
 	app.use('/api/v1/auth', authRouter);
 	app.use('/api/v1/user', authenJwtMiddleware, userRouter);

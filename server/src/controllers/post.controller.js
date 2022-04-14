@@ -94,7 +94,7 @@ module.exports = {
 		}
 	},
 
-	// [GET] /api/v1/post/detail
+	// [GET] /api/v1/post/:username/:postId
 	async detailPost(req, res) {
 		try {
 			let { username, postId } = req.params;
@@ -251,5 +251,28 @@ module.exports = {
 			});
 		}
 		session.endSession();
+	},
+	async likePost(req, res) {
+		try {
+			const { id } = req.params, userId = req.decoded.userId;
+			let post = await Post.findById(id);
+			let index = post.likes.findIndex((id) => id.toString() === userId);
+			if (index === -1)
+				post.likes.push(userId);
+			else
+				post.likes.splice(index, 1);
+			post.save();
+			res.status(200).json({ 
+				status: 'success',
+				message: index === -1 ? 'liked post' : 'unliked post'
+			});
+		}
+		catch(err) {
+			console.log(err);
+			res.status(500).json({
+				status: 'error',
+				message: err.message
+			});
+		}
 	}
 };
