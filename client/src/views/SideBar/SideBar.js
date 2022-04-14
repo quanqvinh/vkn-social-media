@@ -7,7 +7,6 @@ import image from "../../assets/images/profile.jpg";
 
 function Sidebar(props) {
    const { user } = props;
-
    return (
       <Sticky topOffset={-80}>
          <div className="sidebar">

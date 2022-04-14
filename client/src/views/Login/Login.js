@@ -19,8 +19,6 @@ export default function Login() {
    const [resMessage, setResMessage] = useState("");
    const history = useHistory();
 
-   const dispatch = useDispatch();
-
    const handelCheckLogin = () => {
       if ((!username && !email) || !password) return false;
       return true;
@@ -52,15 +50,12 @@ export default function Login() {
       const login = async () => {
          try {
             let res = await authApi.login(data);
-            let user = res?.data;
             let accessToken = res?.accessToken;
             let refreshToken = res?.refreshToken;
 
             setCookie("accessToken", accessToken, 3);
             setCookie("refreshToken", refreshToken, 3);
 
-            let action = saveUser(user);
-            dispatch(action);
             if (res.status === "success") history.push("/");
          } catch (error) {
             if (error.response) {
