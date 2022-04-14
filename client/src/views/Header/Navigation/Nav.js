@@ -6,10 +6,15 @@ import ProfileIcon from "../../Profile/ProfilePreview/ProfileIcon";
 import image from "../../../assets/images/profile.jpg";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { getCookie, setCookie } from "../../Global/cookie";
 
 function Nav() {
    const [isDropDown, setIsDropDown] = useState(false);
 
+   const handelLogout = () => {
+      getCookie("accessToken") && setCookie("accessToken", "", 0);
+      getCookie("refreshToken") && setCookie("refreshToken", "", 0);
+   };
    return (
       <div className="menu">
          <Home className="icon" />
@@ -71,7 +76,7 @@ function Nav() {
                   <span>Profile</span>
                </li>
                <li>
-                  <Link to="/login" className="login">
+                  <Link to="/login" className="login" onClick={handelLogout}>
                      Log Out
                   </Link>
                </li>

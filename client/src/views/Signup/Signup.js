@@ -21,13 +21,10 @@ export default function Signup() {
    const {
       register,
       handleSubmit,
-      watch,
       formState: { errors },
    } = useForm();
 
    const onSubmit = (data) => {
-      console.log(data);
-
       const signUp = async () => {
          try {
             let res = await authApi.signUp(data);
@@ -52,10 +49,10 @@ export default function Signup() {
          setIsEmailError(false);
       }
 
-      if (errors?.fullname?.type && !isFullNameError) {
+      if (errors?.name?.type && !isFullNameError) {
          setIsFullNameError(true);
       }
-      if (!errors?.fullname?.type && isFullNameError) {
+      if (!errors?.name?.type && isFullNameError) {
          setIsFullNameError(false);
       }
 
@@ -121,17 +118,19 @@ export default function Signup() {
                               className={
                                  isFullNameError ? "input--error" : "none"
                               }
-                              {...register("fullname", {
-                                 maxLength: 20,
+                              {...register("name", {
+                                 required: true,
+                                 maxLength: 30,
+                                 minLength: 5,
                               })}
                               type="text"
-                              id="FullName"
+                              id="Name"
                               placeholder="Full Name"
                            />
 
-                           {errors?.fullname?.type === "maxLength" && (
+                           {errors?.name?.type === "maxLength" && (
                               <p className="input__error">
-                                 Full name cannot exceed 20 characters
+                                 Full name cannot exceed 30 characters
                               </p>
                            )}
                         </div>
