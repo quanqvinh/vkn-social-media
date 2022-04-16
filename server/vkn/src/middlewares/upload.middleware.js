@@ -9,7 +9,7 @@ const storagePost = multer.diskStorage({
 		if (!postId)
 			postId = new ObjectId();
 		req.body.postId = postId;
-		let dest = __dirname + '/../../../resources/images/posts/' + postId;
+		let dest = __dirname + '/../../../../resources/images/posts/' + postId;
 		if (fs.existsSync(dest) && req.url !== '/new' && req.method === 'PUT')
 			dest += '-new';
 
@@ -32,7 +32,7 @@ const storagePost = multer.diskStorage({
 
 const storageAvatar = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, __dirname + '/../../../resources/images/avatars');
+		cb(null, __dirname + '/../../../../resources/images/avatars');
 	},
 	fileFilter: (req, file, cb) => {
 		if (file.mimetype.startsWith('image/'))

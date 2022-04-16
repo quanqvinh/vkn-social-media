@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const User = require("../../../common/models/user.model");
+const User = require("../models/user.model");
 const Auth = require("./auth.controller");
 const Crypto = require("../utils/crypto");
 const {
@@ -8,7 +8,7 @@ const {
 const fs = require("fs");
 const path = require('path');
 
-const avatarFolder = __dirname + '/../../../resources/images/avatars/';
+const avatarFolder = __dirname + '/../../../../resources/images/avatars/';
 
 module.exports = {
     // [GET] /api/v1/user/me/profile
