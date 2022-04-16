@@ -12,7 +12,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "mongoose": "^6.3.0"
+    "mongoose": "^6.3.0",
+    "mongoose-delete": "^0.5.4"
   },
   "devDependencies": {
     "morgan": "^1.10.0",
