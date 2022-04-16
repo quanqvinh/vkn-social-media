@@ -207,5 +207,27 @@ module.exports = {
                 }
             }
         });
+    },
+    async searchUser(req, res, next) {
+        console.log(1);
+        console.log(req.body);
+        try {
+            console.log(req.body);
+            let keyword = req.body.keyword;
+            await User.find({name: keyword, username: keyword})
+                .lean()
+                .then((data) => {
+                    res.status(200).json(data);
+                })
+                .catch((err) => {
+                    res.status(400).json({});
+                })
+        } catch(err) {
+            console.log(err);
+            res.status(500).json({
+                'status': 'error',
+                'message': 'Error at server.'
+            });
+        }
     }
 };

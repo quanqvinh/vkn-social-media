@@ -5,6 +5,10 @@ const { uploadAvatar } = require('../middlewares/upload.middleware');
 
 router.get('/me/profile', userController.getMyProfile);
 router.get('/:id', userController.getUserProfile);
+router.get('/search', (req, res, next) => {
+    console.log('Searching...');
+    next();
+}, userController.searchUser);
 
 router.post('/edit/email/request', userController.requestEditUserEmail);
 router.post('/upload/avatar', uploadAvatar.single('avatar'), userController.uploadProfilePicture);
