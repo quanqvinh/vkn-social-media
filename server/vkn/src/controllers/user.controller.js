@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const User = require("../models/user.model");
-const Auth = require("../controllers/auth.controller");
+const Auth = require("./auth.controller");
 const Crypto = require("../utils/crypto");
 const {
     unlink
