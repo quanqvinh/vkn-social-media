@@ -6,7 +6,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 
 const ObjectId = require('mongoose').Types.ObjectId;
-const postResource = __dirname + '/../../../resources/images/posts/';
+const postResource = __dirname + '/../../../../resources/images/posts/';
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
@@ -71,10 +71,12 @@ module.exports = {
 	// [POST] /api/v1/post/new
 	async newPost(req, res) {
 		try {
-			let { postId, caption } = req.body;
+			let { caption } = req.body;
+			let postId = new ObjectId();
 			await Promise.all([
 				Post.create({
 					_id: postId,
+					user: req.decoded.userId,
 					caption
 				}),
 				User.updateOne({ _id: req.decoded.userId }, {
@@ -94,47 +96,36 @@ module.exports = {
 		}
 	},
 
-	// [GET] /api/v1/post/:username/:postId
+	// [GET] /api/v1/post/:postId
 	async detailPost(req, res) {
 		try {
-			let { username, postId } = req.params;
-			if (!username || !postId) 
-				return res.status(400).json({
-					status: 'error',
-					message: 'Parameters problem'
-				});
-			let [user, poster, post] = await Promise.all([
-				User.findById(req.decoded.userId)
-					.select('username avatar friends')
-					.populate({
-						path: 'friends',
+			let { postId } = req.params;
+			let post = await Post.findById(postId)
+				.populate([
+					{
+						path: 'user',
+						select: 'username friends'
+					},
+					{
+						path: 'likes',
 						select: 'username'
-					}).lean(),
-				User.findById(username)
-					.select('_id username').lean(),
-				Post.findById(postId)
-					.populate([
-						{
-							path: 'likes',
+					},
+					{
+						path: 'comments',
+						populate: {
+							path: 'commentBy',
 							select: 'username'
 						},
-						{
-							path: 'comments',
-							populate: {
-								path: 'commentBy',
-								select: 'username -_id'
-							},
-							select: 'commentBy content'
-						}
-					])
-					.select('-reports').lean()
-			]);
+						select: 'commentBy content'
+					}
+				]).select('-reports').lean();
 			
-			poster.isFriend = user.friends.includes(poster._id);
+			post.user.isFriend = post.user.friends.includes(req.decoded.userId) 
+				|| req.decoded.userId === post.user._id.toString();
+			post.user.friends = undefined; 
 			res.status(200).json({
 				status: 'success',
-				posterData: poster,
-				postData: post
+				data: post
 			});
 		}
 		catch(err) {

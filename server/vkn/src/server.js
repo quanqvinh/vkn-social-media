@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+// ExpressJS
 const express = require('express');
 const app = express();
 const methodOverride = require('method-override');
@@ -29,8 +30,16 @@ app.use(morgan('tiny'));
 
 route(app);
 
+
+// Socket.IO
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const socketHandler = require('./listeners');
+
+socketHandler(io);
+
 const port = process.env.PORT;
 const host = process.env.HOST;
-app.listen(port, host, () => {
-   console.log(`Server is listening at http://${host}:${port}/api`);
+server.listen(port, host, () => {
+   console.log(`Server is listening at http://${host}:${port}/api/v1`);
 });

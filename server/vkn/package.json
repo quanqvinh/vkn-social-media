@@ -23,7 +23,8 @@
     "mongoose": "^6.2.7",
     "mongoose-delete": "^0.5.4",
     "multer": "^1.4.4",
-    "nodemailer": "^6.7.2"
+    "nodemailer": "^6.7.2",
+    "socket.io": "^4.4.1"
   },
   "devDependencies": {
     "morgan": "^1.10.0",
