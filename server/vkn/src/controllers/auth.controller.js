@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const User = require("../../../common/models/user.model");
-const Token = require("../../../common/models/token.model");
+const User = require("../models/user.model");
+const Token = require("../models/token.model");
 const crypto = require("../utils/crypto");
 const mail = require("../utils/nodemailer");
 const jwt = require("jsonwebtoken");
@@ -323,7 +323,9 @@ module.exports = {
                message: 'Refresh token is invalid'
             });
          
+         console.log('start find token');
          let token = await Token.findOne({ refreshToken }).lean();
+         console.log(token);
          if (!token)
             return res.status(200).json({
                status: 'error',
@@ -356,7 +358,7 @@ module.exports = {
          });
       }
       catch (error) {
-         console.log(error.message);
+         console.log(error);
          res.status(500).json({
             status: "error",
             message: error.message
