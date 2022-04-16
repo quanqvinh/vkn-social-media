@@ -12,8 +12,12 @@ const postApi = {
    },
 
    add: (data) => {
-      const url = "/posts";
-      return axiosClient.post(url, data);
+      const url = "/posts/new";
+      return axiosClient.post(url, data, {
+         header: {
+            "content-type": "multipart/form-data",
+         },
+      });
    },
 
    delete: (id) => {

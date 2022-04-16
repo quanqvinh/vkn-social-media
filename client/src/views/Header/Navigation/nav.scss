@@ -1,16 +1,32 @@
 @import "../../../assets/styles/variables";
 
+a.navLink--active {
+   svg {
+      color: #000 !important;
+   }
+}
+
 .menu {
    display: flex;
    padding-right: 1.5em;
 
    .icon {
       margin-right: 1.5em;
-      width: 23px;
+      width: 26px;
       height: 23px;
+      color: #fff;
+
+      &--active {
+         color: #000;
+      }
+
+      &--tempDisable {
+         color: #fff;
+      }
 
       &:hover {
          cursor: pointer;
+         opacity: 0.7;
       }
    }
 
