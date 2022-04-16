@@ -1,0 +1,9 @@
+/common/node_modules
+
+/vkn/node_modules
+vkn/.env
+vkn/nodemon.json
+
+/vkn-admin/node_modules
+vkn-admin/.env
+vkn-admin/nodemon.json

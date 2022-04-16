@@ -1,7 +1,7 @@
-const User = require('../models/user.model');
-const Comment = require('../models/comment.model');
-const Post = require('../models/post.model');
-const Report = require('../models/report.model');
+const User = require('../../../common/models/user.model');
+const Comment = require('../../../common/models/comment.model');
+const Post = require('../../../common/models/post.model');
+const Report = require('../../../common/models/report.model');
 const fs = require('fs');
 const fse = require('fs-extra');
 
