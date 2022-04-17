@@ -33,7 +33,12 @@ route(app);
 
 // Socket.IO
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+   cors: {
+      origin: process.env.CLIENT_DOMAIN,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+   }
+});
 const socketHandler = require('./listeners');
 
 socketHandler(io);

@@ -209,7 +209,6 @@ module.exports = {
         });
     },
     async searchUser(req, res, next) {
-        console.log(1);
         console.log(req.body);
         try {
             console.log(req.body);

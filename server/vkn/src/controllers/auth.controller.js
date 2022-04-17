@@ -323,9 +323,7 @@ module.exports = {
                message: 'Refresh token is invalid'
             });
          
-         console.log('start find token');
          let token = await Token.findOne({ refreshToken }).lean();
-         console.log(token);
          if (!token)
             return res.status(200).json({
                status: 'error',

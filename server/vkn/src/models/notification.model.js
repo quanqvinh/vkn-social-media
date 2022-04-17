@@ -8,7 +8,7 @@ const NotificationSchema = new mongoose.Schema({
 	content: {
 		type: String
 	},
-	account_names: [{
+	accountNames: [{
 		type: String
 	}],
 	isChecked: {

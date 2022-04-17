@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const Comment = require('../models/comment.model');
+const Notification = require('../models/notification.model');
 const Post = require('../models/post.model');
 const Report = require('../models/report.model');
 const fs = require('fs');
@@ -22,45 +23,44 @@ module.exports = {
 					},
 					populate: { 
 						path: 'commentBy',
-						select: 'username avatar'
+						select: 'username'
 					},
 					select: '-replies'
 				}
 			};
 			let user = await User.findById(req.decoded.userId)
-				.select('username avatar friends posts notifications')
+				.select('username friends posts notifications')
 				.populate([
 					{
 						path: 'friends',
 						populate: populatePost
 					},
-					populatePost
+					populatePost, 'notifications'
 				]).lean();
 			
 			let posts = {
 				myPosts: user.posts.map(post => ({
 					username: user.username,
-					avatar: user.avatar,
 					...post
 				})),
 				friendPosts: (function() {
 					let allFriendPosts = user.friends.map(friend => friend.posts.map(post => ({
 						username: friend.username,
-						avatar: friend.avatar,
 						...post
 					})));
-					return allFriendPosts.reduce((pre, cur) => pre.concat(car), []);
+					return allFriendPosts.reduce((pre, cur) => pre.concat(cur), []);
 				})()
 			};
 			let newFeed = [ ...posts.myPosts, ...posts.friendPosts ];
 			newFeed.sort((a, b) => Math.random() - 0.5);
 			res.status(200).json({
 				status: 'success',
+				notifications: user.notifications,
 				posts: newFeed,
-				notifications
 			});
 		}
 		catch(err) {
+			console.log(err);
 			res.status(500).json({
 				status: 'error',
 				message: err.message

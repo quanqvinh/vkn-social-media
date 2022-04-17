@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+	<form>
+		<input type="text" placeholder="New comment" id="commentContent">
+		<input type="submit" value="Done" id="sendComment">
+	</form>
+	<script type="module">
+		// Init socket client
+		import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+		const socket = io('http://localhost:7777/post', {
+			auth: {
+				'access-token': '',
+				username: 'username'
+			}
+		});
+
+
+		// LISTEN ERROR IN SERVER
+		socket.on('connect_error', err => {
+			if (err.message === 'unauthorized') {
+				// Refresh token
+				// ...
+				// ============
+				socket.handshake.auth['access-token'] = '...';
+				socket.connect();
+			}
+			console.log('Login again!');
+			// Handle error
+			// ...
+			// ===========
+		});
+
+		socket.on('comment_error', err => {
+			// ...
+			console.log('Try later');
+		});
+
+
+		// EMIT JOIN POST ROOM
+		socket.emit('join_post', window.location.href);
+
+
+		const sendComment = $('#sendComment');
+		const commentContent = $('#commentContent')
+		// EMIT CREATE NEW COMMENT when click send new comment
+		sendComment.click((e) => {
+			e.preventDefault();
+			let content = commentContent.val();
+			if (content) {
+				let payload = {
+					postId: '',
+					content: '', 
+					// ...
+				};
+				socket.emit('create_comment', payload);
+				commentContent.val('');
+			}
+		});
+
+
+		// LISTEN NEW COMMENT
+		socket.on('print_comment', payload => {
+			// insert new comment to DOM
+			// ...
+			// ========================
+		});
+	</script>
+</body>
+</html>
