@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Timezone = require('mongoose-timezone');
 
 const NotificationSchema = new mongoose.Schema({
 	type: {
@@ -8,7 +9,7 @@ const NotificationSchema = new mongoose.Schema({
 	content: {
 		type: String
 	},
-	account_names: [{
+	accountNames: [{
 		type: String
 	}],
 	isChecked: {
@@ -19,5 +20,7 @@ const NotificationSchema = new mongoose.Schema({
 	timestamps: true,
 	versionKey: false
 });
+
+NotificationSchema.plugin(Timezone);
 
 module.exports = mongoose.model('Notification', NotificationSchema);

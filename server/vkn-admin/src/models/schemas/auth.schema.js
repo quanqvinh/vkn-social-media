@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Timezone = require('mongoose-timezone');
 
-module.exports = new mongoose.Schema({
+const authSchema = new mongoose.Schema({
 	password: {
 		type: String,
 		required: true
@@ -23,3 +24,7 @@ module.exports = new mongoose.Schema({
 }, {
 	_id: false
 });
+
+authSchema.plugin(Timezone);
+
+module.exports = authSchema;

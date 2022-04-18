@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Timezone = require('mongoose-timezone');
 
-module.exports = new mongoose.Schema({
+const MessageSchema = new mongoose.Schema({
 	sendBy: {
 		type: String,
 		required: true
@@ -9,8 +10,10 @@ module.exports = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	imageUrl: {
-		type: String
+	isImage: {
+		type: Boolean,
+		required: true,
+		default: false
 	},
 	showWith: {
 		type: String,
@@ -20,3 +23,7 @@ module.exports = new mongoose.Schema({
 	timestamps: true,
 	versionKey: false
 });
+
+MessageSchema.plugin(Timezone);
+
+module.exports = MessageSchema;
