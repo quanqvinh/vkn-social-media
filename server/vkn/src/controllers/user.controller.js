@@ -209,11 +209,11 @@ module.exports = {
         });
     },
     async searchUser(req, res, next) {
-        console.log(req.body);
         try {
-            console.log(req.body);
             let keyword = req.body.keyword;
-            await User.find({name: keyword, username: keyword})
+            
+            let regex = new RegExp(''+keyword, 'i');
+            await User.find({$or: [{name: regex}, {username: regex}]})
                 .lean()
                 .then((data) => {
                     res.status(200).json(data);
