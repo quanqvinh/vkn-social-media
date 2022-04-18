@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Timezone = require('mongoose-timezone');
 
 const TokenSchema = new mongoose.Schema({
 	refreshToken: {
@@ -15,5 +16,7 @@ const TokenSchema = new mongoose.Schema({
 }, {
 	versionKey: false
 });
+
+TokenSchema.plugin(Timezone);
 
 module.exports = mongoose.model('Token', TokenSchema);
