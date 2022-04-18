@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ReplySchema = require('./schemas/reply.schema');
+const Timezone = require('mongoose-timezone');
 
 const CommentSchema = new mongoose.Schema({
 	commentBy: {
@@ -26,5 +27,7 @@ const CommentSchema = new mongoose.Schema({
 	timestamps: true,
 	versionKey: false
 });
+
+CommentSchema.plugin(Timezone);
 
 module.exports = mongoose.model('Comment', CommentSchema);

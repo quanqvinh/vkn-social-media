@@ -2,16 +2,13 @@ const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const authSchema = require('./schemas/auth.schema');
 const ObjectId = mongoose.Types.ObjectId;
+const Timezone = require('mongoose-timezone');
 
 const UserSchema = new mongoose.Schema({
 	username: {
 		type: String,
 		unique: true,
 		required: true
-	},
-	usernameUpdatedAt: {
-		type: Date,
-		default: new Date(Date.now())
 	},
 	email: {
 		type: String,
@@ -63,6 +60,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: 'all'
-})
+});
+UserSchema.plugin(Timezone);
 
 module.exports = mongoose.model('User', UserSchema);
