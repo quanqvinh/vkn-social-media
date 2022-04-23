@@ -218,9 +218,6 @@ module.exports = {
                 .then((data) => {
                     res.status(200).json(data);
                 })
-                .catch((err) => {
-                    res.status(400).json({});
-                })
         } catch(err) {
             console.log(err);
             res.status(500).json({
