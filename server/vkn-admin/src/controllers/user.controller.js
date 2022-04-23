@@ -10,6 +10,7 @@ const User = require("../models/user.model");
 
 // const avatarFolder = __dirname + '/../../../resources/images/avatars/';
 
+const COUNT_ITEM_OF_A_PAGE = 10;
 module.exports = {
     // [GET] admin/api/v1/user/:id
     getUser(req, res, next) {
@@ -27,7 +28,7 @@ module.exports = {
             })
             .lean()
             .then((data) => {
-                    res.status(200).json(data);
+                res.status(200).json(data);
             })
             .catch(() => {
                 res.status(400).json({
@@ -43,7 +44,13 @@ module.exports = {
             })
             .lean()
             .then((data) => {
-                res.status(200).json(data);
+                let lengthData = data.length;
+                let totalPageCount = parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) === parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE ?
+                                parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) : parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) + 1;
+                res.status(200).json({
+                    "users": data,
+                    "totalPageCount": totalPageCount
+                });
             })
             .catch((err) => {
                 res.status(500).json({
@@ -54,24 +61,41 @@ module.exports = {
 
     },
     // [PATCH] admin/api/v1/user/enable/:id
-    enableUser(req, res, next) {
+    async enableUser(req, res, next) {
         try {
             let id = req.params.id;
-            User.restore({
-                    _id: id
-                })
-                .then((data) => {
-                    res.status(200).json({
-                        status: "success",
-                        message: "User has been enabled.",
-                    });
-                })
-                .catch((err) => {
-                    res.status(400).json({
-                        status: "error",
-                        message: "User not found."
-                    });
-                });
+            // await Promise.all([
+            //         User.restore({
+            //             _id: id
+            //         }),
+            //         User.updateOneWithDeleted({
+            //             _id: id
+            //         }, {
+
+            //             deletedAt: undefined
+            //         })
+            //     ])
+            let user = await User.findOneAndUpdateWithDeleted({ _id: id }, {
+                deleted: false,
+                deletedAt: new Date(Date.now())
+            });
+            console.log(user);
+            res.status(200).json({
+                status: "success",
+                message: "User has been enabled.",
+            });
+                // .then((data) => {
+                //     res.status(200).json({
+                //         status: "success",
+                //         message: "User has been enabled.",
+                //     });
+                // })
+                // .catch((err) => {
+                //     res.status(400).json({
+                //         status: "error",
+                //         message: "User not found."
+                //     });
+                // });
         } catch (error) {
             res.status(500).json({
                 status: "error",
@@ -80,24 +104,27 @@ module.exports = {
         }
 
     },
-    disableUser(req, res, next) {
+    async disableUser(req, res, next) {
         try {
             let id = req.params.id;
-            User.delete({
+
+            await User.delete({
                     _id: id
                 })
-                .then((data) => {
+                .then(() => {
                     res.status(200).json({
                         status: "success",
                         message: "User has been disabled.",
                     });
                 })
-                .catch((err) => {
+                .catch(() => {
                     res.status(400).json({
                         status: "error",
                         message: "User not found."
                     });
-                });
+                })
+
+
         } catch (error) {
             res.status(500).json({
                 status: "error",
@@ -105,7 +132,26 @@ module.exports = {
             });
         }
 
+    },
+    async searchUser(req, res, next) {
+        try {
+            let keyword = req.body.keyword;
+            
+            let regex = new RegExp(''+keyword, 'i');
+            await User.findWithDeleted({$or: [{name: regex}, {username: regex}]})
+                .lean()
+                .then((data) => {
+                    res.status(200).json(data);
+                })
+        } catch(err) {
+            console.log(err);
+            res.status(500).json({
+                'status': 'error',
+                'message': 'Error at server.'
+            });
+        }
     }
+
 
 
 

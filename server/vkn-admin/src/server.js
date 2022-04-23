@@ -41,5 +41,5 @@ const server = require('http').Server(app);
 const port = process.env.PORT;
 const host = process.env.HOST;
 server.listen(port, host, () => {
-   console.log(`Server is listening at http://${host}:${port}/api/v1`);
+   console.log(`Server is listening at http://${host}:${port}/admin/api/v1`);
 });
