@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+	<form action="" id="form">
+		<input type="text" name="content" id="content">
+		<input type="submit" value="Send" id="send">
+	</form>
+	<script type="module">
+		// Init socket client
+		import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+		const socket = io('http://localhost:7070', {
+			auth: {
+				'access-token': '',
+				userId: '624000cb773430adfd378d86',
+				username: 'quanqvinh'
+			}
+		});
+
+		let content = $('#content');
+		let send = $('#send');
+		let form = $('#form');
+
+		form.submit((e) => {
+			e.preventDefault();
+			if (content.val()) {
+				console.log(`${socket.auth.username}: ${content.val()}`);
+				socket.emit('chat:send_message', {
+					username: 'kien108',
+					roomId: '625d05d91d214d7596c393b5',
+					content: content.val()
+				});
+				content.val('');
+			}
+		});
+
+		socket.on('chat:print_message', payload => {
+			console.log(`${payload.username}: ${payload.content}`);
+		});
+
+		socket.on('error', () => console.log('error'));
+		socket.on('connect_error', () => {
+			console.log('connecting failed :(');
+			console.log('connecting again ...');
+			socket.connect();
+		});
+		socket.on('reconnect', () => {
+			console.log('Reconnected!');
+		})
+	</script>
+</body>
+</html>
