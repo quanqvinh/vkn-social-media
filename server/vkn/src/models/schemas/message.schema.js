@@ -26,4 +26,7 @@ const MessageSchema = new mongoose.Schema({
 
 MessageSchema.plugin(Timezone);
 
-module.exports = MessageSchema;
+module.exports = {
+	schema: MessageSchema,
+	model: mongoose.model('Message', MessageSchema)
+};

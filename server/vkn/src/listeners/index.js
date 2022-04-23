@@ -1,10 +1,17 @@
-const postHandler = require('./post.socket');
 const authMiddleware = require('../middlewares/authenJwt.socket.middleware');
+const messageHandlerRegister = require('./message.handler');
+const postHandlerRegister = require('./post.handler');
 
 module.exports = (io) => {
-	const postNsp = io.of('/api/v1/post/');
-	const messageNsp = io.of('/api/v1/message/');
-
-	postNsp.use(authMiddleware);
-	postNsp.on('connection', socket => postHandler(postNsp, socket));
+	// io.use(authMiddleware);
+	io.on('connection', (socket) => {
+		console.log(`Socket ID ${socket.id} connect!`);
+		socket.join(socket.handshake.auth.username);
+		socket.join(socket.handshake.auth.userId);
+		
+		messageHandlerRegister(io, socket);
+		postHandlerRegister(io, socket);
+		
+		socket.on('disconnect', () => console.log(`Socket ID ${socket.id} disconnect!`));
+	});
 };

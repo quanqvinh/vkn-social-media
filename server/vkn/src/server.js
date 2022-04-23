@@ -35,7 +35,8 @@ route(app);
 const server = require('http').Server(app);
 const io = require('socket.io')(server, {
    cors: {
-      origin: process.env.CLIENT_DOMAIN,
+      // origin: process.env.CLIENT_DOMAIN,
+      origin: '*',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
    }
 });
