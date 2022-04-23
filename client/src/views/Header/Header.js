@@ -4,7 +4,7 @@ import logo from "../../assets/images/instagramLogo.png";
 import searchIcon from "../../assets/images/searchIcon.png";
 
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 function Header() {
    const [isSearch, setIsSearch] = useState(false);
    const [searchQuery, setSearchQuery] = useState("");
@@ -16,7 +16,10 @@ function Header() {
    return (
       <div className="navigation">
          <div className="container">
-            <img className="logo" src={logo} alt="instagram logo" />
+            <Link to="">
+               <img className="logo" src={logo} alt="instagram logo" />
+            </Link>
+
             <div className="search">
                <img
                   className={`searchIcon ${

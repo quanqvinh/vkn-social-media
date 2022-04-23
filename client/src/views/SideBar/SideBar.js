@@ -4,9 +4,10 @@ import ProfilePreview from "../Profile/ProfilePreview/ProfilePreview";
 import ListsOnline from "./ListsOnline/ListsOnline";
 import Footer from "../Footer/Footer";
 import image from "../../assets/images/profile.jpg";
+import { useSelector } from "react-redux";
 
 function Sidebar(props) {
-   const { user } = props;
+   const user = useSelector((state) => state.user);
    return (
       <Sticky topOffset={-80}>
          <div className="sidebar">

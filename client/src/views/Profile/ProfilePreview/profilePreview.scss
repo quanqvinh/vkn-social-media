@@ -5,6 +5,22 @@
    align-items: center;
    font-size: 0.8em;
    margin-bottom: 0.85em;
+   user-select: none;
+
+   &--chat {
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: 0.1s all linear;
+      margin-bottom: 0;
+      &:hover {
+         background-color: rgba(0, 0, 0, 0.05);
+      }
+      .accountName {
+         &:hover {
+            cursor: pointer;
+         }
+      }
+   }
 
    .textContainer {
       display: flex;
@@ -12,7 +28,7 @@
       margin-left: 1em;
       min-width: 176px;
       text-align: start;
-      font-size: 13px;
+      font-size: 13.7px;
       justify-content: center;
       line-height: 18px;
 
@@ -22,7 +38,6 @@
 
          &:hover {
             cursor: pointer;
-            text-decoration: underline;
          }
       }
 
@@ -31,10 +46,6 @@
          display: block;
          min-width: 200px;
          overflow: hidden;
-
-         &.small {
-            font-size: 12px;
-         }
       }
    }
 
@@ -42,4 +53,12 @@
       text-align: right;
       width: 100%;
    }
+}
+
+.small {
+   font-size: 12px;
+}
+
+.big {
+   font-size: 15px;
 }

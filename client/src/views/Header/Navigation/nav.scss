@@ -1,16 +1,38 @@
 @import "../../../assets/styles/variables";
 
+a.navLink--active {
+   svg {
+      color: #000 !important;
+   }
+}
+
 .menu {
    display: flex;
-   padding-right: 1.5em;
 
    .icon {
       margin-right: 1.5em;
-      width: 23px;
+      width: 26px;
       height: 23px;
+      color: #fff;
+      transition: 0.5s ease all;
+
+      &:hover {
+         opacity: 0.8;
+      }
+      &:active {
+         transform: translateY(6px);
+      }
+      &--active {
+         color: #000;
+      }
+
+      &--tempDisable {
+         color: #fff;
+      }
 
       &:hover {
          cursor: pointer;
+         opacity: 0.7;
       }
    }
 
@@ -69,6 +91,8 @@
                font-weight: 400;
                color: $font-color-primary;
                font-size: 13px;
+               width: 100%;
+               text-align: left;
             }
 
             &:hover {
@@ -79,7 +103,7 @@
                border-top: 2px solid #ccc;
             }
 
-            span {
+            .nav__profile {
                margin-left: 8px;
             }
          }
