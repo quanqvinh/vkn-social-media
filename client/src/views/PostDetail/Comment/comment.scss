@@ -1,0 +1,85 @@
+.message-container {
+   display: flex;
+   gap: 15px;
+   margin-bottom: 20px;
+
+   .profile {
+      margin-bottom: 0rem;
+      align-self: start;
+   }
+
+   &:last-child {
+      margin-bottom: 0;
+   }
+
+   .message__content {
+      text-align: left;
+      &-header {
+         font-size: 0.83rem;
+         span {
+            font-weight: 500;
+            margin-right: 10px;
+            color: #262626;
+         }
+      }
+
+      &-footer {
+         display: flex;
+         gap: 10px;
+         font-size: 0.75rem;
+         color: #8e8e8e;
+         font-weight: 300;
+         user-select: none;
+
+         .message-footer-option,
+         .message-footer-reply {
+            font-weight: 400;
+            cursor: pointer;
+            transition: 0.3s all linear;
+            &:hover {
+               opacity: 0.7;
+            }
+
+            &:active {
+               transform: translateY(2px);
+            }
+         }
+
+         .message-footer-option {
+            font-size: 1.24rem;
+         }
+      }
+
+      .message-view-reply {
+         display: flex;
+         align-items: center;
+         gap: 15px;
+         cursor: pointer;
+         font-size: 0.7rem;
+         color: #8e8e8e;
+         text-align: left;
+         font-weight: 500;
+         transition: 0.3s all linear;
+         margin-top: 10px;
+
+         &:hover {
+            opacity: 0.7;
+         }
+
+         &:active {
+            transform: translateY(2px);
+         }
+
+         span {
+            display: inline-block;
+            width: 25px;
+            border-top: 1px solid #8e8e8e;
+            font-weight: bold;
+         }
+      }
+   }
+}
+
+.display-none {
+   display: none !important;
+}

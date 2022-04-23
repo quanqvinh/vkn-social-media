@@ -7,28 +7,37 @@
    background-color: $background-white;
    width: 100%;
    border-bottom: 1px solid $border-color-grey;
+   user-select: none;
 
    .container {
-      padding: 0.8em 0px 0.8em 20px;
+      padding: 0.8em 0px;
       display: flex;
       align-content: center;
       justify-content: space-between;
-      max-width: 975px;
+      width: 940px;
       margin: 0 auto;
 
       .logo {
-         padding: 0 1em;
-         width: 110px;
+         width: 100px;
+         height: 100%;
+         object-fit: contain;
+         user-select: none;
+         transition: 0.3s ease all;
 
          &:hover {
             cursor: pointer;
+            opacity: 0.8;
+         }
+
+         &:active {
+            transform: translateY(2px);
          }
       }
 
       .search {
          border-radius: 6px;
          background-color: #efefef;
-         min-width: 225px;
+         min-width: 270px;
          display: flex;
          align-items: center;
          padding: 9px 19px;

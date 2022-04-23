@@ -7,19 +7,18 @@ import Signup from "./views/Signup/Signup";
 import VerifyEmail from "./views/VerifyEmail/VerifyEmail";
 import Inbox from "./views/Inbox/Inbox";
 
-import { createContext, useContext, useEffect } from "react";
-import { useSelector, useDispatch, Provider } from "react-redux";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { fetchProfileRequest } from "./actions/user";
+import ProfilePage from "./views/ProfilePage/ProfilePage";
+import EditProfile from "./views/EditProfile/EditProfile";
 
-export const UserContext = createContext();
 function App() {
    const dispatch = useDispatch();
    useEffect(() => {
-      console.log("ahih");
       const fetchUser = async () => {
          try {
-            let action = fetchProfileRequest();
-            dispatch(action);
+            dispatch(fetchProfileRequest());
          } catch (error) {
             console.log(error.message);
          }
@@ -31,27 +30,32 @@ function App() {
 
    return (
       <Router>
-         <UserContext.Provider value={user}>
-            <div className="App">
-               <Switch>
-                  <Route exact path="/">
-                     <Home />
-                  </Route>
-                  <Route path={"/inbox"}>
-                     <Inbox />
-                  </Route>
-                  <Route path="/login">
-                     <Login />
-                  </Route>
-                  <Route path="/signup">
-                     <Signup />
-                  </Route>
-                  <Route path="/auth/verify-email">
-                     <VerifyEmail />
-                  </Route>
-               </Switch>
-            </div>
-         </UserContext.Provider>
+         <div className="App">
+            <Switch>
+               <Route exact path="/">
+                  <Home />
+               </Route>
+               <Route path={"/inbox"}>
+                  <Inbox />
+               </Route>
+
+               <Route exact path={"/profile"}>
+                  <ProfilePage />
+               </Route>
+               <Route path={"/profile/edit"}>
+                  <EditProfile />
+               </Route>
+               <Route path="/login">
+                  <Login />
+               </Route>
+               <Route path="/signup">
+                  <Signup />
+               </Route>
+               <Route path="/auth/verify-email">
+                  <VerifyEmail />
+               </Route>
+            </Switch>
+         </div>
       </Router>
    );
 }

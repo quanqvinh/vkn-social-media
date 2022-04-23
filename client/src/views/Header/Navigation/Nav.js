@@ -7,15 +7,14 @@ import NewPost from "../../NewPost/NewPost";
 import ProfileIcon from "../../Profile/ProfilePreview/ProfileIcon";
 import image from "../../../assets/images/profile.jpg";
 
-import { useState, useContext } from "react";
-import { UserContext } from "../../../App";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getCookie, setCookie } from "../../Global/cookie";
-
 import { NavLink } from "react-router-dom";
 const $ = document.querySelector.bind(document);
 function Nav() {
-   const user = useContext(UserContext);
+   const user = useSelector((state) => state.user);
    const [isDropDown, setIsDropDown] = useState(false);
    const [currentOption, setCurrentOption] = useState({
       newPost: false,
@@ -147,7 +146,9 @@ function Nav() {
                         ></circle>
                      </svg>
 
-                     <span>Profile</span>
+                     <Link to="/profile" className="nav__profile">
+                        Profile
+                     </Link>
                   </li>
                   <li>
                      <Link to="/login" className="login" onClick={handelLogout}>

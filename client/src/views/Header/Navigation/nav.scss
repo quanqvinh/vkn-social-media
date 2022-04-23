@@ -8,14 +8,20 @@ a.navLink--active {
 
 .menu {
    display: flex;
-   padding-right: 1.5em;
 
    .icon {
       margin-right: 1.5em;
       width: 26px;
       height: 23px;
       color: #fff;
+      transition: 0.5s ease all;
 
+      &:hover {
+         opacity: 0.8;
+      }
+      &:active {
+         transform: translateY(6px);
+      }
       &--active {
          color: #000;
       }
@@ -85,6 +91,8 @@ a.navLink--active {
                font-weight: 400;
                color: $font-color-primary;
                font-size: 13px;
+               width: 100%;
+               text-align: left;
             }
 
             &:hover {
@@ -95,7 +103,7 @@ a.navLink--active {
                border-top: 2px solid #ccc;
             }
 
-            span {
+            .nav__profile {
                margin-left: 8px;
             }
          }

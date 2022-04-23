@@ -12,14 +12,24 @@ function ProfilePreview(props) {
       storyBorder,
       hideAccountName,
       image,
+      src,
+      chooseRoom,
    } = props;
 
    let accountName = username
       ? username
       : users[Math.floor(Math.random() * users.length)].username;
 
+   const handelClickProfile = () => {
+      if (!(src === "ListChat")) return;
+
+      chooseRoom();
+   };
    return (
-      <div className="profile">
+      <div
+         className={`profile ${src === "ListChat" ? "profile--chat" : ""}`}
+         onClick={handelClickProfile}
+      >
          <ProfileIcon
             iconSize={iconSize}
             storyBorder={storyBorder}
@@ -27,7 +37,9 @@ function ProfilePreview(props) {
          />
          {(accountName || name) && !hideAccountName && (
             <div className="textContainer">
-               <span className="accountName">{accountName}</span>
+               <span className={`accountName ${captionSize}`}>
+                  {accountName}
+               </span>
                <span className={`name ${captionSize}`}>{name}</span>
             </div>
          )}

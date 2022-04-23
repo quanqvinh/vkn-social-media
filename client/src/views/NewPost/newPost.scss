@@ -112,9 +112,15 @@
          color: $primary-btn-color;
          font-weight: 500;
          cursor: pointer;
+         user-select: none;
+         transition: 0.3s all linear;
 
          &:hover {
             opacity: 0.8;
+         }
+
+         &:active {
+            transform: translateY(1px);
          }
       }
    }
@@ -163,6 +169,7 @@
          align-items: center;
          flex-direction: column;
          justify-content: center;
+         user-select: none;
 
          &-select {
             padding: 6px 15px;
@@ -173,9 +180,14 @@
             font-size: 0.9rem;
             margin-top: 20px;
             cursor: pointer;
+            transition: 0.3s all linear;
 
             &:hover {
                opacity: 0.8;
+            }
+
+            &:active {
+               transform: translateY(3px);
             }
          }
       }

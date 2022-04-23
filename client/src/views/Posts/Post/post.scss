@@ -5,6 +5,7 @@
    background-color: $background-white;
    border-radius: 3px;
    margin-top: 25px;
+   user-select: none;
 
    header {
       display: flex;
@@ -97,14 +98,26 @@
          font-size: 14px;
          resize: none;
          overflow: hidden;
+
+         &::placeholder {
+            user-select: none;
+         }
       }
 
       .postText {
          color: $link-color-secondary;
+         transition: 0.3s all ease-in-out;
+         user-select: none;
 
          &--active {
             color: $link-color;
             font-weight: 600;
+            cursor: pointer;
+
+            &:hover {
+               opacity: 0.8;
+               transform: translateY(1px);
+            }
          }
       }
    }

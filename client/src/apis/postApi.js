@@ -7,12 +7,12 @@ const postApi = {
    },
 
    get: (id) => {
-      const url = `/posts/${id}`;
+      const url = `/post/${id}`;
       return axiosClient.get(url);
    },
 
    add: (data) => {
-      const url = "/posts/new";
+      const url = "/post/new";
       return axiosClient.post(url, data, {
          header: {
             "content-type": "multipart/form-data",
