@@ -10,7 +10,8 @@ const ReplySchema = new mongoose.Schema({
 	content: { type:String }
 }, {
 	timestamps: true,
-	versionKey: false
+	versionKey: false,
+	autoCreate: false
 });
 
 ReplySchema.plugin(Timezone);

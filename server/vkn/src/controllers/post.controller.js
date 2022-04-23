@@ -28,7 +28,7 @@ module.exports = {
 					select: '-replies'
 				}
 			};
-			let user = await User.findById(req.decoded.userId)
+			let user = await User.findById(req.auth.userId)
 				.select('username friends posts notifications')
 				.populate([
 					{
@@ -76,10 +76,10 @@ module.exports = {
 			await Promise.all([
 				Post.create({
 					_id: postId,
-					user: req.decoded.userId,
+					user: req.auth.userId,
 					caption
 				}),
-				User.updateOne({ _id: req.decoded.userId }, {
+				User.updateOne({ _id: req.auth.userId }, {
 					$push: { posts: postId }
 				})
 			]);
@@ -120,8 +120,8 @@ module.exports = {
 					}
 				]).select('-reports').lean();
 			
-			post.user.isFriend = post.user.friends.includes(req.decoded.userId) 
-				|| req.decoded.userId === post.user._id.toString();
+			post.user.isFriend = post.user.friends.includes(req.auth.userId) 
+				|| req.auth.userId === post.user._id.toString();
 			post.user.friends = undefined; 
 			res.status(200).json({
 				status: 'success',
@@ -152,7 +152,7 @@ module.exports = {
 			 await Promise.all([
 				Report.create([{
 					_id,
-					userId: req.decoded.userId,
+					userId: req.auth.userId,
 					content
 				}], { session }),
 				Post.findByIdAndUpdate(postId, {
@@ -213,7 +213,7 @@ module.exports = {
 			let [ post, user ] = await Promise.all([
 				Post.findByIdAndDelete(id, { session })
 				.select('reports comments -_id').lean(),
-				User.updateOne({ _id: req.decoded.userId }, {
+				User.updateOne({ _id: req.auth.userId }, {
 					$pull: { posts: id }
 				}, { session })
 			]);
@@ -245,7 +245,7 @@ module.exports = {
 	},
 	async likePost(req, res) {
 		try {
-			const { id } = req.params, userId = req.decoded.userId;
+			const { id } = req.params, userId = req.auth.userId;
 			let post = await Post.findById(id);
 			let index = post.likes.findIndex((id) => id.toString() === userId);
 			if (index === -1)

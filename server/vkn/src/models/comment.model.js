@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const ReplySchema = require('./schemas/reply.schema');
+const ReplySchema = require('./schemas/reply.schema').schema;
 const Timezone = require('mongoose-timezone');
 
 const CommentSchema = new mongoose.Schema({

@@ -22,7 +22,8 @@ const authSchema = new mongoose.Schema({
 		index: { expireAfterSeconds: 60 * 60 * 24 * 7 }
 	}
 }, {
-	_id: false
+	_id: false,
+	autoCreate: false
 });
 
 authSchema.plugin(Timezone);

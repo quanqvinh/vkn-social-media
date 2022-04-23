@@ -12,8 +12,8 @@ const avatarFolder = __dirname + '/../../../../resources/images/avatars/';
 
 module.exports = {
     // [GET] /api/v1/user/me/profile
-    getMyProfile(req, res, next) {
-        let id = req.decoded.userId;
+    getMyProfile(req, res) {
+        let id = req.auth.userId;
         User.findOne({
                 _id: id
             }, {
@@ -32,7 +32,7 @@ module.exports = {
             });
     },
     // [GET] /api/v1/user/:id
-    getUserProfile(req, res, next) {
+    getUserProfile(req, res) {
         let id = req.params.id;
         if (id) {
             User.findOne({
@@ -61,8 +61,8 @@ module.exports = {
         }
     },
     // [PATCH] /api/v1/user/edit/info
-    editUserProfile(req, res, next) {
-        let id = req.decoded.userId;
+    editUserProfile(req, res) {
+        let id = req.auth.userId;
         let reqData = req.body;
         User.findOneAndUpdate({
                 _id: id
@@ -83,14 +83,14 @@ module.exports = {
             });
     },
     // [POST] /api/v1/user/edit/email/request
-    requestEditUserEmail(req, res, next) {
-        return Auth.requestVerifyEmail(req, res, next);
+    requestEditUserEmail(req, res) {
+        return Auth.requestVerifyEmail(req, res);
     },
 
     // [PATCH] /api/v1/user/edit/email
-    async editUserEmail(req, res, next) {
+    async editUserEmail(req, res) {
         try {
-            let id = req.decoded.userId;
+            let id = req.auth.userId;
 
             let user = await User.findOne({
                 _id: id
@@ -122,9 +122,9 @@ module.exports = {
         }
 
     },
-    changePassword(req, res, next) {
+    changePassword(req, res) {
         let password = req.body.password;
-        let id = req.decoded.userId;
+        let id = req.auth.userId;
 
         if (password) {
             let hashedPassword = Crypto.hash(password);
@@ -151,8 +151,8 @@ module.exports = {
     },
 
     // [DELETE] /api/v1/user/delete
-    softDeleteUser(req, res, next) {
-        let id = req.decoded.userId;
+    softDeleteUser(req, res) {
+        let id = req.auth.userId;
         console.log(id);
         if (id) {
             User.delete({
@@ -182,7 +182,7 @@ module.exports = {
         }
     },
 
-    async uploadProfilePicture(req, res, next) {
+    async uploadProfilePicture(req, res) {
         let file = avatarFolder + req.filename;
         let deleteFileFunction = (async function (filepath) {
             try {
@@ -198,7 +198,7 @@ module.exports = {
                 console.log("avatar does not exist in folder");
             } else {
                 if (file.includes('new-')) { // check whether there is a new avatar, then delete the old one
-                    deleteFileFunction(avatarFolder + req.decoded.userId + path.extname(file));
+                    deleteFileFunction(avatarFolder + req.auth.userId + path.extname(file));
                     fs.rename(file, file.replace('new-', ''), (err) => {
                         if (err) {
                             console.log("error when changing name:", err.message);
@@ -208,7 +208,7 @@ module.exports = {
             }
         });
     },
-    async searchUser(req, res, next) {
+    async searchUser(req, res) {
         try {
             let keyword = req.body.keyword;
             

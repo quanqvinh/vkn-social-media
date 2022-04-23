@@ -8,7 +8,8 @@ const MessageSchema = new mongoose.Schema({
 	},
 	content: {
 		type: String,
-		required: true
+		required: true,
+		default: ''
 	},
 	isImage: {
 		type: Boolean,
@@ -21,7 +22,8 @@ const MessageSchema = new mongoose.Schema({
 	}
 }, {
 	timestamps: true,
-	versionKey: false
+	versionKey: false,
+	autoCreate: false
 });
 
 MessageSchema.plugin(Timezone);

@@ -9,7 +9,7 @@ module.exports = {
 			let user = await User.aggregate([
 				{
 					$match: {
-						_id: ObjectId(req.decoded.userId)
+						_id: ObjectId(req.auth.userId)
 					}
 				},
 				{
@@ -38,7 +38,7 @@ module.exports = {
 					$match: {
 						'rooms.chatMate._id': {
 							$not: {
-								$eq: ObjectId(req.decoded.userId)
+								$eq: ObjectId(req.auth.userId)
 							}
 						}
 					}
@@ -64,7 +64,7 @@ module.exports = {
 													$eq: ['$$this.showWith', 'all']
 												},
 												{
-													$eq: ['$$this.showWith', req.decoded.userId]
+													$eq: ['$$this.showWith', req.auth.userId]
 												}
 											]
 										}
@@ -114,7 +114,7 @@ module.exports = {
 		try {
 			let roomId = req.params.roomId;
 			let numberOfMessage = req.query.nMessage;
-			let numberOfLoadMessage = 3;
+			let numberOfLoadMessage = 100;
 
 			let [ countMessage, data ] = await Promise.all([
 				Room.aggregate([
@@ -147,7 +147,7 @@ module.exports = {
 													$eq: ['$$this.showWith', 'all']
 												},
 												{
-													$eq: ['$$this.showWith', req.decoded.userId]
+													$eq: ['$$this.showWith', req.auth.userId]
 												}
 											]
 										}
@@ -183,6 +183,40 @@ module.exports = {
 				status: 'success',
 				data: data
 			})
+		}
+		catch (err) {
+			console.log(err);
+			res.status(500).json({
+				status: 'error',
+				message: err.message
+			});
+		}
+	},
+
+	// [GET] /api/v1/room/check
+	async checkRoom(req, res) {
+		try {
+			let { userId } = req.query;
+			let user = await User.findById(req.auth.userId)
+				.select('rooms')
+				.populate('rooms')
+				.lean();
+				
+			let roomData = null, roomId = undefined;
+			user.rooms.some(room => {
+				if (room.chatMate.map(userId => userId.toString()).includes(userId)) {
+					roomData = room;
+					return true;
+				}
+				return false;
+			})
+			if (roomData == null) 
+				roomId = new ObjectId();
+			res.json({
+				status: 'success',
+				data: roomData,
+				roomId
+			});
 		}
 		catch (err) {
 			console.log(err);
