@@ -1,7 +1,3 @@
-/vkn/node_modules
-vkn/.env
-vkn/nodemon.json
-
-/vkn-admin/node_modules
-vkn-admin/.env
-vkn-admin/nodemon.json
+node_modules
+.env
+nodemon.json

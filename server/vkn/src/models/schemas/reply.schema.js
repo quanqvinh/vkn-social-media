@@ -15,4 +15,7 @@ const ReplySchema = new mongoose.Schema({
 
 ReplySchema.plugin(Timezone);
 
-module.exports = ReplySchema;
+module.exports = {
+	schema: ReplySchema,
+	model: mongoose.model('Reply', ReplySchema)
+};
