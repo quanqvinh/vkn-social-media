@@ -1,76 +1,47 @@
 import React from "react";
+import { useEffect, useState } from "react";
 import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
+import "./listchat.scss";
+import userApi from "../../../apis/userApi";
 
 const ListChat = (props) => {
-   const { chooseRoom } = props;
+   const { latestMessage, getToRoom } = props;
+   const [listRooms, setListRooms] = useState([]);
+
+   useEffect(() => {
+      const fetchRooms = async () => {
+         try {
+            let res = await userApi.getRooms();
+            res?.data?.rooms && setListRooms([...listRooms, ...res.data.rooms]);
+         } catch (error) {
+            console.log(error.message);
+         }
+      };
+      fetchRooms();
+   }, []);
 
    return (
-      <div style={{ maxHeight: "80%", overflowY: "scroll" }}>
-         <ProfilePreview
-            chooseRoom={chooseRoom}
-            username="kien108"
-            name="Hello everybody"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            captionSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            captionSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            captionSize="big"
-            src="ListChat"
-         />
-         <ProfilePreview
-            username="kien109"
-            name="Today i feel so good"
-            iconSize="big"
-            captionSize="big"
-            src="ListChat"
-         />
+      <div className="list-room">
+         {listRooms?.length > 0 &&
+            listRooms.map((room) => (
+               <ProfilePreview
+                  key={room._id}
+                  room={room}
+                  getToRoom={getToRoom}
+                  username={room.chatMate.username}
+                  name={
+                     latestMessage.roomId === room._id
+                        ? latestMessage.content !== null
+                           ? latestMessage.content
+                           : "image has been sent"
+                        : room.messages[0].content !== null
+                        ? room.messages[0].content
+                        : "image has been sent"
+                  }
+                  iconSize="big"
+                  src="ListChat"
+               />
+            ))}
       </div>
    );
 };

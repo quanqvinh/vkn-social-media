@@ -29,7 +29,7 @@ const ChatRoom = (props) => {
          ...listMessage,
          {
             content: inputContent,
-            imgs: [],
+            img: null,
             isMine: true,
          },
       ]);
@@ -38,13 +38,13 @@ const ChatRoom = (props) => {
    };
 
    useEffect(() => {
-      socket.on("chat:print_message", (payload) => {
-         console.log(payload.message);
+      socket.on("chat:print_message", ({ message }) => {
+         console.log(message);
          setListMessage([
             ...listMessage,
             {
-               content: payload.message.content,
-               img: payload.message._id || null,
+               content: message.content,
+               img: message._id || null,
                isMine: false,
             },
          ]);
@@ -81,6 +81,23 @@ const ChatRoom = (props) => {
          });
       };
       reader.readAsDataURL(image);
+
+      var binaryData = [];
+      binaryData.push(image);
+      let imgSrc = window.URL.createObjectURL(
+         new Blob(binaryData, { type: "application/zip" })
+      );
+
+      setListMessage([
+         ...listMessage,
+         {
+            content: null,
+            img: imgSrc,
+            isMine: true,
+         },
+      ]);
+      handelLastestMessage(currentRoom.roomId, inputContent);
+      setInputContent("");
    };
 
    return (
@@ -102,9 +119,15 @@ const ChatRoom = (props) => {
                         July 10, 2021, 11:27 am
                      </p> */}
                      {message.isMine ? (
-                        <p className="content__day-message">
-                           {message.content}
-                        </p>
+                        message.content !== null ? (
+                           <p className="content__day-message">
+                              {message.content}
+                           </p>
+                        ) : (
+                           <div className="content__day-img">
+                              <img src={message.img} alt="img" />
+                           </div>
+                        )
                      ) : (
                         <div className="content__day-partner">
                            <div className="content__day-partner-avatar">
@@ -115,10 +138,6 @@ const ChatRoom = (props) => {
                            </p>
                         </div>
                      )}
-
-                     {/* <div className="content__day-img">
-                        <img src={img} alt="img" />
-                     </div> */}
                   </div>
                ))}
          </div>

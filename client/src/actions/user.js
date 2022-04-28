@@ -10,6 +10,7 @@ export const saveUser = (user) => {
 export const fetchProfileRequest = () => {
    return async (dispatch) => {
       let res = await userApi.get();
+      res && sessionStorage.setItem("USER_INFO", JSON.stringify({ ...res }));
       dispatch(fetchProfile(res));
    };
 };

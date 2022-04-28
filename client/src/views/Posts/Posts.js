@@ -30,13 +30,10 @@ function Posts(props) {
    const [post, setPost] = useState(null);
    const [listImg, setListImg] = useState([]);
 
-   console.log("render");
    useEffect(() => {
       const fetchPost = async () => {
-         console.log("fetch");
          try {
             if (isEmpty(user)) {
-               console.log("user empty");
                return;
             }
 

@@ -25,6 +25,7 @@ function Nav() {
    const handelLogout = () => {
       getCookie("accessToken") && setCookie("accessToken", "", 0);
       getCookie("refreshToken") && setCookie("refreshToken", "", 0);
+      sessionStorage.removeItem("USER_INFO");
    };
 
    const handelClick = (e) => {

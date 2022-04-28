@@ -20,7 +20,7 @@ async function validateRoom(roomId, user1, user2) {
    ]);
    console.log(room);
    if (!room) return false;
-   let chatMate = room[0].charMate;
+   let chatMate = room[0].chatMate;
    if (chatMate[0].toString() === user1 && chatMate[1].toString() === user2)
       return true;
    if (chatMate[1].toString() === user1 && chatMate[0].toString() === user2)
@@ -32,9 +32,6 @@ module.exports = (io, socket) => {
    socket.on("chat:send_message", async (payload) => {
       try {
          let { username, userId, roomId, content } = payload;
-
-         // if (!validateRoom(roomId, userId, socket.handshake.auth.userId))
-         // 	throw Error('Room error');
 
          let message = new Message({
             sendBy: socket.handshake.auth.username,

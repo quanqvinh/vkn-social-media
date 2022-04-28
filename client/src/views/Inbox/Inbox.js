@@ -1,15 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Header from "../Header/Header";
 import "./inbox.scss";
 import ListChat from "./ListChat/ListChat";
 import { ReactComponent as NewInbox } from "../../assets/images/newInbox.svg";
 import { ReactComponent as InboxIcon } from "../../assets/images/inbox_outline.svg";
 import ChatRoom from "./ChatRoom/ChatRoom";
+import { SOCKET } from "../../App";
 const Inbox = () => {
-   const [isInBoxEmpty, setIsInboxEmpty] = useState(true);
+   const [latestMessage, setLatestMessage] = useState({
+      payload: {},
+      content: "",
+   });
+   const [currentRoom, setCurrentRoom] = useState({
+      chatMate: null,
+      room: null,
+   });
+   const socket = useContext(SOCKET);
 
-   const chooseRoom = () => {
-      setIsInboxEmpty(false);
+   const handelLastestMessage = (roomId, content) => {
+      setLatestMessage({
+         roomId,
+         content,
+      });
+   };
+
+   socket.once("chat:print_message", (payload) => {
+      handelLastestMessage(payload.roomId, payload.content);
+   });
+
+   const getToRoom = (room) => {
+      setCurrentRoom({
+         chatMate: room.chatMate,
+         roomId: room.roomId,
+      });
    };
    return (
       <>
@@ -21,9 +44,13 @@ const Inbox = () => {
                      <h2 className="nav-left__header-username">kien108</h2>
                      <NewInbox />
                   </div>
-                  <ListChat chooseRoom={chooseRoom} />
+                  <ListChat
+                     currentRoom={currentRoom}
+                     getToRoom={getToRoom}
+                     latestMessage={latestMessage}
+                  />
                </div>
-               {isInBoxEmpty ? (
+               {currentRoom.chatMate === null ? (
                   <div className="nav-right">
                      <span className="nav-right__wrap-icon">
                         <InboxIcon className="nav-right__wrap-icon-svg" />
@@ -38,7 +65,10 @@ const Inbox = () => {
                   </div>
                ) : (
                   <>
-                     <ChatRoom />
+                     <ChatRoom
+                        handelLastestMessage={handelLastestMessage}
+                        currentRoom={currentRoom}
+                     />
                   </>
                )}
             </div>
