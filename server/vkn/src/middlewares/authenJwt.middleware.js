@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
 					status: 'error',
 					message: 'Unauthorized access'
 				});
-			req.decoded = decoded;
+			req.auth = decoded;
 			next();
 		});
 	}
