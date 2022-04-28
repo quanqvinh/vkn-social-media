@@ -1,98 +1,103 @@
-const fs = require('fs');
-const Room = require('../models/room.model');
-const Message = require('../models/schemas/message.schema').model;
-const ObjectId = require('mongoose').Types.ObjectId;
+const fs = require("fs");
+const Room = require("../models/room.model");
+const Message = require("../models/schemas/message.schema").model;
+const ObjectId = require("mongoose").Types.ObjectId;
 
-const messageResource = __dirname + '/../../../../resources/images/messages/';
+const messageResource = __dirname + "/../../../../resources/images/messages/";
 
 async function validateRoom(roomId, user1, user2) {
-	let room = await Room.aggregate([
-		{
-			$match: {
-				_id: ObjectId(roomId)
-			}
-		},
-		{
-			$project: {
-				chatMate: 1
-			}
-		}
-	]);
-	console.log(room);
-	if (!room) 
-		return false;
-	let chatMate = room[0].charMate;
-	if (chatMate[0].toString() === user1 && chatMate[1].toString() === user2)
-		return true;
-	if (chatMate[1].toString() === user1 && chatMate[0].toString() === user2)
-		return true;
-	return false;
+   let room = await Room.aggregate([
+      {
+         $match: {
+            _id: ObjectId(roomId),
+         },
+      },
+      {
+         $project: {
+            chatMate: 1,
+         },
+      },
+   ]);
+   console.log(room);
+   if (!room) return false;
+   let chatMate = room[0].charMate;
+   if (chatMate[0].toString() === user1 && chatMate[1].toString() === user2)
+      return true;
+   if (chatMate[1].toString() === user1 && chatMate[0].toString() === user2)
+      return true;
+   return false;
 }
 
 module.exports = (io, socket) => {
-	socket.on('chat:send_message', async (payload) => {
-		try {
-			let { username, userId, roomId, content } = payload;
+   socket.on("chat:send_message", async (payload) => {
+      try {
+         let { username, userId, roomId, content } = payload;
 
-			// if (!validateRoom(roomId, userId, socket.handshake.auth.userId))
-			// 	throw Error('Room error');
+         // if (!validateRoom(roomId, userId, socket.handshake.auth.userId))
+         // 	throw Error('Room error');
 
-			let message = new Message({
-				sendBy: socket.handshake.auth.username,
-				content
-			});
+         let message = new Message({
+            sendBy: socket.handshake.auth.username,
+            content,
+         });
 
-			await Room.updateOne({ _id: roomId }, {
-				$push: { messages: message }
-			});
-			
-			io.to(username).emit('chat:print_message', {
-				roomId,
-				userId,
-				username: socket.handshake.auth.username,
-				message: message._doc
-			});
-		}
-		catch (error) {
-			console.log(error);
-			socket.emit('error');
-		}
-	});
+         await Room.updateOne(
+            { _id: roomId },
+            {
+               $push: { messages: message },
+            }
+         );
 
-	socket.on('chat:send_image', async (payload) => {
-		try {
-			let { image, username, userId, roomId } = payload;
+         io.to(username).emit("chat:print_message", {
+            roomId,
+            userId,
+            username: socket.handshake.auth.username,
+            message: message._doc,
+         });
+      } catch (error) {
+         console.log(error);
+         socket.emit("error");
+      }
+   });
 
-			if (!validateRoom(roomId, userId, socket.handshake.auth.userId))
-				throw Error('Room error');
+   socket.on("chat:send_image", async (payload) => {
+      try {
+         let { image, username, userId, roomId } = payload;
 
-			let imageBase64 = image.split(';base64,')[1];
-			let message = new Message({
-				sendBy: username,
-				isImage: true
-			});
+         if (!validateRoom(roomId, userId, socket.handshake.auth.userId))
+            throw Error("Room error");
 
-			let roomResource = messageResource + roomId;
-			if (!fs.existsSync(roomResource))
-				fs.mkdirSync(roomResource);
+         let imageBase64 = image.split(";base64,")[1];
+         let message = new Message({
+            sendBy: username,
+            isImage: true,
+         });
 
-			fs.writeFileSync(roomResource + `/${message._id.toString()}.png`, 
-				imageBase64, { encoding: 'base64' });
+         let roomResource = messageResource + roomId;
+         if (!fs.existsSync(roomResource)) fs.mkdirSync(roomResource);
 
-			io.to(username).emit('chat:print_image', {
-				roomId,
-				userId,
-				username: socket.handshake.auth.username,
-				message: message._doc
-			})
+         fs.writeFileSync(
+            roomResource + `/${message._id.toString()}.png`,
+            imageBase64,
+            { encoding: "base64" }
+         );
 
-			await Room.updateOne({ _id: roomId }, {
-				$push: { messages: message }
-			});
-		}
-		catch (error) {
-			console.log(error);
-			socket.emit('error');
-		}
-	});
+         io.to(username).emit("chat:print_message", {
+            roomId,
+            userId,
+            username: socket.handshake.auth.username,
+            message: message._doc,
+         });
+
+         await Room.updateOne(
+            { _id: roomId },
+            {
+               $push: { messages: message },
+            }
+         );
+      } catch (error) {
+         console.log(error);
+         socket.emit("error");
+      }
+   });
 };
