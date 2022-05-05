@@ -22,6 +22,8 @@ function App() {
          userId: user._id,
          username: user.username,
       },
+      query: {
+      }
    });
 
    return (

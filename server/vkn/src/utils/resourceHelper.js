@@ -13,8 +13,8 @@ module.exports = {
 	createAvatarFile(userId) {
 		return path.join(this.avatarResource, userId + ext);
 	},
-	createMessageImageFile(messageId) {
-		return path.join(this.messageResource, messageId + ext);
+	createRoomImageFile(roomId) {
+		return path.join(this.messageResource, roomId);
 	},
 	getListPostImages(postId) {
 		return fs.readdirSync(path.join(this.postResource, postId));

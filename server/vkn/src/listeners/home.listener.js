@@ -2,6 +2,7 @@ const User = require('../models/user.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = (io, socket) => {
+	// console.log('Auth:', socket.handshake.query);
 	// let listFriendIds = getListFriends(socket.handshake.auth.userId);
 	// let userInfo = {
 	// 	username: socket.handshake.auth.username,
@@ -30,5 +31,6 @@ async function getListFriends(_id) {
 			}
 		}
 	]);
+	console.log('Data user:', user);
 	return user[0].friends.map((friendId) => friendId.toString());
 }
