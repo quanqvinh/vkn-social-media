@@ -15,6 +15,11 @@ const userApi = {
       const url = "/room";
       return axiosClient.get(url);
    },
+
+   getById: (userId) => {
+      const url = `user/${userId}`;
+      return axiosClient.get(url);
+   },
 };
 
 export default userApi;

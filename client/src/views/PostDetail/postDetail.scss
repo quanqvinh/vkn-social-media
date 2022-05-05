@@ -16,21 +16,25 @@
    margin: 0 auto;
    z-index: 9999;
    display: grid;
+   border-radius: 10px;
    grid-template-columns: 0.58fr 0.42fr;
 
    .post__left {
       img {
-         width: 100%;
          object-fit: cover;
+         border-top-left-radius: 10px;
+         border-bottom-left-radius: 10px;
+         width: 100%;
          height: 100%;
-         border-radius: 10px;
       }
    }
 
    .post__right {
+      background-color: #fff;
+      width: 490px;
       border-top-right-radius: 10px;
       border-bottom-right-radius: 10px;
-      background-color: #fff;
+
       .right__header {
          display: flex;
          align-items: center;
@@ -146,6 +150,86 @@
                   transform: translateY(2px);
                }
             }
+         }
+      }
+   }
+}
+
+.post__body {
+   display: grid;
+   grid-template-columns: 520px 340px;
+   height: 524px;
+   padding-left: 2px;
+
+   &-img {
+      height: 700px;
+      width: 700px;
+      position: relative;
+      border-top-right-radius: 0px;
+
+      &:hover .slick-arrow {
+         opacity: 1;
+      }
+
+      .slick-arrow {
+         border: none;
+      }
+
+      .slick-prev svg,
+      .slick-next svg {
+         z-index: 1;
+      }
+
+      img {
+         display: block;
+         width: 100%;
+         height: 600px;
+      }
+   }
+
+   &-content {
+      height: 100%;
+      padding: 10px;
+      border-left: 1px solid #ccc;
+
+      &-caption {
+         font-family: $font;
+         width: 100%;
+         border: none;
+         outline: none;
+         overflow: auto;
+         resize: none;
+         font-size: 1rem;
+         height: 300px;
+         color: #252525;
+         padding: 0 4px;
+      }
+   }
+
+   &-remind {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      user-select: none;
+
+      &-select {
+         padding: 6px 15px;
+         background-color: #0095f6;
+         color: #fff;
+         border: 1px solid #ccc;
+         border-radius: 4px;
+         font-size: 0.9rem;
+         margin-top: 20px;
+         cursor: pointer;
+         transition: 0.3s all linear;
+
+         &:hover {
+            opacity: 0.8;
+         }
+
+         &:active {
+            transform: translateY(3px);
          }
       }
    }

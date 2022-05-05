@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./profilePage.scss";
 import avatar from "../../assets/images/profile.jpg";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -8,22 +8,24 @@ import Footer from "../Footer/Footer";
 import PostDetail from "../PostDetail/PostDetail";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import postApi from "../../apis/postApi";
 
 const ProfilePage = () => {
-   const [isSelectedPost, setIsSelectedPost] = useState(false);
+   const [postSelected, setPostSelected] = useState({
+      isSelected: false,
+      post: null,
+   });
    const [posts, setPosts] = useState([]);
-   const closePost = () => {
-      setIsSelectedPost(false);
-   };
+
+   const closePost = useCallback(() => {
+      setPostSelected({ isSelected: false, post: null });
+   }, [postSelected]);
 
    const user = useSelector((state) => state.user);
-   console.log(user);
+
    useEffect(() => {
       setPosts([...user.posts]);
    }, []);
 
-   console.log(posts);
    return (
       <>
          <Header />
@@ -56,7 +58,7 @@ const ProfilePage = () => {
 
             <div
                className={`profile__body ${
-                  isSelectedPost ? "profile__body--open-post" : ""
+                  postSelected.isSelected ? "profile__body--open-post" : ""
                }`}
             >
                <div className="list-posts">
@@ -65,32 +67,36 @@ const ProfilePage = () => {
                         <div
                            className="post"
                            key={post._id}
-                           onClick={() => setIsSelectedPost(true)}
+                           onClick={() =>
+                              setPostSelected({ isSelected: true, post })
+                           }
                         >
                            <div className="post__img">
-                              {/* <img
+                              <img
                                  src={
                                     process.env.REACT_APP_STATIC_URL +
-                                    `${post._id}/${post.imgs[0]}`
+                                    `/posts/${post._id}/${post.imgs[0]}`
                                  }
                                  alt="postImage"
-                              /> */}
+                              />
                            </div>
                            <div className="post__overlay">
                               <div className="post__react">
                                  <FavoriteIcon />
-                                 <span>14</span>
+                                 <span>{post.likes.length}</span>
                               </div>
                               <div className="post__comments">
                                  <ModeCommentIcon />
-                                 <span>14</span>
+                                 <span>{post.comments.length}</span>
                               </div>
                            </div>
                         </div>
                      ))}
                </div>
 
-               {isSelectedPost && <PostDetail closePost={closePost} />}
+               {postSelected.isSelected && (
+                  <PostDetail post={postSelected.post} closePost={closePost} />
+               )}
             </div>
             <Footer className="profile__footer" />
          </div>

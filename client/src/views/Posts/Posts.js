@@ -13,11 +13,7 @@ function Posts(props) {
    useEffect(() => {
       const fetchPost = async () => {
          try {
-            if (isEmpty(user)) {
-               return;
-            }
             const res = await postApi.newFeeds();
-            console.log(res);
             res?.status === "success" && setPosts([...res.posts]);
          } catch (error) {
             console.log(error.message);
@@ -32,8 +28,6 @@ function Posts(props) {
       }
       return true;
    }
-
-   console.log(posts);
    return (
       <div className="cards">
          {!isEmpty(user) &&

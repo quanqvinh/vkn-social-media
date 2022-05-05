@@ -20,7 +20,6 @@ function Post(props) {
       content,
    } = props;
 
-   console.log(imgs);
    const [isShowCmt, setIsShowCmt] = useState(false);
    const [isCmt, setIsCmt] = useState(false);
    const [comment, setComment] = useState("");

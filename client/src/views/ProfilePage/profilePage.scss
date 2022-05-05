@@ -132,7 +132,7 @@
             user-select: none;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 0 1px #ccc inset;
+            box-shadow: 0 0 4px 2px #888;
             &:hover {
                .post__overlay {
                   opacity: 1;
