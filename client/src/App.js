@@ -16,15 +16,18 @@ import { getCookie } from "./views/Global/cookie";
 export const SOCKET = createContext();
 function App() {
    const user = useSelector((state) => state.user);
-   const socket = io("http://localhost:7070", {
-      auth: {
-         "access-token": getCookie("accessToken"),
-         userId: user._id,
-         username: user.username,
-      },
-      query: {
-      }
-   });
+
+   let socket;
+   if (getCookie("accessToken")) {
+      socket = io("http://localhost:7070", {
+         auth: {
+            "access-token": getCookie("accessToken"),
+            userId: user._id,
+            username: user.username,
+         },
+      });
+   }
+   console.log(socket);
 
    return (
       <Router>
