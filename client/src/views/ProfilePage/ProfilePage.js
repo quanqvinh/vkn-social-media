@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./profilePage.scss";
 import avatar from "../../assets/images/profile.jpg";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -7,12 +7,23 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import PostDetail from "../PostDetail/PostDetail";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import postApi from "../../apis/postApi";
 
 const ProfilePage = () => {
    const [isSelectedPost, setIsSelectedPost] = useState(false);
+   const [posts, setPosts] = useState([]);
    const closePost = () => {
       setIsSelectedPost(false);
    };
+
+   const user = useSelector((state) => state.user);
+   console.log(user);
+   useEffect(() => {
+      setPosts([...user.posts]);
+   }, []);
+
+   console.log(posts);
    return (
       <>
          <Header />
@@ -23,9 +34,7 @@ const ProfilePage = () => {
                </div>
                <div className="header__right">
                   <div className="right__header">
-                     <p className="right__header-username">
-                        kien.letrung.376258
-                     </p>
+                     <p className="right__header-username">{user.username}</p>
                      <Link
                         to="/profile/edit"
                         className="right__header-btn-edit"
@@ -35,13 +44,13 @@ const ProfilePage = () => {
                   </div>
                   <div className="right__body">
                      <span className="right__body-posts">
-                        <span>17</span> posts
+                        <span>{user.posts.length}</span> posts
                      </span>
                      <span className="right__body-friends">
-                        <span>108</span> friends
+                        <span>{user.friends.length}</span> friends
                      </span>
                   </div>
-                  <span className="header__right-name">Kien Letrung</span>
+                  <span className="header__right-name">{user.name}</span>
                </div>
             </div>
 
@@ -51,16 +60,21 @@ const ProfilePage = () => {
                }`}
             >
                <div className="list-posts">
-                  {Array(10)
-                     .fill(0)
-                     .map((v, i) => (
+                  {posts?.length &&
+                     posts.map((post) => (
                         <div
                            className="post"
-                           key={i}
+                           key={post._id}
                            onClick={() => setIsSelectedPost(true)}
                         >
                            <div className="post__img">
-                              <img src={avatar} alt="postImage" />
+                              {/* <img
+                                 src={
+                                    process.env.REACT_APP_STATIC_URL +
+                                    `${post._id}/${post.imgs[0]}`
+                                 }
+                                 alt="postImage"
+                              /> */}
                            </div>
                            <div className="post__overlay">
                               <div className="post__react">

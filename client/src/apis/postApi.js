@@ -11,6 +11,14 @@ const postApi = {
       });
    },
 
+   newFeeds: () => {
+      const url = "/post/new-feed";
+      let accessToken = getCookie("accessToken");
+      return axiosClient.get(url, {
+         headers: { "access-token": accessToken },
+      });
+   },
+
    get: (id) => {
       const url = `/post/${id}`;
       let accessToken = getCookie("accessToken");
