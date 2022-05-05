@@ -6,10 +6,8 @@ import { UserContext } from "../../App";
 import { useSelector } from "react-redux";
 
 function Posts(props) {
-   const [firstRender, setFirstRender] = useState(true);
    const user = useSelector((state) => state.user);
    const [posts, setPosts] = useState([]);
-   const [post, setPost] = useState(null);
    const [listImg, setListImg] = useState([]);
 
    useEffect(() => {
@@ -18,14 +16,14 @@ function Posts(props) {
             if (isEmpty(user)) {
                return;
             }
-            const res = await postApi.get(user.posts[0]);
-            res?.status === "success" && setPost(res.data);
+            const res = await postApi.newFeeds();
+            res?.status === "success" && setPosts([...res.posts]);
          } catch (error) {
             console.log(error.message);
          }
       };
       fetchPost();
-   }, [user]);
+   }, []);
 
    function isEmpty(obj) {
       for (var key in obj) {
@@ -36,61 +34,23 @@ function Posts(props) {
 
    return (
       <div className="cards">
-         {!isEmpty(user) && !isEmpty(post) && (
-            <>
+         {!isEmpty(user) &&
+            !isEmpty(posts) &&
+            posts?.length > 0 &&
+            posts.map((post) => (
                <Post
-                  key={post.id}
-                  accountName={post.user.username}
+                  key={post._id}
+                  accountName={post.username}
                   content={post.caption}
                   storyBorder={true}
-                  image="https://picsum.photos/800/900"
+                  imgs={posts.imgs}
                   comments={post.comments}
                   likedByText="dadatlacak"
                   likedByNumber={post.numberOfLikes}
-                  hours={16}
+                  hours={post.createdAt}
                />
-               <Post
-                  key={post.id}
-                  accountName={post.user.username}
-                  content={post.caption}
-                  storyBorder={true}
-                  image="https://picsum.photos/800/900"
-                  comments={post.comments}
-                  likedByText="dadatlacak"
-                  likedByNumber={post.numberOfLikes}
-                  hours={16}
-               />
-               <Post
-                  key={post.id}
-                  accountName={post.user.username}
-                  content={post.caption}
-                  storyBorder={true}
-                  image="https://picsum.photos/800/900"
-                  comments={post.comments}
-                  likedByText="dadatlacak"
-                  likedByNumber={post.numberOfLikes}
-                  hours={16}
-               />
-            </>
-         )}
+            ))}
       </div>
-      // <div className="cards">
-      //    {" "}
-      //    {posts?.length > 0 &&
-      //       posts.map((post) => (
-      //          <Post
-      //             key={post.id}
-      //             // accountName={post.userId}
-      //             content={post.title}
-      //             storyBorder={true}
-      //             image="https://picsum.photos/800/900"
-      //             comments={commentsOne}
-      //             likedByText="dadatlacak"
-      //             likedByNumber={69}
-      //             hours={16}
-      //          />
-      //       ))}{" "}
-      // </div>
    );
 }
 

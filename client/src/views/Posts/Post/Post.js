@@ -3,13 +3,16 @@ import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
 import { ReactComponent as PostButton } from "../../../assets/images/cardButton.svg";
 import PostMenu from "./PostMenu";
 import Comment from "./Comment";
-
+import Slider from "react-slick";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useState } from "react";
 
 function Post(props) {
    const {
+      id,
       storyBorder,
-      image,
+      imgs,
       comments,
       likedByNumber,
       hours,
@@ -30,6 +33,44 @@ function Post(props) {
       setIsCmt(true);
    };
 
+   const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
+      <button
+         {...props}
+         className={
+            "slick-prev slick-arrow" +
+            (currentSlide === 0 ? " slick-disabled" : "")
+         }
+         aria-hidden="true"
+         aria-disabled={currentSlide === 0 ? true : false}
+         type="button"
+      >
+         <ArrowBackIosNewIcon sx={{ fontSize: 40 }} />
+      </button>
+   );
+   const SlickArrowRight = ({ currentSlide, slideCount, ...props }) => (
+      <button
+         {...props}
+         className={
+            "slick-next slick-arrow" +
+            (currentSlide === slideCount - 1 ? " slick-disabled" : "")
+         }
+         aria-hidden="true"
+         aria-disabled={currentSlide === slideCount - 1 ? true : false}
+         type="button"
+      >
+         <ArrowForwardIosIcon sx={{ fontSize: 40 }} />
+      </button>
+   );
+
+   const settings = {
+      dots: true,
+      infinite: true,
+      speed: 300,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      nextArrow: <SlickArrowRight />,
+      prevArrow: <SlickArrowLeft />,
+   };
    return (
       <div className="card">
          <header>
@@ -40,7 +81,17 @@ function Post(props) {
             />
             <PostButton className="cardButton" />
          </header>
-         <img className="cardImage" src={image} alt="card content" />
+         <Slider {...settings} className="post__body-img">
+            {imgs?.length > 0 &&
+               imgs.map((img) => (
+                  <img
+                     key={img}
+                     src={process.env.REACT_APP_STATIC_URL + `${id}/${img}`}
+                     alt="postImg"
+                  />
+               ))}
+         </Slider>
+         {/* <img className="cardImage" src={image} alt="card content" /> */}
          <PostMenu />
          <div className="likedBy">
             <span>
