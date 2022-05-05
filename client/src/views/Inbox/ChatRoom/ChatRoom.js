@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
 import { ReactComponent as Option } from "../../../assets/images/report.svg";
 import { ReactComponent as AddImage } from "../../../assets/images/addImg.svg";
@@ -7,6 +7,7 @@ import avatar from "../../../assets/images/profile.jpg";
 import { SOCKET } from "../../../App";
 import { useState, useContext } from "react";
 import { useSelector } from "react-redux";
+import { memo } from "react";
 
 const ChatRoom = (props) => {
    const user = useSelector((state) => state.user);
@@ -17,7 +18,7 @@ const ChatRoom = (props) => {
 
    const socket = useContext(SOCKET);
 
-   const sendMessage = () => {
+   const sendMessage = useCallback(() => {
       socket.emit("chat:send_message", {
          username: currentRoom.chatMate.username,
          roomId: currentRoom.roomId,
@@ -35,19 +36,11 @@ const ChatRoom = (props) => {
       ]);
       handelLastestMessage(currentRoom.roomId, inputContent);
       setInputContent("");
-   };
+   }, [listMessage, inputContent]);
 
    useEffect(() => {
-      socket.on("chat:print_message", ({ message }) => {
-         console.log(message);
-         setListMessage([
-            ...listMessage,
-            {
-               content: message.content,
-               img: message._id || null,
-               isMine: false,
-            },
-         ]);
+      socket.once("chat:print_message", ({ message }) => {
+         setListMessage([...listMessage, message]);
       });
    }, [listMessage]);
 
@@ -69,36 +62,39 @@ const ChatRoom = (props) => {
       }
    };
 
-   const handelSendImage = (e) => {
-      const image = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-         socket.emit("chat:send_image", {
-            image: reader.result,
-            username: currentRoom.chatMate.username,
-            roomId: currentRoom.roomId,
-            userId: user._id,
-         });
-      };
-      reader.readAsDataURL(image);
+   const handelSendImage = useCallback(
+      (e) => {
+         const image = e.target.files[0];
+         const reader = new FileReader();
+         reader.onloadend = () => {
+            socket.emit("chat:send_image", {
+               image: reader.result,
+               username: currentRoom.chatMate.username,
+               roomId: currentRoom.roomId,
+               userId: user._id,
+            });
+         };
+         reader.readAsDataURL(image);
 
-      var binaryData = [];
-      binaryData.push(image);
-      let imgSrc = window.URL.createObjectURL(
-         new Blob(binaryData, { type: "application/zip" })
-      );
+         var binaryData = [];
+         binaryData.push(image);
+         let imgSrc = window.URL.createObjectURL(
+            new Blob(binaryData, { type: "application/zip" })
+         );
 
-      setListMessage([
-         ...listMessage,
-         {
-            content: null,
-            img: imgSrc,
-            isMine: true,
-         },
-      ]);
-      handelLastestMessage(currentRoom.roomId, inputContent);
-      setInputContent("");
-   };
+         setListMessage([
+            ...listMessage,
+            {
+               content: null,
+               img: imgSrc,
+               isMine: true,
+            },
+         ]);
+         handelLastestMessage(currentRoom.roomId, inputContent);
+         setInputContent("");
+      },
+      [listMessage, inputContent]
+   );
 
    return (
       <div className="chat-room">
@@ -167,7 +163,7 @@ const ChatRoom = (props) => {
                <label htmlFor="input__choose-img">
                   <AddImage />
                </label>
-               <span className="input__send" onClick={handelSendMessage}>
+               <span className="input__send" onClick={sendMessage}>
                   Send
                </span>
             </div>
@@ -176,4 +172,4 @@ const ChatRoom = (props) => {
    );
 };
 
-export default ChatRoom;
+export default memo(ChatRoom);

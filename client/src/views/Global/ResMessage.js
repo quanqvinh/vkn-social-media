@@ -14,8 +14,8 @@ const ResMessage = (props) => {
 
    const listKeysLogin = ["Username", "Password"];
    const listNotiesLogin = [
-      "Username or email was incorrect",
-      "Your password was incorrect",
+      "Username or email is incorrect",
+      "Your password is incorrect",
    ];
    useEffect(() => {
       if (callBy === "Signup") {

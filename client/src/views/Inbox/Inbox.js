@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import Header from "../Header/Header";
 import "./inbox.scss";
 import ListChat from "./ListChat/ListChat";
@@ -15,25 +15,33 @@ const Inbox = () => {
       chatMate: null,
       room: null,
    });
+
    const socket = useContext(SOCKET);
 
-   const handelLastestMessage = (roomId, content) => {
-      setLatestMessage({
-         roomId,
-         content,
-      });
-   };
+   const handelLastestMessage = useCallback(
+      (roomId, content) => {
+         setLatestMessage({
+            roomId,
+            content,
+         });
+      },
+      [latestMessage]
+   );
 
    socket.once("chat:print_message", (payload) => {
       handelLastestMessage(payload.roomId, payload.content);
    });
 
-   const getToRoom = (room) => {
-      setCurrentRoom({
-         chatMate: room.chatMate,
-         roomId: room.roomId,
-      });
-   };
+   const getToRoom = useCallback(
+      (room) => {
+         setCurrentRoom({
+            chatMate: room.chatMate,
+            roomId: room.roomId,
+         });
+      },
+      [currentRoom]
+   );
+
    return (
       <>
          <Header />
@@ -45,7 +53,6 @@ const Inbox = () => {
                      <NewInbox />
                   </div>
                   <ListChat
-                     currentRoom={currentRoom}
                      getToRoom={getToRoom}
                      latestMessage={latestMessage}
                   />

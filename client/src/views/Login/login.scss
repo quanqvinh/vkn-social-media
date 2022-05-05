@@ -140,6 +140,37 @@
    .form__field {
       margin: 0.5rem 0;
 
+      .res-message {
+         font-size: 14px !important;
+         font-weight: 400;
+         color: #f60707;
+         margin-bottom: 5px;
+
+         @include medium {
+            font-size: 15px;
+         }
+      }
+
+      input {
+         display: block;
+         width: 100%;
+         font-size: 15px;
+         border-radius: 4px;
+         border: 1px solid $border-color-grey;
+         outline: none;
+         padding: 0.6rem 10px;
+         font-family: $font;
+         background-color: #fafafa;
+
+         &::placeholder {
+            font-size: 13px;
+         }
+
+         &:focus {
+            border-color: #777;
+         }
+      }
+
       &-password-container {
          display: flex;
          align-items: center;
@@ -176,37 +207,6 @@
             background-color: transparent;
             border: none;
             font-size: 15px;
-         }
-      }
-
-      .res-message {
-         font-size: 16px;
-         font-weight: 400;
-         color: #f60707;
-         margin-bottom: 5px;
-
-         @include medium {
-            font-size: 15px;
-         }
-      }
-
-      input[type="text"]#Username {
-         display: block;
-         width: 100%;
-         font-size: 15px;
-         border-radius: 4px;
-         border: 1px solid $border-color-grey;
-         outline: none;
-         padding: 0.6rem 10px;
-         font-family: $font;
-         background-color: #fafafa;
-
-         &::placeholder {
-            font-size: 13px;
-         }
-
-         &:focus {
-            border-color: #777;
          }
       }
    }

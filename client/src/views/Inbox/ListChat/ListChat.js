@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
 import "./listchat.scss";
 import userApi from "../../../apis/userApi";
+import { memo } from "react";
 
 const ListChat = (props) => {
    const { latestMessage, getToRoom } = props;
    const [listRooms, setListRooms] = useState([]);
 
+   console.log("render");
    useEffect(() => {
       const fetchRooms = async () => {
          try {
@@ -46,4 +48,4 @@ const ListChat = (props) => {
    );
 };
 
-export default ListChat;
+export default memo(ListChat);

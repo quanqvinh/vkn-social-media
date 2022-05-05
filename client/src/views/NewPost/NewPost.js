@@ -16,6 +16,7 @@ const NewPost = (props) => {
       imgs: [],
       fileImgs: null,
    });
+
    const [caption, setCaption] = useState("");
 
    const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
@@ -94,8 +95,9 @@ const NewPost = (props) => {
             console.log(error.message);
          }
       };
-
       addPost();
+
+      resetCurrentOption("newPost");
    };
 
    return (

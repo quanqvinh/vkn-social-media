@@ -1,6 +1,7 @@
 import "./profilePreview.scss";
 import ProfileIcon from "./ProfileIcon";
 import users from "../../../data/users";
+import { memo } from "react";
 
 function ProfilePreview(props) {
    const {
@@ -53,4 +54,4 @@ function ProfilePreview(props) {
    );
 }
 
-export default ProfilePreview;
+export default memo(ProfilePreview);
