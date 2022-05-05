@@ -1,31 +1,110 @@
 import "./postDetail.scss";
-import React from "react";
+import React, { useEffect } from "react";
 import avatar from "../../assets/images/profile.jpg";
 import ProfilePreview from "../Profile/ProfilePreview/ProfilePreview";
 import { useSelector } from "react-redux";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Comment from "./Comment/Comment";
 import PostMenu from "../Posts/Post/PostMenu";
+import { memo } from "react";
+import { useState } from "react";
+import userApi from "../../apis/userApi";
+import Slider from "react-slick";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const PostDetail = (props) => {
    const user = useSelector((state) => state.user);
-   const { closePost } = props;
+   const { closePost, post } = props;
+   const [postOwner, setPostOwner] = useState({});
 
    const handelClosePost = (e) => {
       if (!e.target.classList.contains("post__overlay")) return;
       closePost();
    };
+   console.log(post);
+
+   useEffect(() => {
+      const fetchUser = async () => {
+         try {
+            let res = await userApi.getById(post.user);
+            res && setPostOwner(res);
+         } catch (error) {
+            console.log(error.message);
+         }
+      };
+      fetchUser();
+   }, []);
+
+   console.log("post owner", postOwner);
+
+   const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
+      <button
+         {...props}
+         className={
+            "slick-prev slick-arrow" +
+            (currentSlide === 0 ? " slick-disabled" : "")
+         }
+         aria-hidden="true"
+         aria-disabled={currentSlide === 0 ? true : false}
+         type="button"
+      >
+         <ArrowBackIosNewIcon sx={{ fontSize: 40 }} />
+      </button>
+   );
+   const SlickArrowRight = ({ currentSlide, slideCount, ...props }) => (
+      <button
+         {...props}
+         className={
+            "slick-next slick-arrow" +
+            (currentSlide === slideCount - 1 ? " slick-disabled" : "")
+         }
+         aria-hidden="true"
+         aria-disabled={currentSlide === slideCount - 1 ? true : false}
+         type="button"
+      >
+         <ArrowForwardIosIcon sx={{ fontSize: 40 }} />
+      </button>
+   );
+
+   const settings = {
+      dots: true,
+      infinite: true,
+      speed: 300,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      nextArrow: <SlickArrowRight />,
+      prevArrow: <SlickArrowLeft />,
+   };
+
    return (
       <>
          <div className="post__overlay" onClick={handelClosePost}>
             <div className="post-detail__container">
                <div className="post__left">
-                  <img src={avatar} alt="postImgs" />
+                  <Slider {...settings} className="post__body-img">
+                     {post.imgs?.length > 0 &&
+                        post.imgs.map((img) => (
+                           <img
+                              key={img}
+                              src={
+                                 process.env.REACT_APP_STATIC_URL +
+                                 `/posts/${post._id}/${img}`
+                              }
+                              alt="postImg"
+                           />
+                        ))}
+                  </Slider>
                </div>
+
+               {/* <div className="post__left">
+
+                  <img src={avatar} alt="postImgs" />
+               </div> */}
                <div className="post__right">
                   <div className="right__header">
                      <ProfilePreview
-                        username={user.username}
+                        username={postOwner.username}
                         iconSize="medium"
                         image={avatar}
                      />
@@ -33,6 +112,11 @@ const PostDetail = (props) => {
                   </div>
                   <div className="right__body">
                      <div className="right__body-list-messages">
+                        <>
+                           <div className="message">
+                              <Comment user={user} caption={post.caption} />
+                           </div>
+                        </>
                         {Array(3)
                            .fill(0)
                            .map((v, i) => (
@@ -47,6 +131,18 @@ const PostDetail = (props) => {
                                  </div>
                               </div>
                            ))}
+                        {/* {post?.comments?.length > 0 &&
+                           post.comments.map((comment) => (
+                              <div className="message" key={comment._id}>
+                                 <Comment user={user} />
+                                 <div className="message-list-reply">
+                                    <Comment
+                                       user={user}
+                                       hideSubComments={true}
+                                    />
+                                 </div>
+                              </div>
+                           ))} */}
                      </div>
                   </div>
                   <div className="right__footer">
@@ -57,7 +153,9 @@ const PostDetail = (props) => {
                               Liked by <span>trungkien</span> and{" "}
                               <span>19 others</span>
                            </p>
-                           <p className="footer__title-time">JUNE 5, 2019</p>
+                           <p className="footer__title-time">
+                              {post.createdAt}
+                           </p>
                         </div>
                      </div>
                      <div className="footer__input">
@@ -72,4 +170,4 @@ const PostDetail = (props) => {
    );
 };
 
-export default PostDetail;
+export default memo(PostDetail);

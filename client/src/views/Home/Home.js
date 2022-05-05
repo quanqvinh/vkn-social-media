@@ -24,7 +24,9 @@ const Home = () => {
             console.log(error.message);
          }
       };
-      fetchUser();
+      if (accessToken) {
+         fetchUser();
+      }
    }, []);
 
    return (

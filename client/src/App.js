@@ -16,7 +16,6 @@ import { getCookie } from "./views/Global/cookie";
 export const SOCKET = createContext();
 function App() {
    const user = useSelector((state) => state.user);
-
    let socket;
    if (getCookie("accessToken")) {
       socket = io("http://localhost:7070", {
@@ -27,7 +26,6 @@ function App() {
          },
       });
    }
-   console.log(socket);
 
    return (
       <Router>
