@@ -4,10 +4,7 @@ const Auth = require("./auth.controller");
 const Crypto = require("../utils/crypto");
 const { unlink } = require("fs/promises");
 const fs = require("fs");
-const path = require("path");
-const postResource = require("../utils/postImage");
-
-const avatarFolder = __dirname + "/../../../../resources/images/avatars/";
+const resourceHelper = require("../utils/resourceHelper");
 
 module.exports = {
    // [GET] /api/v1/user/me/profile
@@ -26,11 +23,14 @@ module.exports = {
          .lean()
          .then((data) => {
             data.posts.forEach((post) => {
-               post.imgs = postResource.getListImages(post._id);
+               post.imgs = resourceHelper.getListPostImages(
+                  post._id.toString()
+               );
             });
             res.status(200).json(data);
          })
          .catch((err) => {
+            console.log(err);
             res.status(500).json({
                status: "error",
                message: "Error at server",
@@ -55,7 +55,9 @@ module.exports = {
             .lean()
             .then((data) => {
                data.posts.forEach((post) => {
-                  post.imgs = postResource.getListImages(post._id);
+                  post.imgs = resourceHelper.getListPostImages(
+                     post._id.toString()
+                  );
                });
                res.status(200).json(data);
             })
@@ -197,7 +199,7 @@ module.exports = {
    },
 
    async uploadProfilePicture(req, res) {
-      let file = avatarFolder + req.filename;
+      let file = resourceHelper.createAvatarFile(req.filename);
       let deleteFileFunction = async function (filepath) {
          try {
             await unlink(filepath);
@@ -217,7 +219,7 @@ module.exports = {
             if (file.includes("new-")) {
                // check whether there is a new avatar, then delete the old one
                deleteFileFunction(
-                  avatarFolder + req.auth.userId + path.extname(file)
+                  resourceHelper.createAvatarFile(req.auth.userId)
                );
                fs.rename(file, file.replace("new-", ""), (err) => {
                   if (err) {

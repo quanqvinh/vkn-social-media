@@ -5,10 +5,9 @@ const Post = require('../models/post.model');
 const Report = require('../models/report.model');
 const fs = require('fs');
 const fse = require('fs-extra');
-const postResource = require('../utils/postImage');
-
+const resourceHelper = require('../utils/resourceHelper');
 const ObjectId = require('mongoose').Types.ObjectId;
-const postResourcePath = __dirname + '/../../../../resources/images/posts/';
+
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
@@ -43,13 +42,13 @@ module.exports = {
 				myPosts: user.posts.map(post => ({
 					username: user.username,
 					...post,
-					imgs: postResource.getListImages(post._id)
+					imgs: resourceHelper.getListPostImages(post._id.toString())
 				})),
 				friendPosts: (function() {
 					let allFriendPosts = user.friends.map(friend => friend.posts.map(post => ({
 						username: friend.username,
 						...post,
-						imgs: postResource.getListImages(post._id)
+						imgs: resourceHelper.getListPostImages(post._id.toString())
 					})));
 					return allFriendPosts.reduce((pre, cur) => pre.concat(cur), []);
 				})()
@@ -125,7 +124,7 @@ module.exports = {
 			post.user.isFriend = post.user.friends.includes(req.auth.userId) 
 				|| req.auth.userId === post.user._id.toString();
 			post.user.friends = undefined; 
-			post.imgs = postResource.getListImages
+			post.imgs = resourceHelper.getListPostImages(postId);
 			res.status(200).json({
 				status: 'success',
 				data: post
@@ -185,7 +184,7 @@ module.exports = {
 		console.log(req.body);
 		try {
 			let { postId, caption } = req.body;
-			let imageDir = postResourcePath + postId.toString();
+			let imageDir = resourceHelper.createPostPath(postId.toString());
 			if (fs.existsSync(imageDir + '-new')) {
 				fse.emptyDirSync(imageDir);
 				fse.copySync(imageDir + '-new', imageDir);
@@ -212,7 +211,10 @@ module.exports = {
 		session.startTransaction();
 		try {
 			let { id } = req.params;
-			fs.rmSync(postResourcePath + id.toString(), { force: true, recursive: true });
+			fs.rmSync(resourceHelper.createPostPath(id.toString()), { 
+				force: true, 
+				recursive: true 
+			});
 			console.log('Deleted image resource');
 			let [ post, user ] = await Promise.all([
 				Post.findByIdAndDelete(id, { session })
