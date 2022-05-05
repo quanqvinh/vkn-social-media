@@ -1,4 +1,5 @@
 import "./profileIcon.scss";
+import { memo } from "react";
 
 function ProfileIcon(props) {
    const { iconSize, storyBorder, image } = props;
@@ -26,4 +27,4 @@ function ProfileIcon(props) {
    );
 }
 
-export default ProfileIcon;
+export default memo(ProfileIcon);
