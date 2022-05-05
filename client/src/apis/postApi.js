@@ -1,14 +1,22 @@
 import axiosClient from "./axiosClient";
+import { getCookie } from "../views/Global/cookie";
 
 const postApi = {
    getAll: (params) => {
       const url = "/posts";
-      return axiosClient.get(url, { params });
+      let accessToken = getCookie("accessToken");
+      return axiosClient.get(url, {
+         params,
+         headers: { "access-token": accessToken },
+      });
    },
 
    get: (id) => {
       const url = `/post/${id}`;
-      return axiosClient.get(url);
+      let accessToken = getCookie("accessToken");
+      return axiosClient.get(url, {
+         headers: { "access-token": accessToken },
+      });
    },
 
    add: (data) => {

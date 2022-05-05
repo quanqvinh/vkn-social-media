@@ -1,21 +1,110 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
 import { ReactComponent as Option } from "../../../assets/images/report.svg";
 import { ReactComponent as AddImage } from "../../../assets/images/addImg.svg";
 import "./chatroom.scss";
-import img from "../../../assets/images/login1.png";
+import avatar from "../../../assets/images/profile.jpg";
+import { SOCKET } from "../../../App";
+import { useState, useContext } from "react";
+import { useSelector } from "react-redux";
 
-import { useState } from "react";
-
-const ChatRoom = () => {
+const ChatRoom = (props) => {
+   const user = useSelector((state) => state.user);
+   const { handelLastestMessage, currentRoom } = props;
    const [inputing, setInputing] = useState(false);
    const [inputContent, setInputContent] = useState("");
+   const [listMessage, setListMessage] = useState([]);
+
+   const socket = useContext(SOCKET);
+
+   const sendMessage = () => {
+      socket.emit("chat:send_message", {
+         username: currentRoom.chatMate.username,
+         roomId: currentRoom.roomId,
+         content: inputContent,
+         userId: user._id,
+      });
+
+      setListMessage([
+         ...listMessage,
+         {
+            content: inputContent,
+            img: null,
+            isMine: true,
+         },
+      ]);
+      handelLastestMessage(currentRoom.roomId, inputContent);
+      setInputContent("");
+   };
+
+   useEffect(() => {
+      socket.on("chat:print_message", ({ message }) => {
+         console.log(message);
+         setListMessage([
+            ...listMessage,
+            {
+               content: message.content,
+               img: message._id || null,
+               isMine: false,
+            },
+         ]);
+      });
+   }, [listMessage]);
+
+   const handelSendMessage = () => {
+      try {
+         sendMessage();
+      } catch (error) {
+         console.log(error.message);
+      }
+   };
+
+   const handelKeyUp = (e) => {
+      if (e.keyCode === 13) {
+         try {
+            sendMessage();
+         } catch (error) {
+            console.log(error.message);
+         }
+      }
+   };
+
+   const handelSendImage = (e) => {
+      const image = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+         socket.emit("chat:send_image", {
+            image: reader.result,
+            username: currentRoom.chatMate.username,
+            roomId: currentRoom.roomId,
+            userId: user._id,
+         });
+      };
+      reader.readAsDataURL(image);
+
+      var binaryData = [];
+      binaryData.push(image);
+      let imgSrc = window.URL.createObjectURL(
+         new Blob(binaryData, { type: "application/zip" })
+      );
+
+      setListMessage([
+         ...listMessage,
+         {
+            content: null,
+            img: imgSrc,
+            isMine: true,
+         },
+      ]);
+      handelLastestMessage(currentRoom.roomId, inputContent);
+      setInputContent("");
+   };
 
    return (
       <div className="chat-room">
          <div className="header">
             <ProfilePreview
-               username="kien108"
+               username={currentRoom.chatMate.username}
                iconSize="small"
                captionSize="big"
             />
@@ -23,42 +112,34 @@ const ChatRoom = () => {
          </div>
 
          <div className="content">
-            <div className="content__day">
-               <p className="content__day-time">July 10, 2021, 11:27 am</p>
-               <p className="content__day-message">Hello</p>
-               <div className="content__day-img">
-                  <img src={img} alt="img" />
-               </div>
-            </div>
-
-            <div className="content__day">
-               <p className="content__day-time">July 10, 2021, 11:27 am</p>
-               <p className="content__day-message">Hello</p>
-               <div className="content__day-img">
-                  <img src={img} alt="img" />
-               </div>
-            </div>
-
-            <div className="content__day">
-               <p className="content__day-time">July 10, 2021, 11:27 am</p>
-               <p className="content__day-message">Hello</p>
-               <div className="content__day-img">
-                  <img src={img} alt="img" />
-               </div>
-            </div>
-
-            <div className="content__day">
-               <p className="content__day-time">July 10, 2021, 11:27 am</p>
-               <p className="content__day-message">
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. A
-                  tenetur at minus asperiores. Eaque doloribus, commodi
-                  voluptatem, delectus qui accusantium ipsa ducimus tempora
-                  aperiam neque expedita. Quas ea cum praesentium?
-               </p>
-               <div className="content__day-img">
-                  <img src={img} alt="img" />
-               </div>
-            </div>
+            {listMessage?.length > 0 &&
+               listMessage.map((message, index) => (
+                  <div className="content__day" key={index}>
+                     {/* <p className="content__day-time">
+                        July 10, 2021, 11:27 am
+                     </p> */}
+                     {message.isMine ? (
+                        message.content !== null ? (
+                           <p className="content__day-message">
+                              {message.content}
+                           </p>
+                        ) : (
+                           <div className="content__day-img">
+                              <img src={message.img} alt="img" />
+                           </div>
+                        )
+                     ) : (
+                        <div className="content__day-partner">
+                           <div className="content__day-partner-avatar">
+                              <img src={avatar} alt="" />
+                           </div>
+                           <p className="content__day-message">
+                              {message.content}
+                           </p>
+                        </div>
+                     )}
+                  </div>
+               ))}
          </div>
 
          <div className="chat-footer">
@@ -71,8 +152,8 @@ const ChatRoom = () => {
                   type="text"
                   placeholder="Message"
                   onFocus={() => setInputing(true)}
-                  onBlur={() => setInputing(!inputing)}
                   onChange={(e) => setInputContent(e.target.value)}
+                  onKeyUp={(e) => handelKeyUp(e)}
                   value={inputContent}
                />
                <input
@@ -81,11 +162,14 @@ const ChatRoom = () => {
                   name=""
                   id="input__choose-img"
                   accept="image/*"
+                  onChange={(e) => handelSendImage(e)}
                />
                <label htmlFor="input__choose-img">
                   <AddImage />
                </label>
-               <span className="input__send">Send</span>
+               <span className="input__send" onClick={handelSendMessage}>
+                  Send
+               </span>
             </div>
          </div>
       </div>

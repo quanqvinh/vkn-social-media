@@ -1,4 +1,6 @@
-let initState = {};
+let initState = sessionStorage.getItem("USER_INFO")
+   ? JSON.parse(sessionStorage.getItem("USER_INFO"))
+   : {};
 
 const userReducer = (state = initState, action) => {
    switch (action.type) {

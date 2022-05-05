@@ -7,39 +7,17 @@ import { useSelector } from "react-redux";
 
 function Posts(props) {
    const [firstRender, setFirstRender] = useState(true);
-   // const commentsOne = [
-   //    {
-   //       user: "raffagrassetti",
-   //       text: "Woah dude, this is awesome! 🔥",
-   //       id: 1,
-   //    },
-   //    {
-   //       user: "therealadamsavage",
-   //       text: "Like!",
-   //       id: 2,
-   //    },
-   //    {
-   //       user: "mapvault",
-   //       text: "Niceeeee!",
-   //       id: 3,
-   //    },
-   // ];
-
    const user = useSelector((state) => state.user);
    const [posts, setPosts] = useState([]);
    const [post, setPost] = useState(null);
    const [listImg, setListImg] = useState([]);
 
-   console.log("render");
    useEffect(() => {
       const fetchPost = async () => {
-         console.log("fetch");
          try {
             if (isEmpty(user)) {
-               console.log("user empty");
                return;
             }
-
             const res = await postApi.get(user.posts[0]);
             res?.status === "success" && setPost(res.data);
          } catch (error) {

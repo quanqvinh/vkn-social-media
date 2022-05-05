@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.scss";
 import Home from "./views/Home/Home";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
@@ -7,55 +6,54 @@ import Signup from "./views/Signup/Signup";
 import VerifyEmail from "./views/VerifyEmail/VerifyEmail";
 import Inbox from "./views/Inbox/Inbox";
 
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchProfileRequest } from "./actions/user";
+import { createContext } from "react";
+import { useSelector } from "react-redux";
 import ProfilePage from "./views/ProfilePage/ProfilePage";
 import EditProfile from "./views/EditProfile/EditProfile";
+import { io } from "socket.io-client";
+import { getCookie } from "./views/Global/cookie";
 
+export const SOCKET = createContext();
 function App() {
-   const dispatch = useDispatch();
-   useEffect(() => {
-      const fetchUser = async () => {
-         try {
-            dispatch(fetchProfileRequest());
-         } catch (error) {
-            console.log(error.message);
-         }
-      };
-      fetchUser();
-   }, []);
-
    const user = useSelector((state) => state.user);
+   const socket = io("http://localhost:7070", {
+      auth: {
+         "access-token": getCookie("accessToken"),
+         userId: user._id,
+         username: user.username,
+      },
+   });
 
    return (
       <Router>
-         <div className="App">
-            <Switch>
-               <Route exact path="/">
-                  <Home />
-               </Route>
-               <Route path={"/inbox"}>
-                  <Inbox />
-               </Route>
+         <SOCKET.Provider value={socket}>
+            <div className="App">
+               <Switch>
+                  <Route exact path="/">
+                     <Home />
+                  </Route>
+                  <Route path={"/inbox"}>
+                     <Inbox />
+                  </Route>
 
-               <Route exact path={"/profile"}>
-                  <ProfilePage />
-               </Route>
-               <Route path={"/profile/edit"}>
-                  <EditProfile />
-               </Route>
-               <Route path="/login">
-                  <Login />
-               </Route>
-               <Route path="/signup">
-                  <Signup />
-               </Route>
-               <Route path="/auth/verify-email">
-                  <VerifyEmail />
-               </Route>
-            </Switch>
-         </div>
+                  <Route exact path={"/profile"}>
+                     <ProfilePage />
+                  </Route>
+                  <Route path={"/profile/edit"}>
+                     <EditProfile />
+                  </Route>
+                  <Route path="/login">
+                     <Login />
+                  </Route>
+                  <Route path="/signup">
+                     <Signup />
+                  </Route>
+                  <Route path="/auth/verify-email">
+                     <VerifyEmail />
+                  </Route>
+               </Switch>
+            </div>
+         </SOCKET.Provider>
       </Router>
    );
 }

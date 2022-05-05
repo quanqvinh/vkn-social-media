@@ -13,22 +13,27 @@ function ProfilePreview(props) {
       hideAccountName,
       image,
       src,
-      chooseRoom,
+      getToRoom,
+      room,
    } = props;
 
    let accountName = username
       ? username
       : users[Math.floor(Math.random() * users.length)].username;
 
-   const handelClickProfile = () => {
+   const handelGetToRoom = () => {
       if (!(src === "ListChat")) return;
+      let selectedRoom = {
+         chatMate: room.chatMate,
+         roomId: room._id,
+      };
 
-      chooseRoom();
+      getToRoom(selectedRoom);
    };
    return (
       <div
          className={`profile ${src === "ListChat" ? "profile--chat" : ""}`}
-         onClick={handelClickProfile}
+         onClick={handelGetToRoom}
       >
          <ProfileIcon
             iconSize={iconSize}
