@@ -20,6 +20,7 @@ function Post(props) {
       content,
    } = props;
 
+   console.log(imgs);
    const [isShowCmt, setIsShowCmt] = useState(false);
    const [isCmt, setIsCmt] = useState(false);
    const [comment, setComment] = useState("");
@@ -81,12 +82,14 @@ function Post(props) {
             />
             <PostButton className="cardButton" />
          </header>
-         <Slider {...settings} className="post__body-img">
+         <Slider {...settings} className="post__body-img cardImage">
             {imgs?.length > 0 &&
                imgs.map((img) => (
                   <img
                      key={img}
-                     src={process.env.REACT_APP_STATIC_URL + `${id}/${img}`}
+                     src={
+                        process.env.REACT_APP_STATIC_URL + `/posts/${id}/${img}`
+                     }
                      alt="postImg"
                   />
                ))}
