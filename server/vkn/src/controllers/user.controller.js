@@ -23,11 +23,12 @@ module.exports = {
             .lean()
             .then((data) => {
                 data.posts.forEach((post) => {
-                    post.imgs = postResource.getListImages(post._id);
+                    post.imgs = postResource.getListImages(post._id.toString());
                 });
                 res.status(200).json(data);
             })
             .catch((err) => {
+                console.log(err);
                 res.status(500).json({
                     status: "error",
                     message: "Error at server"
@@ -49,7 +50,7 @@ module.exports = {
                 .lean()
                 .then((data) => {
                     data.posts.forEach((post) => {
-                        post.imgs = postResource.getListImages(post._id);
+                        post.imgs = postResource.getListImages(post._id.toString());
                     });
                     res.status(200).json(data);
                 })

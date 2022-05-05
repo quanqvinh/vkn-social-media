@@ -43,13 +43,13 @@ module.exports = {
 				myPosts: user.posts.map(post => ({
 					username: user.username,
 					...post,
-					imgs: postResource.getListImages(post._id)
+					imgs: postResource.getListImages(post._id.toString())
 				})),
 				friendPosts: (function() {
 					let allFriendPosts = user.friends.map(friend => friend.posts.map(post => ({
 						username: friend.username,
 						...post,
-						imgs: postResource.getListImages(post._id)
+						imgs: postResource.getListImages(post._id.toString())
 					})));
 					return allFriendPosts.reduce((pre, cur) => pre.concat(cur), []);
 				})()
@@ -125,7 +125,7 @@ module.exports = {
 			post.user.isFriend = post.user.friends.includes(req.auth.userId) 
 				|| req.auth.userId === post.user._id.toString();
 			post.user.friends = undefined; 
-			post.imgs = postResource.getListImages
+			post.imgs = postResource.getListImages(postId);
 			res.status(200).json({
 				status: 'success',
 				data: post
