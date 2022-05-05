@@ -16,7 +16,6 @@ import { getCookie } from "./views/Global/cookie";
 export const SOCKET = createContext();
 function App() {
    const user = useSelector((state) => state.user);
-   console.log(user._id, user.username);
    const socket = io("http://localhost:7070", {
       auth: {
          "access-token": getCookie("accessToken"),

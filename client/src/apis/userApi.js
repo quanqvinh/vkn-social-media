@@ -4,7 +4,11 @@ import { getCookie } from "../views/Global/cookie";
 const userApi = {
    get: (params) => {
       const url = `/user/me/profile`;
-      return axiosClient.get(url, { params });
+      let accessToken = getCookie("accessToken");
+      return axiosClient.get(url, {
+         params,
+         headers: { "access-token": accessToken },
+      });
    },
 
    getRooms: () => {

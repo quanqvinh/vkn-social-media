@@ -5,18 +5,20 @@ import Footer from "../Footer/Footer";
 import authApi from "../../apis/authApi";
 import ResMessage from "../Global/ResMessage";
 import { setCookie } from "../Global/cookie";
-
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { saveUser } from "../../actions/user";
-import { useDispatch } from "react-redux";
+
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function Login() {
    const [username, setUserName] = useState("");
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const [resMessage, setResMessage] = useState("");
+   const [showPassword, setShowPassword] = useState(false);
+
    const history = useHistory();
 
    const handelCheckLogin = () => {
@@ -68,6 +70,15 @@ export default function Login() {
       login();
    };
 
+   const handelShowPassword = () => {
+      var passwordElement = document.getElementById("password");
+      if (passwordElement.type === "password") {
+         passwordElement.type = "text";
+      } else {
+         passwordElement.type = "password";
+      }
+      setShowPassword((prev) => !prev);
+   };
    return (
       <>
          <div className="wrapper">
@@ -102,15 +113,28 @@ export default function Login() {
                            />
                         </div>
                         <div className="form__field">
-                           <input
-                              type="password"
-                              id="password"
-                              name="Password"
-                              required
-                              placeholder="Password"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                           />
+                           <p className="form__field-password-container">
+                              <input
+                                 type="password"
+                                 id="password"
+                                 name="Password"
+                                 required
+                                 placeholder="Password"
+                                 value={password}
+                                 onChange={(e) => setPassword(e.target.value)}
+                              />
+                              {showPassword ? (
+                                 <VisibilityOffIcon
+                                    onClick={handelShowPassword}
+                                    sx={{ color: "#555" }}
+                                 />
+                              ) : (
+                                 <RemoveRedEyeIcon
+                                    onClick={handelShowPassword}
+                                    sx={{ color: "#555" }}
+                                 />
+                              )}
+                           </p>
                         </div>
                         {handelCheckLogin() ? (
                            <button className="primary-insta-btn primary-insta-btn--active">
