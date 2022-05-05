@@ -146,11 +146,15 @@
    padding-left: 2px;
 
    &-img {
-      height: 524px;
+      height: 600px;
       position: relative;
 
       &:hover .slick-arrow {
          opacity: 1;
+      }
+
+      .slick-arrow {
+         border: none;
       }
 
       .slick-prev svg,
@@ -161,7 +165,7 @@
       img {
          display: block;
          width: 100%;
-         height: 524px;
+         height: 600px;
       }
    }
 
