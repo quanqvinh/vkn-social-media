@@ -5,9 +5,10 @@ const Post = require('../models/post.model');
 const Report = require('../models/report.model');
 const fs = require('fs');
 const fse = require('fs-extra');
+const postResource = require('../utils/postImage');
 
 const ObjectId = require('mongoose').Types.ObjectId;
-const postResource = __dirname + '/../../../../resources/images/posts/';
+const postResourcePath = __dirname + '/../../../../resources/images/posts/';
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
@@ -41,12 +42,14 @@ module.exports = {
 			let posts = {
 				myPosts: user.posts.map(post => ({
 					username: user.username,
-					...post
+					...post,
+					imgs: postResource.getListImages(post._id)
 				})),
 				friendPosts: (function() {
 					let allFriendPosts = user.friends.map(friend => friend.posts.map(post => ({
 						username: friend.username,
-						...post
+						...post,
+						imgs: postResource.getListImages(post._id)
 					})));
 					return allFriendPosts.reduce((pre, cur) => pre.concat(cur), []);
 				})()
@@ -71,8 +74,7 @@ module.exports = {
 	// [POST] /api/v1/post/new
 	async newPost(req, res) {
 		try {
-			let { caption } = req.body;
-			let postId = new ObjectId();
+			let { caption, postId } = req.body;
 			await Promise.all([
 				Post.create({
 					_id: postId,
@@ -123,12 +125,14 @@ module.exports = {
 			post.user.isFriend = post.user.friends.includes(req.auth.userId) 
 				|| req.auth.userId === post.user._id.toString();
 			post.user.friends = undefined; 
+			post.imgs = postResource.getListImages
 			res.status(200).json({
 				status: 'success',
 				data: post
 			});
 		}
 		catch(err) {
+			console.log(err);
 			res.status(500).json({
 				status: 'error',
 				message: err.message
@@ -181,7 +185,7 @@ module.exports = {
 		console.log(req.body);
 		try {
 			let { postId, caption } = req.body;
-			let imageDir = postResource + postId.toString();
+			let imageDir = postResourcePath + postId.toString();
 			if (fs.existsSync(imageDir + '-new')) {
 				fse.emptyDirSync(imageDir);
 				fse.copySync(imageDir + '-new', imageDir);
@@ -202,13 +206,13 @@ module.exports = {
 		}
 	},
 
-	// [DELETE] /api/v1/post
+	// [DELETE] /api/v1/post/:id
 	async deletePost(req, res) {
 		let session = await require('mongoose').startSession();
 		session.startTransaction();
 		try {
 			let { id } = req.params;
-			fs.rmSync(postResource + id.toString(), { force: true, recursive: true });
+			fs.rmSync(postResourcePath + id.toString(), { force: true, recursive: true });
 			console.log('Deleted image resource');
 			let [ post, user ] = await Promise.all([
 				Post.findByIdAndDelete(id, { session })
@@ -243,6 +247,8 @@ module.exports = {
 		}
 		session.endSession();
 	},
+
+	// [PATCH] /api//vi/post/:id/like
 	async likePost(req, res) {
 		try {
 			const { id } = req.params, userId = req.auth.userId;
