@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const Auth = require("./auth.controller");
 const Crypto = require("../utils/crypto");
-const {
-    unlink
-} = require('fs/promises');
+const { unlink } = require('fs/promises');
 const fs = require("fs");
 const path = require('path');
+const postResource = require('../utils/postImage');
 
 const avatarFolder = __dirname + '/../../../../resources/images/avatars/';
 
@@ -20,8 +19,12 @@ module.exports = {
                 rooms: 0,
                 auth: 0
             })
+            .populate('posts')
             .lean()
             .then((data) => {
+                data.posts.forEach((post) => {
+                    post.imgs = postResource.getListImages(post._id);
+                });
                 res.status(200).json(data);
             })
             .catch((err) => {
@@ -31,6 +34,7 @@ module.exports = {
                 });
             });
     },
+
     // [GET] /api/v1/user/:id
     getUserProfile(req, res) {
         let id = req.params.id;
@@ -41,8 +45,12 @@ module.exports = {
                     rooms: 0,
                     auth: 0
                 })
+                .populate('posts')
                 .lean()
                 .then((data) => {
+                    data.posts.forEach((post) => {
+                        post.imgs = postResource.getListImages(post._id);
+                    });
                     res.status(200).json(data);
                 })
                 .catch((err) => {
@@ -60,6 +68,7 @@ module.exports = {
                 });
         }
     },
+
     // [PATCH] /api/v1/user/edit/info
     editUserProfile(req, res) {
         let id = req.auth.userId;
@@ -82,6 +91,7 @@ module.exports = {
                 });
             });
     },
+
     // [POST] /api/v1/user/edit/email/request
     requestEditUserEmail(req, res) {
         return Auth.requestVerifyEmail(req, res);
@@ -122,6 +132,7 @@ module.exports = {
         }
 
     },
+
     changePassword(req, res) {
         let password = req.body.password;
         let id = req.auth.userId;
@@ -208,6 +219,7 @@ module.exports = {
             }
         });
     },
+
     async searchUser(req, res) {
         try {
             let keyword = req.body.keyword;

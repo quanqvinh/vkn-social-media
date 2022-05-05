@@ -6,7 +6,6 @@ const homeHandlerRegister = require('./home.listener');
 module.exports = (io) => {
 	// io.use(authMiddleware);
 	io.on('connection', (socket) => {
-		console.log(socket);
 		console.log(`Socket ID ${socket.id} connect!`);
 		socket.join(socket.handshake.auth.username);
 		socket.join(socket.handshake.auth.userId);
