@@ -30,6 +30,8 @@ async function validateRoom(roomId, user1, user2) {
 module.exports = (io, socket) => {
    socket.on('chat:send_message', async (payload) => {
       try {
+         console.log(socket.handshake.auth);
+
          let { username, userId, roomId, content } = payload;
 
          let message = new Message({
