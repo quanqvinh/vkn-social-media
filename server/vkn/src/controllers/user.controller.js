@@ -199,35 +199,49 @@ module.exports = {
    },
 
    async uploadProfilePicture(req, res) {
-      let file = resourceHelper.createAvatarFile(req.filename);
+      let file = resourceHelper.avatarResource + "/" + req.filename;
+      let err;
       let deleteFileFunction = async function (filepath) {
          try {
             await unlink(filepath);
-            console.log("delete");
+            console.log("deleted");
          } catch (error) {
             console.error(
                "there was an error when deleting file:",
                error.message
             );
+            err = error;
          }
       };
+      if (err)
+         return res.status(500).json({
+            status: "failed",
+         });
       // check whether file exists
-      fs.access(file, fs.constants.F_OK, (err) => {
-         if (err) {
+      fs.access(file, fs.constants.F_OK, (error) => {
+         if (error) {
             console.log("avatar does not exist in folder");
-         } else {
-            if (file.includes("new-")) {
-               // check whether there is a new avatar, then delete the old one
-               deleteFileFunction(
-                  resourceHelper.createAvatarFile(req.auth.userId)
-               );
-               fs.rename(file, file.replace("new-", ""), (err) => {
-                  if (err) {
-                     console.log("error when changing name:", err.message);
-                  }
-               });
-            }
+            err = error;
+         } else if (file.includes("new-")) {
+            // check whether there is a new avatar, then delete the old one
+            deleteFileFunction(
+               resourceHelper.createAvatarFile(req.auth.userId)
+            );
+            fs.rename(file, file.replace("new-", ""), (err) => {
+               if (err) {
+                  console.log("error when changing name:", err.message);
+                  this.err = err;
+               }
+            });
          }
+      });
+
+      if (err)
+         return res.status(500).json({
+            status: "failed",
+         });
+      return res.status(201).json({
+         status: "success",
       });
    },
 

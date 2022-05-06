@@ -5,10 +5,9 @@ import Footer from "../Footer/Footer";
 import authApi from "../../apis/authApi";
 import ResMessage from "../Global/ResMessage";
 import { setCookie } from "../Global/cookie";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
-
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
@@ -57,6 +56,7 @@ export default function Login() {
 
             setCookie("accessToken", accessToken, 3);
             setCookie("refreshToken", refreshToken, 3);
+            sessionStorage.setItem("USER_INFO", null);
 
             if (res.status === "success") history.push("/");
          } catch (error) {
@@ -79,6 +79,10 @@ export default function Login() {
       }
       setShowPassword((prev) => !prev);
    };
+
+   useEffect(() => {
+      sessionStorage.removeItem("USER_INFO");
+   }, []);
    return (
       <>
          <div className="wrapper">

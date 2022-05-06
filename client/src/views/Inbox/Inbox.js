@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import Header from "../Header/Header";
 import "./inbox.scss";
 import ListChat from "./ListChat/ListChat";
@@ -7,16 +7,15 @@ import { ReactComponent as InboxIcon } from "../../assets/images/inbox_outline.s
 import ChatRoom from "./ChatRoom/ChatRoom";
 import { SOCKET } from "../../App";
 const Inbox = () => {
+   const socket = useContext(SOCKET);
    const [latestMessage, setLatestMessage] = useState({
-      payload: {},
+      roomId: "",
       content: "",
    });
    const [currentRoom, setCurrentRoom] = useState({
       chatMate: null,
       room: null,
    });
-
-   const socket = useContext(SOCKET);
 
    const handelLastestMessage = useCallback(
       (roomId, content) => {
@@ -28,9 +27,19 @@ const Inbox = () => {
       [latestMessage]
    );
 
-   socket.once("chat:print_message", (payload) => {
-      handelLastestMessage(payload.roomId, payload.content);
-   });
+   console.log(latestMessage);
+
+   useEffect(() => {
+      socket &&
+         socket.on("chat:print_message", ({ message, roomId }) => {
+            setLatestMessage({
+               roomId: roomId,
+               content: message.content,
+            });
+         });
+   }, [socket]);
+
+   console.log("render inbox");
 
    const getToRoom = useCallback(
       (room) => {

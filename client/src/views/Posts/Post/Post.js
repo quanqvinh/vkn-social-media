@@ -10,6 +10,7 @@ import { useState } from "react";
 
 function Post(props) {
    const {
+      avatar,
       id,
       storyBorder,
       imgs,
@@ -75,6 +76,7 @@ function Post(props) {
       <div className="card">
          <header>
             <ProfilePreview
+               image={avatar}
                iconSize="medium"
                storyBorder={storyBorder}
                username={accountName}

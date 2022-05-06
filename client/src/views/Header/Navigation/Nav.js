@@ -5,7 +5,6 @@ import { ReactComponent as Notifications } from "../../../assets/images/notifica
 import { ReactComponent as NewPostIcon } from "../../../assets/images/newPost.svg";
 import NewPost from "../../NewPost/NewPost";
 import ProfileIcon from "../../Profile/ProfilePreview/ProfileIcon";
-import image from "../../../assets/images/profile.jpg";
 
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -74,6 +73,7 @@ function Nav() {
             break;
       }
    };
+
    return (
       <>
          <div className="menu">
@@ -96,7 +96,13 @@ function Nav() {
             />
 
             <div className="profile" onClick={() => setIsDropDown(!isDropDown)}>
-               <ProfileIcon iconSize="small" image={image} />
+               <ProfileIcon
+                  iconSize="small"
+                  image={
+                     process.env.REACT_APP_STATIC_URL +
+                     `/avatars/${user._id}.png`
+                  }
+               />
             </div>
 
             <div

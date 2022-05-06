@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 function Header() {
    const [isSearch, setIsSearch] = useState(false);
    const [searchQuery, setSearchQuery] = useState("");
-
    const handelSearch = (e) => {
       setSearchQuery(e.target.value);
    };
@@ -16,10 +15,9 @@ function Header() {
    return (
       <div className="navigation">
          <div className="container">
-            <Link to="">
+            <Link to="/">
                <img className="logo" src={logo} alt="instagram logo" />
             </Link>
-
             <div className="search">
                <img
                   className={`searchIcon ${

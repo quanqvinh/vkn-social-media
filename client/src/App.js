@@ -6,26 +6,31 @@ import Signup from "./views/Signup/Signup";
 import VerifyEmail from "./views/VerifyEmail/VerifyEmail";
 import Inbox from "./views/Inbox/Inbox";
 
-import { createContext } from "react";
-import { useSelector } from "react-redux";
+import { createContext, useEffect } from "react";
+import { useSelector, useStore } from "react-redux";
 import ProfilePage from "./views/ProfilePage/ProfilePage";
 import EditProfile from "./views/EditProfile/EditProfile";
 import { io } from "socket.io-client";
 import { getCookie } from "./views/Global/cookie";
+import { useState } from "react";
 
 export const SOCKET = createContext();
 function App() {
    const user = useSelector((state) => state.user);
-   let socket;
-   if (getCookie("accessToken")) {
-      socket = io("http://localhost:7070", {
+   const [socket, setSocket] = useState(null);
+
+   useEffect(() => {
+      if (!JSON.parse(sessionStorage.getItem("USER_INFO"))) return;
+      console.log("create socket");
+      const socket = io("http://localhost:7070", {
          auth: {
             "access-token": getCookie("accessToken"),
             userId: user._id,
             username: user.username,
          },
       });
-   }
+      setSocket(socket);
+   }, [user]);
 
    return (
       <Router>
