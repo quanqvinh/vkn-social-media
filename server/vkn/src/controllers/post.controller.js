@@ -8,6 +8,7 @@ const fse = require('fs-extra');
 const resourceHelper = require('../utils/resourceHelper');
 const ObjectId = require('mongoose').Types.ObjectId;
 const objectIdHelper = require('../utils/objectIdHelper');
+const mongodbHelper = require('../utils/mongodbHelper');
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
@@ -163,7 +164,7 @@ module.exports = {
 				}, { session })
 			]);
 
-			await session.commitTransaction();
+			await mongodbHelper.commitWithRetry(session);
 			res.status(200).json({
 				status: 'success'
 			});
@@ -234,7 +235,7 @@ module.exports = {
 			console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
 			console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
 			console.log('Delete post successful');
-			await session.commitTransaction();
+			await mongodbHelper.commitWithRetry(session);
 			res.status(200).json({
 				status: 'success'
 			});

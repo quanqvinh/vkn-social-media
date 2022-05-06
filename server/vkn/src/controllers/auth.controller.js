@@ -4,6 +4,7 @@ const Token = require("../models/token.model");
 const crypto = require("../utils/crypto");
 const mail = require("../utils/nodemailer");
 const jwt = require("jsonwebtoken");
+const mongodbHelper = require('../utils/mongodbHelper');
 
 const secretKey = process.env.SECRET_KEY;
 const refreshSecretKey = process.env.REFRESH_SECRET_KEY;
@@ -64,7 +65,7 @@ module.exports = {
             username: params.username,
             token,
          });
-         await session.commitTransaction();
+         await mongodbHelper.commitWithRetry(session);
          res.status(201).json({
             status: "success",
             message: "Account is created",
@@ -204,7 +205,7 @@ module.exports = {
          let refreshToken = jwt.sign(payload, refreshSecretKey, { expiresIn: refreshTokenLife });
 
          await Token.create([{ refreshToken, payload }], { session });
-         await session.commitTransaction();
+         await mongodbHelper.commitWithRetry(session);
          res.status(200).json({
             status: "success",
             message: "Login successful",
@@ -297,7 +298,7 @@ module.exports = {
                status: "error",
                ...tokenErr
             });
-         await session.commitTransaction()
+         await mongodbHelper.commitWithRetry(session)
          res.status(200).json({
             status: "success",
             message: "Password is updated",

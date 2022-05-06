@@ -1,13 +1,16 @@
-const mongoose = require("mongoose");
-const User = require("../models/user.model");
-const Auth = require("./auth.controller");
-const Crypto = require("../utils/crypto");
+const mongoose = require('mongoose');
+const User = require('../models/user.model');
+const Notification = require('../models/notification.model');
+const Request = require('../models/request.model');
+const Auth = require('./auth.controller');
+const Crypto = require('../utils/crypto');
 const {
     unlink
-} = require("fs/promises");
-const fs = require("fs");
-const resourceHelper = require("../utils/resourceHelper");
-const objectIdHelper = require("../utils/objectIdHelper");
+} = require('fs/promises');
+const fs = require('fs');
+const resourceHelper = require('../utils/resourceHelper');
+const objectIdHelper = require('../utils/objectIdHelper');
+const mongodbHelper = require('../utils/mongodbHelper');
 
 module.exports = {
     // [GET] /api/v1/user/me/profile
@@ -17,10 +20,10 @@ module.exports = {
                 rooms: 0,
                 auth: 0,
             })
-            .populate(["posts", {
+            .populate(['posts', {
                 path: 'friends',
                 select: 'username name'
-            }])
+            }, 'notifications'])
             .lean()
             .then((data) => {
                 data.posts.forEach((post) => {
@@ -33,8 +36,8 @@ module.exports = {
             .catch((err) => {
                 console.log(err);
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server",
+                    status: 'error',
+                    message: 'Error at server',
                 });
             });
     },
@@ -49,7 +52,7 @@ module.exports = {
                         rooms: 0,
                         auth: 0,
                     })
-                    .populate(["posts", {
+                    .populate(['posts', {
                         path: 'friends',
                         select: 'username name'
                     }])
@@ -69,14 +72,14 @@ module.exports = {
                 })
                 .catch((err) => {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server",
+                        status: 'error',
+                        message: 'Error at server',
                     });
                 });
         } else {
             res.status(400).json({
-                status: "error",
-                message: "Bad request. User id is needed.",
+                status: 'error',
+                message: 'Bad request. User id is needed.',
             });
         }
     },
@@ -92,14 +95,14 @@ module.exports = {
             )
             .then((data) => {
                 res.status(200).json({
-                    status: "success",
-                    message: "User has been edited.",
+                    status: 'success',
+                    message: 'User has been edited.',
                 });
             })
             .catch((err) => {
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server.",
+                    status: 'error',
+                    message: 'Error at server.',
                 });
             });
     },
@@ -126,19 +129,19 @@ module.exports = {
                     user.email = responseData.req.body.email;
                     await user.save();
                     res.status(200).json({
-                        status: "success",
-                        message: "Email has been updated.",
+                        status: 'success',
+                        message: 'Email has been updated.',
                     });
                 } else {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server.",
+                        status: 'error',
+                        message: 'Error at server.',
                     });
                 }
             }
         } catch (error) {
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message,
             });
         }
@@ -155,18 +158,18 @@ module.exports = {
                     _id: id,
                 }, {
                     $set: {
-                        "auth.password": hashedPassword,
+                        'auth.password': hashedPassword,
                     },
                 })
                 .then(() => {
                     res.status(200).json({
-                        status: "success",
-                        message: "Password has been updated.",
+                        status: 'success',
+                        message: 'Password has been updated.',
                     });
                 })
                 .catch((err) => {
                     res.status(500).json({
-                        status: "error",
+                        status: 'error',
                         message: error.message,
                     });
                 });
@@ -183,35 +186,35 @@ module.exports = {
                 })
                 .then((data) => {
                     res.status(200).json({
-                        status: "success",
-                        message: "User account has been moved to recycle bin.",
+                        status: 'success',
+                        message: 'User account has been moved to recycle bin.',
                     });
                 })
                 .catch((err) => {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server.",
+                        status: 'error',
+                        message: 'Error at server.',
                     });
                 });
         } else {
             res.status(400).json({
-                status: "error",
-                message: "Bad request. User id is needed.",
+                status: 'error',
+                message: 'Bad request. User id is needed.',
             });
         }
     },
 
     // [POST] /api/v1/user/upload/avatar
     async uploadProfilePicture(req, res) {
-        let file = resourceHelper.avatarResource + "/" + req.filename;
+        let file = resourceHelper.avatarResource + '/' + req.filename;
       let err;
       let deleteFileFunction = async function (filepath) {
          try {
             await unlink(filepath);
-            console.log("deleted");
+            console.log('deleted');
          } catch (error) {
             console.error(
-               "there was an error when deleting file:",
+               'there was an error when deleting file:',
                error.message
             );
             err = error;
@@ -219,21 +222,21 @@ module.exports = {
       };
       if (err)
          return res.status(500).json({
-            status: "failed",
+            status: 'failed',
          });
       // check whether file exists
       fs.access(file, fs.constants.F_OK, (error) => {
          if (error) {
-            console.log("avatar does not exist in folder");
+            console.log('avatar does not exist in folder');
             err = error;
-         } else if (file.includes("new-")) {
+         } else if (file.includes('new-')) {
             // check whether there is a new avatar, then delete the old one
             deleteFileFunction(
                resourceHelper.createAvatarFile(req.auth.userId)
             );
-            fs.rename(file, file.replace("new-", ""), (err) => {
+            fs.rename(file, file.replace('new-', ''), (err) => {
                if (err) {
-                  console.log("error when changing name:", err.message);
+                  console.log('error when changing name:', err.message);
                   this.err = err;
                }
             });
@@ -242,10 +245,10 @@ module.exports = {
 
       if (err)
          return res.status(500).json({
-            status: "failed",
+            status: 'failed',
          });
       return res.status(201).json({
-         status: "success",
+         status: 'success',
       });
     },
 
@@ -254,7 +257,7 @@ module.exports = {
         try {
             let keyword = req.body.keyword;
 
-            let regex = new RegExp("" + keyword, "i");
+            let regex = new RegExp('' + keyword, 'i');
             await User.find({
                     $or: [{
                         name: regex
@@ -269,8 +272,8 @@ module.exports = {
         } catch (err) {
             console.log(err);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
         }
     },
@@ -315,7 +318,7 @@ module.exports = {
                 receivedUser.modifiedCount === 1 && 
                 deletedNotification.deletedCount === 1 && 
                 deletedRequest.deletedCount === 1) {
-                await session.commitTransaction();
+                await mongodbHelper.commitWithRetry(session);
                 return res.status(200).json({ status: 'success' });
             }
             else
@@ -325,8 +328,8 @@ module.exports = {
             await session.abortTransaction();
 			console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
 		}
         session.endSession();
@@ -344,7 +347,11 @@ module.exports = {
 				type: 'add_friend_request',
 				tag: requestedUserId
 			}).lean();
-
+            console.log({
+				user: req.auth.userId,
+				type: 'add_friend_request',
+				tag: requestedUserId
+			});
 			let [ receivedUser, deletedNotification, deletedRequest ] = await Promise.all([
 				User.updateOne({ _id: req.auth.userId }, {
 					$pull: { notifications: notification._id }
@@ -366,7 +373,7 @@ module.exports = {
             if (receivedUser.modifiedCount === 1 && 
                 deletedNotification.deletedCount === 1 && 
                 deletedRequest.deletedCount === 1) {
-                await session.commitTransaction();
+                await mongodbHelper.commitWithRetry(session);
                 return res.status(200).json({ status: 'success' });
             }
             else
@@ -376,8 +383,8 @@ module.exports = {
             await session.abortTransaction();
             console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
         }
         session.endSession();
@@ -402,8 +409,8 @@ module.exports = {
                 Notification.deleteOne({ _id: notification._id }, { session }),
                 Request.deleteOne({
 					type: 'add_friend',
-					from: requestedUserId,
-					to: req.auth.userId
+					from: req.auth.userId,
+					to: receivedUserId
 				}, { session })
             ]);
 
@@ -416,7 +423,7 @@ module.exports = {
             if (receivedUser.modifiedCount === 1 && 
                 deletedNotification.deletedCount === 1 && 
                 deletedRequest.deletedCount === 1) {
-                await session.commitTransaction();
+                await mongodbHelper.commitWithRetry(session);
                 return res.status(200).json({ status: 'success' });
             }
             else
@@ -426,13 +433,13 @@ module.exports = {
             await session.abortTransaction();
 			console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
 		}
         session.endSession();
     },
-
+    
     // [POST] /api/v1/user/friends/unfriend
     async unfriend(req, res) {
         const session = await mongoose.startSession();
@@ -454,7 +461,7 @@ module.exports = {
 			console.log('OK');
 
             if (updatedFriendStatus.modifiedCount === 1 && updatedMyStatus.modifiedCount === 1) {
-                await session.commitTransaction();
+                await mongodbHelper.commitWithRetry(session);
                 return res.status(200).json({ status: 'success' });
             }
             else 
@@ -464,8 +471,8 @@ module.exports = {
             await session.abortTransaction();
             console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
         }
         session.endSession();
