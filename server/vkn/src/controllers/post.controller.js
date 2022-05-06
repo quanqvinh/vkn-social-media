@@ -7,7 +7,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const resourceHelper = require('../utils/resourceHelper');
 const ObjectId = require('mongoose').Types.ObjectId;
-
+const objectIdHelper = require('../utils/objectIdHelper');
 
 module.exports = {
 	// [GET] /api/v1/post/new-feed
@@ -121,8 +121,8 @@ module.exports = {
 					}
 				]).select('-reports').lean();
 			
-			post.user.isFriend = post.user.friends.includes(req.auth.userId) 
-				|| req.auth.userId === post.user._id.toString();
+			post.user.isFriend = objectIdHelper.include(post.user.friends, req.auth.userId) 
+				|| objectIdHelper.compare(req.auth.userId, post.user._id);
 			post.user.friends = undefined; 
 			post.imgs = resourceHelper.getListPostImages(postId);
 			res.status(200).json({
@@ -250,12 +250,12 @@ module.exports = {
 		session.endSession();
 	},
 
-	// [PATCH] /api//vi/post/:id/like
+	// [PATCH] /api/v1/post/:id/like
 	async likePost(req, res) {
 		try {
 			const { id } = req.params, userId = req.auth.userId;
 			let post = await Post.findById(id);
-			let index = post.likes.findIndex((id) => id.toString() === userId);
+			let index = post.likes.findIndex((id) => objectIdHelper.compare(id, userId));
 			if (index === -1)
 				post.likes.push(userId);
 			else

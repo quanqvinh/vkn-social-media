@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const Room = require('../models/room.model');
 const ObjectId = require('mongoose').Types.ObjectId;
+const objectIdHelper = require('../utils/objectIdHelper');
 
 module.exports = {
 	// [GET] /api/v1/room
@@ -204,7 +205,7 @@ module.exports = {
 				
 			let roomData = null, roomId = undefined;
 			user.rooms.some(room => {
-				if (room.chatMate.map(userId => userId.toString()).includes(userId)) {
+				if (objectIdHelper.include(room.chatMate, userId)) {
 					roomData = room;
 					return true;
 				}
