@@ -50,6 +50,7 @@ module.exports = (io, socket) => {
             userId,
             username: socket.handshake.auth.username,
             message: message._doc,
+            sendAt: Date.now(),
          });
       } catch (error) {
          console.log(error);

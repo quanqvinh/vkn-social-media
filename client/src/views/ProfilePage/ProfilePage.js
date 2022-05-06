@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import "./profilePage.scss";
-import avatar from "../../assets/images/profile.jpg";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ModeCommentIcon from "@mui/icons-material/ModeComment";
 import Header from "../Header/Header";
@@ -8,6 +7,10 @@ import Footer from "../Footer/Footer";
 import PostDetail from "../PostDetail/PostDetail";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import userApi from "../../apis/userApi";
+import avatarDefault from "../../assets/images/avatar_default.png";
+
+const $ = document.querySelector.bind(document);
 
 const ProfilePage = () => {
    const [postSelected, setPostSelected] = useState({
@@ -26,13 +29,78 @@ const ProfilePage = () => {
       setPosts([...user.posts]);
    }, []);
 
+   const openModal = () => {
+      const overlay = $(".overlay");
+      const modal = $(".modal");
+      modal.classList.add("modal--open");
+      overlay.classList.add("overlay--open");
+   };
+
+   const closeModal = () => {
+      const overlay = $(".overlay");
+      const modal = $(".modal");
+      modal.classList.remove("modal--open");
+      overlay.classList.remove("overlay--open");
+   };
+
+   const handelChangeAvatar = (e) => {
+      const fileAvatar = e.target.files[0];
+      console.log(fileAvatar);
+      const formData = new FormData();
+      formData.append("avatar", fileAvatar);
+
+      const changeImg = async () => {
+         try {
+            let res = await userApi.changeAvatar(formData);
+            window.location.reload();
+         } catch (error) {
+            console.log(error.message);
+         }
+      };
+      changeImg();
+
+      const overlay = $(".overlay");
+      const modal = $(".modal");
+      modal.classList.remove("modal--open");
+      overlay.classList.remove("overlay--open");
+   };
+
+   const defaltAvatar = (e) => {
+      console.log(avatarDefault);
+      e.target.src = avatarDefault;
+   };
    return (
       <>
          <Header />
+         <div className="overlay" onClick={closeModal}></div>
+         <div className="modal">
+            <p className="modal__title">Change Profile Photo</p>
+            <input
+               type="file"
+               name=""
+               id="input-file-avatar"
+               hidden
+               onChange={(e) => handelChangeAvatar(e)}
+            />
+            <label htmlFor="input-file-avatar" className="modal__upload">
+               Upload Photo
+            </label>
+            <p className="modal__cancel" onClick={closeModal}>
+               Cancel
+            </p>
+         </div>
          <div className="profile-container">
             <div className="profile__header">
                <div className="header__left">
-                  <img src={avatar} alt="avatar" />
+                  <img
+                     onError={(e) => defaltAvatar(e)}
+                     src={
+                        process.env.REACT_APP_STATIC_URL +
+                        `/avatars/${user._id}.png`
+                     }
+                     alt="avatar"
+                     onClick={openModal}
+                  />
                </div>
                <div className="header__right">
                   <div className="right__header">

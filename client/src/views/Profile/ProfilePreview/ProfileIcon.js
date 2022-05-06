@@ -1,27 +1,24 @@
 import "./profileIcon.scss";
 import { memo } from "react";
+import avatarDefault from "../../../assets/images/avatar_default.png";
 
 function ProfileIcon(props) {
    const { iconSize, storyBorder, image } = props;
 
-   function getRandomInt(min, max) {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-   }
+   let profileImage = image ? image : avatarDefault;
 
-   let randomId = getRandomInt(1, 70);
-
-   let profileImage = image
-      ? image
-      : `https://i.pravatar.cc/150?img=${randomId}`;
-
+   const setDefault = (e) => {
+      e.target.onerror = null;
+      e.target.src = avatarDefault;
+   };
    return (
       <div className={storyBorder ? "storyBorder" : ""}>
          <img
+            aria-hidden={true}
             className={`profileIcon ${iconSize}`}
             src={profileImage}
             alt="profile"
+            onError={(e) => setDefault(e)}
          />
       </div>
    );

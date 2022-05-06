@@ -16,7 +16,9 @@ function Sidebar(props) {
                name={user.name || "null"}
                urlText="Switch"
                iconSize="big"
-               image={image}
+               image={
+                  process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`
+               }
                storyBorder={true}
             />
             <ListsOnline />

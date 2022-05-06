@@ -19,7 +19,9 @@ function Posts(props) {
             console.log(error.message);
          }
       };
-      fetchPost();
+      if (sessionStorage.getItem("USER_INFO")) {
+         fetchPost();
+      }
    }, []);
 
    function isEmpty(obj) {
@@ -28,6 +30,7 @@ function Posts(props) {
       }
       return true;
    }
+
    return (
       <div className="cards">
          {!isEmpty(user) &&
@@ -35,6 +38,10 @@ function Posts(props) {
             posts?.length > 0 &&
             posts.map((post) => (
                <Post
+                  avatar={
+                     process.env.REACT_APP_STATIC_URL +
+                     `/avatars/${post.user}.png`
+                  }
                   key={post._id}
                   accountName={post.username}
                   content={post.caption}

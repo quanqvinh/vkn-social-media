@@ -8,6 +8,7 @@ import { SOCKET } from "../../../App";
 import { useState, useContext } from "react";
 import { useSelector } from "react-redux";
 import { memo } from "react";
+import { useRef } from "react";
 
 const ChatRoom = (props) => {
    const user = useSelector((state) => state.user);
@@ -15,9 +16,9 @@ const ChatRoom = (props) => {
    const [inputing, setInputing] = useState(false);
    const [inputContent, setInputContent] = useState("");
    const [listMessage, setListMessage] = useState([]);
+   const listRef = useRef([]);
 
    const socket = useContext(SOCKET);
-
    const sendMessage = useCallback(() => {
       socket.emit("chat:send_message", {
          username: currentRoom.chatMate.username,
@@ -26,31 +27,28 @@ const ChatRoom = (props) => {
          userId: user._id,
       });
 
-      setListMessage([
-         ...listMessage,
+      listRef.current = [
+         ...listRef.current,
          {
             content: inputContent,
             img: null,
             isMine: true,
          },
-      ]);
+      ];
+
+      setListMessage([...listRef.current]);
+
       handelLastestMessage(currentRoom.roomId, inputContent);
       setInputContent("");
    }, [listMessage, inputContent]);
 
    useEffect(() => {
-      socket.once("chat:print_message", ({ message }) => {
-         setListMessage([...listMessage, message]);
-      });
-   }, [listMessage]);
-
-   const handelSendMessage = () => {
-      try {
-         sendMessage();
-      } catch (error) {
-         console.log(error.message);
-      }
-   };
+      socket &&
+         socket.on("chat:print_message", ({ message }) => {
+            listRef.current = [...listRef.current, message];
+            setListMessage([...listRef.current]);
+         });
+   }, [socket]);
 
    const handelKeyUp = (e) => {
       if (e.keyCode === 13) {
@@ -100,6 +98,10 @@ const ChatRoom = (props) => {
       <div className="chat-room">
          <div className="header">
             <ProfilePreview
+               image={
+                  process.env.REACT_APP_STATIC_URL +
+                  `/avatars/${currentRoom.chatMate._id}.png`
+               }
                username={currentRoom.chatMate.username}
                iconSize="small"
                captionSize="big"

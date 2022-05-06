@@ -9,7 +9,6 @@ const ListChat = (props) => {
    const { latestMessage, getToRoom } = props;
    const [listRooms, setListRooms] = useState([]);
 
-   console.log("render");
    useEffect(() => {
       const fetchRooms = async () => {
          try {
@@ -27,6 +26,10 @@ const ListChat = (props) => {
          {listRooms?.length > 0 &&
             listRooms.map((room) => (
                <ProfilePreview
+                  image={
+                     process.env.REACT_APP_STATIC_URL +
+                     `/avatars/${room.chatMate._id}.png`
+                  }
                   key={room._id}
                   room={room}
                   getToRoom={getToRoom}
