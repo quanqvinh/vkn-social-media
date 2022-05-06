@@ -3,6 +3,7 @@ const Room = require('../models/room.model');
 const Message = require('../models/schemas/message.schema').model;
 const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../utils/resourceHelper');
+const objectIdHelper = require('../utils/objectIdHelper');
 
 async function validateRoom(roomId, user1, user2) {
    let room = await Room.aggregate([
@@ -20,9 +21,9 @@ async function validateRoom(roomId, user1, user2) {
    console.log(room);
    if (!room) return false;
    let chatMate = room[0].chatMate;
-   if (chatMate[0].toString() === user1 && chatMate[1].toString() === user2)
+   if (objectIdHelper.compareArray(chatMate, [user1, user2]))
       return true;
-   if (chatMate[1].toString() === user1 && chatMate[0].toString() === user2)
+   if (objectIdHelper.compareArray(chatMate, [user2, user1]))
       return true;
    return false;
 }
