@@ -73,29 +73,33 @@ module.exports = {
 
 	// [POST] /api/v1/post/new
 	async newPost(req, res) {
-		try {
-			let { caption, postId } = req.body;
-			await Promise.all([
-				Post.create({
-					_id: postId,
-					user: req.auth.userId,
-					caption
-				}),
-				User.updateOne({ _id: req.auth.userId }, {
-					$push: { posts: postId }
-				})
-			]);
-			res.status(201).json({
-				status: 'success'
-			});
-		}
-		catch(err) {
-			console.log(err);
-			res.status(500).json({
-				status: 'error',
-				message: err.message
-			});
-		}
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let { caption, postId } = req.body;
+				await Promise.all([
+					Post.create([{
+						_id: postId,
+						user: req.auth.userId,
+						caption
+					}], { session }),
+					User.updateOne({ _id: req.auth.userId }, {
+						$push: { posts: postId }
+					}, { session })
+				]);
+			},
+			successCallback() {
+				return res.status(201).json({
+					status: 'success'
+				});
+			},
+			errorCallback(error) {
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: error.message
+				});
+			}
+		 });
 	},
 
 	// [GET] /api/v1/post/:postId
@@ -142,47 +146,44 @@ module.exports = {
 
 	// [POST] /api/v1/post/report
 	async reportPost(req, res) {
-		let session = await require('mongoose').startSession();
-		session.startTransaction();
-		try {
-			let { postId, content } = req.body;
-			if (!postId || !content)
-				return res.status(400).json({
-					status: 'error',
-					message: 'Parameters problem'
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let { postId, content } = req.body;
+				if (!postId || !content)
+					return res.status(400).json({
+						status: 'error',
+						message: 'Parameters problem'
+					});
+				
+				let _id = new ObjectId();
+				let temp = await Promise.all([
+					Report.create([{
+						_id,
+						userId: req.auth.userId,
+						content
+					}], { session }),
+					Post.updateOne({ _id: postId }, {
+						$push: { reports: _id }
+					}, { session })
+				]);
+			},
+			successCallback() {
+				res.status(200).json({
+					status: 'success'
 				});
-			
-			let _id = new ObjectId();
-			 await Promise.all([
-				Report.create([{
-					_id,
-					userId: req.auth.userId,
-					content
-				}], { session }),
-				Post.findByIdAndUpdate(postId, {
-					$push: { reports: _id }
-				}, { session })
-			]);
-
-			await mongodbHelper.commitWithRetry(session);
-			res.status(200).json({
-				status: 'success'
-			});
-		}
-		catch(err) {
-			console.log(err);
-			await session.abortTransaction();
-			res.status(500).json({
-				status: 'error',
-				message: err.message
-			});
-		}
-		session.endSession();
+			},
+			errorCallback(error) {
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: error.message
+				});
+			}
+		});
 	},
 
 	// [PUT] /api/v1/post
 	async updatePost(req, res) {
-		console.log(req.body);
 		try {
 			let { postId, caption } = req.body;
 			let imageDir = resourceHelper.createPostPath(postId.toString());
@@ -208,59 +209,62 @@ module.exports = {
 
 	// [DELETE] /api/v1/post/:id
 	async deletePost(req, res) {
-		let session = await require('mongoose').startSession();
-		session.startTransaction();
-		try {
-			let { id } = req.params;
-			fs.rmSync(resourceHelper.createPostPath(id.toString()), { 
-				force: true, 
-				recursive: true 
-			});
-			console.log('Deleted image resource');
-			let [ post, user ] = await Promise.all([
-				Post.findByIdAndDelete(id, { session })
-				.select('reports comments -_id').lean(),
-				User.updateOne({ _id: req.auth.userId }, {
-					$pull: { posts: id }
-				}, { session })
-			]);
-			let [ reports, comments ] = await Promise.all([
-				Report.deleteMany({ 
-					_id: { $in: post.reports }
-				}, { session }),
-				Comment.deleteMany({ 
-					_id: { $in: post.comments }
-				}, { session })
-			]);
-			console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
-			console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
-			console.log('Delete post successful');
-			await mongodbHelper.commitWithRetry(session);
-			res.status(200).json({
-				status: 'success'
-			});
-		}
-		catch(err) {
-			await session.abortTransaction();
-			console.log(err);
-			res.status(500).json({
-				status: 'error',
-				message: err.message
-			});
-		}
-		session.endSession();
+		mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let { id } = req.params;
+				fs.rmSync(resourceHelper.createPostPath(id.toString()), { 
+					force: true, 
+					recursive: true 
+				});
+				console.log('Deleted image resource');
+				let [ post, user ] = await Promise.all([
+					Post.findByIdAndDelete(id, { session })
+					.select('reports comments -_id').lean(),
+					User.updateOne({ _id: req.auth.userId }, {
+						$pull: { posts: id }
+					}, { session })
+				]);
+				let [ reports, comments ] = await Promise.all([
+					Report.deleteMany({ 
+						_id: { $in: post.reports }
+					}, { session }),
+					Comment.deleteMany({ 
+						_id: { $in: post.comments }
+					}, { session })
+				]);
+				console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
+				console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
+				console.log('Delete post successful');
+			},
+			successCallback() {
+				res.status(200).json({
+					status: 'success'
+				});
+			},
+			errorCallback(error) {
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: error.message
+				});
+			}
+		})
 	},
 
 	// [PATCH] /api/v1/post/:id/like
 	async likePost(req, res) {
 		try {
-			const { id } = req.params, userId = req.auth.userId;
+			const { id } = req.params, userId = req.auth.userId;	
 			let post = await Post.findById(id);
 			let index = post.likes.findIndex((id) => objectIdHelper.compare(id, userId));
-			if (index === -1)
+			if (index === -1) {
 				post.likes.push(userId);
-			else
+				post.numberOfLikes++;
+			}
+			else {
 				post.likes.splice(index, 1);
+				post.numberOfLikes--;
+			}
 			post.save();
 			res.status(200).json({ 
 				status: 'success',

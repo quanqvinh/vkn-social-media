@@ -101,11 +101,11 @@ module.exports = {
 				data: user[0]
 			});
 		} 
-		catch (err) {
-			console.log(err);
+		catch (error) {
+			console.log(error);
 			res.status(500).json({
 				status: 'error',
-				message: err.message
+				message: error.message
 			});
 		}
 	},
@@ -185,11 +185,11 @@ module.exports = {
 				data: data
 			})
 		}
-		catch (err) {
-			console.log(err);
+		catch (error) {
+			console.log(error);
 			res.status(500).json({
 				status: 'error',
-				message: err.message
+				message: error.message
 			});
 		}
 	},
@@ -219,11 +219,11 @@ module.exports = {
 				roomId
 			});
 		}
-		catch (err) {
-			console.log(err);
+		catch (error) {
+			console.log(error);
 			res.status(500).json({
 				status: 'error',
-				message: err.message
+				message: error.message
 			});
 		}
 	}

@@ -280,201 +280,192 @@ module.exports = {
 
     // [POST] /api/v1/user/friends/accept-request
     async acceptAddFriendRequest(req, res) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-			const { requestedUserId, requestedUsername } = req.body;
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const { requestedUserId, requestedUsername } = req.body;
 
-			let notification = await Notification.findOne({
-				user: req.auth.userId,
-				type: 'add_friend_request',
-				tag: requestedUserId
-			}).lean();
+                let notification = await Notification.findOne({
+                    user: req.auth.userId,
+                    type: 'add_friend_request',
+                    tag: requestedUserId
+                }).lean();
 
-			let [ requestedUser, receivedUser, deletedNotification, deletedRequest ] = await Promise.all([
-				User.updateOne({ _id: requestedUserId }, {
-					$push: { friends: req.auth.userId }
-				}, { session }),
-				User.updateOne({ _id: req.auth.userId }, {
-					$push: { friends: requestedUserId },
-					$pull: { notifications: notification._id }
-				}, { session }),
-				Notification.deleteOne({ _id: notification._id }, { session }),
-				Request.deleteOne({
-					type: 'add_friend',
-					from: requestedUserId,
-					to: req.auth.userId
-				}, { session })
-			]);
-
-			console.log('Accept add friend result');
-			console.log(`requestedUser.modifiedCount: ${requestedUser.modifiedCount}`);
-			console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
-			console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
-			console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
-			console.log('OK');
-
-            if (requestedUser.modifiedCount === 1 &&
-                receivedUser.modifiedCount === 1 && 
-                deletedNotification.deletedCount === 1 && 
-                deletedRequest.deletedCount === 1) {
-                await mongodbHelper.commitWithRetry(session);
+                if (!notification)
+                    throw new Error('Notification is not found!');
+    
+                let [ requestedUser, receivedUser, deletedNotification, deletedRequest ] = await Promise.all([
+                    User.updateOne({ _id: requestedUserId }, {
+                        $push: { friends: req.auth.userId }
+                    }, { session }),
+                    User.updateOne({ _id: req.auth.userId }, {
+                        $push: { friends: requestedUserId },
+                        $pull: { notifications: notification._id }
+                    }, { session }),
+                    Notification.deleteOne({ _id: notification._id }, { session }),
+                    Request.deleteOne({
+                        type: 'add_friend',
+                        from: requestedUserId,
+                        to: req.auth.userId
+                    }, { session })
+                ]);
+    
+                console.log('Accept add friend result');
+                console.log(`requestedUser.modifiedCount: ${requestedUser.modifiedCount}`);
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
+                console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
+                console.log('OK');
+                if (requestedUser.modifiedCount < 1 ||
+                    receivedUser.modifiedCount < 1 || 
+                    deletedNotification.deletedCount < 1 || 
+                    deletedRequest.deletedCount < 1) 
+                    throw new Error('Contain not updated data');
+            },
+            successCallback() {
                 return res.status(200).json({ status: 'success' });
+            },
+            errorCallback: (error) => {
+                console.log(error);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.',
+                });
             }
-            else
-                throw new Error('Contain not updated data');
-		} 
-        catch (error) {
-            await session.abortTransaction();
-			console.log(error);
-            res.status(500).json({
-                status: 'error',
-                message: 'Error at server.',
-            });
-		}
-        session.endSession();
+        });
     },
 
     // [POST] /api/v1/user/friends/decline-request
     async declineAddFriendRequest(req, res) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const { requestedUserId, requestedUsername } = req.body;
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const { requestedUserId, requestedUsername } = req.body;
 
-            let notification = await Notification.findOne({
-				user: req.auth.userId,
-				type: 'add_friend_request',
-				tag: requestedUserId
-			}).lean();
-            console.log({
-				user: req.auth.userId,
-				type: 'add_friend_request',
-				tag: requestedUserId
-			});
-			let [ receivedUser, deletedNotification, deletedRequest ] = await Promise.all([
-				User.updateOne({ _id: req.auth.userId }, {
-					$pull: { notifications: notification._id }
-				}, { session }),
-				Notification.deleteOne({ _id: notification._id }, { session }),
-				Request.deleteOne({
-					type: 'add_friend',
-					from: requestedUserId,
-					to: req.auth.userId
-				}, { session })
-			]);
+                let notification = await Notification.findOne({
+                    user: req.auth.userId,
+                    type: 'add_friend_request',
+                    tag: requestedUserId
+                }).lean();
+                
+                if (!notification)
+                    throw new Error('Notification is not found!');
+                    
+                let [ receivedUser, deletedNotification, deletedRequest ] = await Promise.all([
+                    User.updateOne({ _id: req.auth.userId }, {
+                        $pull: { notifications: notification._id }
+                    }, { session }),
+                    Notification.deleteOne({ _id: notification._id }, { session }),
+                    Request.deleteOne({
+                        type: 'add_friend',
+                        from: requestedUserId,
+                        to: req.auth.userId
+                    }, { session })
+                ]);
 
-			console.log('Decline add friend result');
-			console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
-			console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
-			console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
-			console.log('OK');
+                console.log('Decline add friend result');
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
+                console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
+                console.log('OK');
 
-            if (receivedUser.modifiedCount === 1 && 
-                deletedNotification.deletedCount === 1 && 
-                deletedRequest.deletedCount === 1) {
-                await mongodbHelper.commitWithRetry(session);
+                if (receivedUser.modifiedCount < 1 || 
+                    deletedNotification.deletedCount < 1 || 
+                    deletedRequest.deletedCount < 1) 
+                    throw new Error('Contain not updated data');
+            },
+            successCallback() {
                 return res.status(200).json({ status: 'success' });
+            },
+            errorCallback: (error) => {
+                console.log(error);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.',
+                });
             }
-            else
-                throw new Error('Contain not updated data');
-        }
-        catch (error) {
-            await session.abortTransaction();
-            console.log(error);
-            res.status(500).json({
-                status: 'error',
-                message: 'Error at server.',
-            });
-        }
-        session.endSession();
+        });
     },
 
     // [POST] /api/v1/user/friends/undo-request
     async undoAddFriendRequest(req, res) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const { receivedUserId, receivedUsername } = req.body;
-            let notification = await Notification.findOne({
-				user: receivedUserId,
-				type: 'add_friend_request',
-				tag: req.auth.userId
-			}).lean();
-
-            let [ receivedUser ,deletedNotification, deletedRequest ] = await Promise.all([
-                User.updateOne({ _id: receivedUserId }, {
-                    $pull: { notifications: notification._id }
-                }, { session }),
-                Notification.deleteOne({ _id: notification._id }, { session }),
-                Request.deleteOne({
-					type: 'add_friend',
-					from: req.auth.userId,
-					to: receivedUserId
-				}, { session })
-            ]);
-
-            console.log('Undo add friend result');
-			console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
-			console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
-			console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
-			console.log('OK');
-            
-            if (receivedUser.modifiedCount === 1 && 
-                deletedNotification.deletedCount === 1 && 
-                deletedRequest.deletedCount === 1) {
-                await mongodbHelper.commitWithRetry(session);
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const { receivedUserId, receivedUsername } = req.body;
+                let notification = await Notification.findOne({
+                    user: receivedUserId,
+                    type: 'add_friend_request',
+                    tag: req.auth.userId
+                }).lean();
+    
+                if (!notification)
+                throw new Error('Notification is not found!');
+    
+                let [ receivedUser ,deletedNotification, deletedRequest ] = await Promise.all([
+                    User.updateOne({ _id: receivedUserId }, {
+                        $pull: { notifications: notification._id }
+                    }, { session }),
+                    Notification.deleteOne({ _id: notification._id }, { session }),
+                    Request.deleteOne({
+                        type: 'add_friend',
+                        from: req.auth.userId,
+                        to: receivedUserId
+                    }, { session })
+                ]);
+    
+                console.log('Undo add friend result');
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
+                console.log(`deletedNotification.deletedCount: ${deletedNotification.deletedCount}`);
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
+                console.log('OK');
+                
+                if (receivedUser.modifiedCount < 1 || 
+                    deletedNotification.deletedCount < 1 || 
+                    deletedRequest.deletedCount < 1) 
+                    throw new Error('Contain not updated data');
+            },
+            successCallback() {
                 return res.status(200).json({ status: 'success' });
+            },
+            errorCallback(error) {
+                console.log(error);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.',
+                });
             }
-            else
-                throw new Error('Contain not updated data');
-		} 
-        catch (error) {
-            await session.abortTransaction();
-			console.log(error);
-            res.status(500).json({
-                status: 'error',
-                message: 'Error at server.',
-            });
-		}
-        session.endSession();
+        });
     },
     
     // [POST] /api/v1/user/friends/unfriend
     async unfriend(req, res) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const { friendId, friendUsername } = req.body;
-            let [ updatedFriendStatus, updatedMyStatus ] = await Promise.all([
-                User.updateOne({ _id: friendId }, {
-                    $pull: { friends: req.auth.userId }
-                }, { session }),
-                User.updateOne({ _id: req.auth.userId }, {
-                    $pull: { friends: friendId }
-                }, { session }),
-            ]);
-
-            console.log('Unfriend result');
-			console.log(`updatedFriendStatus.modifiedCount: ${updatedFriendStatus.modifiedCount}`);
-			console.log(`updatedMyStatus.modifiedCount: ${updatedMyStatus.modifiedCount}`);
-			console.log('OK');
-
-            if (updatedFriendStatus.modifiedCount === 1 && updatedMyStatus.modifiedCount === 1) {
-                await mongodbHelper.commitWithRetry(session);
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const { friendId, friendUsername } = req.body;
+                let [ updatedFriendStatus, updatedMyStatus ] = await Promise.all([
+                    User.updateOne({ _id: friendId }, {
+                        $pull: { friends: req.auth.userId }
+                    }, { session }),
+                    User.updateOne({ _id: req.auth.userId }, {
+                        $pull: { friends: friendId }
+                    }, { session }),
+                ]);
+    
+                console.log('Unfriend result');
+                console.log(`updatedFriendStatus.modifiedCount: ${updatedFriendStatus.modifiedCount}`);
+                console.log(`updatedMyStatus.modifiedCount: ${updatedMyStatus.modifiedCount}`);
+                console.log('OK');
+                if (updatedFriendStatus.modifiedCount < 1 || updatedMyStatus.modifiedCount < 1)
+                    throw new Error('Data is not updated');
+            },
+            successCallback() {
                 return res.status(200).json({ status: 'success' });
+            },
+            errorCallback(error) {
+                console.log(error);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.',
+                });
             }
-            else 
-                throw new Error('Data is not updated');
-        }
-        catch (error) {
-            await session.abortTransaction();
-            console.log(error);
-            res.status(500).json({
-                status: 'error',
-                message: 'Error at server.',
-            });
-        }
-        session.endSession();
+        });
     }
 };
