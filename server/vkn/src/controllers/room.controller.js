@@ -2,6 +2,7 @@ const User = require('../models/user.model');
 const Room = require('../models/room.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const objectIdHelper = require('../utils/objectIdHelper');
+const mongodbHelper = require('../utils/mongodbHelper');
 
 module.exports = {
 	// [GET] /api/v1/room
@@ -226,5 +227,90 @@ module.exports = {
 				message: error.message
 			});
 		}
+	},
+
+	// [DELETE] /api/v1/room/message/delete
+	async deleteMessage(req, res) {
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				const { roomId, messageId } = req.query;
+
+				let room = await Room.findOne({ _id: roomId })
+					.select('chatMate messages')
+					.populate({
+						path: 'chatMate',
+						select: 'username'
+					});
+				let message = room.messages.id(messageId), showWith;
+				if (message.showWith === 'all') {
+					if (req.auth.userId === room.chatMate[0].userId)
+						showWith = room.chatMate[1].userId;
+					else 
+						showWith = room.chatMate[0].userId;
+				}
+				else
+					showWith = 'nobody';
+
+				let updatedRoom;
+				if (showWith !== 'nobody')
+					updatedRoom = await Room.updateOne({ 
+						_id: roomId,
+						'messages._id': messageId
+					}, {
+						$set: {
+							'messages.$.showWith': showWith
+						}
+					}, { session });
+				else
+					updatedRoom = await Room.updateOne({ _id: roomId }, {
+						$pull: {
+							messages: { _id: new ObjectId(messageId) }
+						}
+					});
+
+				console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+				if (updatedRoom.modifiedCount < 1) 
+					throw new Error('Delete data failed');
+			},
+			successCallback() {
+				return res.status(200).json({ status: 'success' });
+			},
+			errorCallback(error) {
+				console.log(error);
+				return res.status(500).json({
+					status: 'error',
+					message: 'Error at server'
+				});
+			}
+		});
+	},
+
+	// [DELETE] /api/v1/room/message/recall
+	async recallMessage(req, res) {
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				const { roomId, messageId } = req.query;
+
+				let updatedRoom = await Room.updateOne({ _id: roomId }, {
+					$pull: {
+						messages: { _id: new ObjectId(messageId) }
+					}
+				});
+
+				console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+				if (updatedRoom.modifiedCount < 1) 
+					throw new Error('Delete data failed');
+			},
+			successCallback() {
+				return res.status(200).json({ status: 'success' });
+			},
+			errorCallback(error) {
+				console.log(error);
+				return res.status(500).json({
+					status: 'error',
+					message: 'Error at server'
+				});
+			}
+		});
 	}
 }

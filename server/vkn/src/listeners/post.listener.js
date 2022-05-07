@@ -10,6 +10,7 @@ module.exports = (io, socket) => {
 	socket.on('post:leave_post_room', leavePostRoom);
 	socket.on('post:like_post', likePost);
 	socket.on('post:comment_post', commentPost);
+	socket.on('post:reply_comment', replyComment);
 
 	function joinPostRoom(payload) {
 		const { postId } = payload;
@@ -49,7 +50,9 @@ module.exports = (io, socket) => {
 			},
 			successCallback() {
 				if (postOwnerId !== socket.handshake.auth.userId)
-					io.to(postOwnerId).emit('user:print_notification', { notification });
+					io.to(postOwnerId).emit('user:print_notification', { 
+						notification: notification.toObject()
+					});
 			},
 			errorCallback(error) {
 				console.log(error);
@@ -98,10 +101,100 @@ module.exports = (io, socket) => {
 				socket.broadcast.to(postId).emit('post:print_comment', {
 					commentedUserId: socket.handshake.auth.userId,
 					commentedUsername: socket.handshake.auth.username,
-					comment
+					comment: comment.toObject()
 				});
 				if (postOwnerId !== socket.handshake.auth.userId)
-					io.to(postOwnerId).emit('user:print_notification', { notification });
+					io.to(postOwnerId).emit('user:print_notification', { 
+						notification: notification.toObject()
+					});
+			},
+			errorCallback(error) {
+				console.log(error);
+				socket.emit('error');
+			}
+		});
+	}
+
+	async function replyComment(payload) {
+		const { postId, postOwnerId, postOwnerUsername, commentId, commentOwnerId, commentOwnerUsername, content } = payload;
+		let reply, notificationOfPostOwner, notificationOfCommentOwner;
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				reply = new Reply({
+					replyBy: socket.handshake.auth.userId,
+					content
+				});
+				notificationOfPostOwner = new Notification({
+					user: postOwnerId,
+					type: 'reply',
+					relatedUsers: {
+						from: socket.handshake.auth.username,
+						to: commentOwnerUsername,
+						from: postOwnerUsername
+					},
+					tag: commentId
+				});
+				notificationOfCommentOwner = new Notification({
+					user: commentOwnerId,
+					type: 'reply',
+					relatedUsers: {
+						from: socket.handshake.auth.username,
+						to: commentOwnerUsername,
+						from: postOwnerUsername
+					},
+					tag: commentId
+				});
+
+				let [ updatedComment, savedNotificationOfPostOwner, updatedPostOwner, savedNotificationOfCommentOwner, updatedCommentOwner ] = await Promise.all([
+					Comment.updateOne({ _id: commentId }, {
+						$push: { replies: reply }
+					}, { session }),
+					...(socket.handshake.auth.userId === postOwnerId ? [ null, null ] : [
+						notificationOfPostOwner.save({ session }),
+						User.updateOne({ _id: postOwnerId }, {
+							$push: { notifications: notificationOfPostOwner._id }
+						}, { session })
+					]),
+					...(socket.handshake.auth.userId === commentOwnerId ? [ null, null ] : [
+						notificationOfCommentOwner.save({ session }),
+						User.updateOne({ _id: commentOwnerId }, {
+							$push: { notifications: notificationOfCommentOwner._id }
+						}, { session }),
+					])
+				]);
+				
+				console.log('updatedComment:', updatedComment.modifiedCount);
+				if (savedNotificationOfPostOwner) {
+					console.log('savedNotificationOfPostOwner:', savedNotificationOfPostOwner === notificationOfPostOwner);
+					console.log('updatedPostOwner:', updatedPostOwner.modifiedCount);
+				}
+				if (savedNotificationOfCommentOwner) {
+					console.log('savedNotificationOfCommentOwner:', savedNotificationOfCommentOwner === notificationOfCommentOwner);
+					console.log('updatedCommentOwner:', updatedCommentOwner.modifiedCount);
+				}
+
+				if (updatedComment.modifiedCount < 1)
+					throw new Error('Update data failed');
+				if (savedNotificationOfPostOwner && (savedNotificationOfPostOwner !== notificationOfPostOwner || updatedPostOwner.modifiedCount < 1)) 
+					throw new Error('Update data failed');
+				if (savedNotificationOfCommentOwner && (savedNotificationOfCommentOwner !== notificationOfCommentOwner || updatedCommentOwner.modifiedCount < 1)) 
+					throw new Error('Update data failed');
+			},
+			successCallback() {
+				socket.broadcast.to(postId).emit('post:print_reply', {
+					repliedUserId: socket.handshake.auth.userId,
+					repliedUsername: socket.handshake.auth.username,
+					commentId,
+					reply: reply.toObject()
+				});
+				if (socket.handshake.auth.userId !== postOwnerId)
+					io.to(postOwnerId).emit('user:print_notification', { 
+						notification: notification.toObject()
+					});
+				if (socket.handshake.auth.userId !== commentOwnerId)
+					io.to(commentOwnerId).emit('user:print_notification', { 
+						notification: notification.toObject()
+					});
 			},
 			errorCallback(error) {
 				console.log(error);

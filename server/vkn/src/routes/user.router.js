@@ -18,6 +18,7 @@ router.patch('/edit/email', controller.editUserEmail);
 router.patch('/edit/password', controller.changePassword);
 
 router.delete('/delete', controller.softDeleteUser);
+router.delete('/notification/:id', controller.deleteNotification);
 
 
 module.exports = router;

@@ -467,5 +467,36 @@ module.exports = {
                 });
             }
         });
+    },
+
+    // [DELETE] /api/v1/user/notification/:id
+    async deleteNotification(req, res) {
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const id = req.params.id;
+
+                let [ updatedUser, deletedNotification ] = await Promise.all([
+                    User.updateOne({ _id: req.auth.userId }, {
+                        $pull: { notifications: id }
+                    }, { session }),
+                    Notification.deleteOne({ _id: id }, { session })
+                ]);
+
+                console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
+                console.log('deletedNotification.deletedCount:', deletedNotification.deletedCount);
+                if (updatedUser.modifiedCount < 1 || deletedNotification.deletedCount < 1)
+                    throw new Error('Update data failed');
+            },
+            successCallback() {
+                return res.status(200).json({ status: 'success' });
+            },
+            errorCallback(error) {
+                console.log(error);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.',
+                });
+            }
+        })
     }
 };
