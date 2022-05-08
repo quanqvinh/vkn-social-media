@@ -27,8 +27,6 @@ const Inbox = () => {
       [latestMessage]
    );
 
-   console.log(latestMessage);
-
    useEffect(() => {
       socket &&
          socket.on("chat:print_message", ({ message, roomId }) => {
@@ -38,8 +36,6 @@ const Inbox = () => {
             });
          });
    }, [socket]);
-
-   console.log("render inbox");
 
    const getToRoom = useCallback(
       (room) => {

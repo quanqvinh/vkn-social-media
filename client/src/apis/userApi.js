@@ -21,6 +21,13 @@ const userApi = {
       });
    },
 
+   getRoomById: (roomId, params) => {
+      const url = `/room/${roomId}`;
+      return axiosClient.get(url, {
+         params,
+      });
+   },
+
    getById: (userId) => {
       const url = `user/${userId}`;
       return axiosClient.get(url);
