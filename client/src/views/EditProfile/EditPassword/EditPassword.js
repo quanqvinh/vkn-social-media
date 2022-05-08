@@ -26,6 +26,7 @@ const EditPassword = () => {
          try {
             let res = await userApi.editPassword(formInfos);
             console.log(res);
+            setNotify("Change password successful");
          } catch (error) {
             console.log(error.message);
             setNotify("Your old password is incorrect");

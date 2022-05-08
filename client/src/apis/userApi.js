@@ -70,6 +70,11 @@ const userApi = {
          token,
       });
    },
+
+   search: (params) => {
+      const url = `/user/search`;
+      return axiosClient.get(url, { params });
+   },
 };
 
 export default userApi;

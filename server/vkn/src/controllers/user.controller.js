@@ -295,23 +295,15 @@ module.exports = {
    // [GET] /api/v1/user/search
    async searchUser(req, res) {
       try {
-         let keyword = req.body.keyword;
-
+         let keyword = req.query.keyword;
          let regex = new RegExp("" + keyword, "i");
-         await User.find({
-            $or: [
-               {
-                  name: regex,
-               },
-               {
-                  username: regex,
-               },
-            ],
-         })
-            .lean()
-            .then((data) => {
-               res.status(200).json(data);
-            });
+         let result = await User.find({
+            $or: [{ name: regex }, { username: regex }],
+         }).lean();
+         return res.status(200).json({
+            status: "success",
+            result,
+         });
       } catch (err) {
          console.log(err);
          res.status(500).json({

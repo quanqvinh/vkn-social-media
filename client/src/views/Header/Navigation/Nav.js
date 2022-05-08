@@ -11,7 +11,11 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getCookie, setCookie } from "../../Global/cookie";
 import { NavLink } from "react-router-dom";
+import { SOCKET } from "../../../App";
+import { useContext } from "react";
+
 const $ = document.querySelector.bind(document);
+
 function Nav() {
    const user = useSelector((state) => state.user);
    const [isDropDown, setIsDropDown] = useState(false);
@@ -21,10 +25,13 @@ function Nav() {
       parentPage: "home",
    });
 
+   const socket = useContext(SOCKET);
+
    const handelLogout = () => {
       getCookie("accessToken") && setCookie("accessToken", "", 0);
       getCookie("refreshToken") && setCookie("refreshToken", "", 0);
       sessionStorage.removeItem("USER_INFO");
+      socket.disconnect();
    };
 
    const handelClick = (e) => {

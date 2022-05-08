@@ -22,7 +22,6 @@ const ChatRoom = (props) => {
    const listRef = useRef([]);
    const chatContentRef = useRef(null);
 
-   console.log("render");
    const socket = useContext(SOCKET);
    const sendMessage = useCallback(() => {
       socket.emit("chat:send_message", {
