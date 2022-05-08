@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const User = require("../models/user.model");
-const Token = require("../models/token.model");
-const crypto = require("../utils/crypto");
-const mail = require("../utils/nodemailer");
-const jwt = require("jsonwebtoken");
+const User = require('../models/user.model');
+const Token = require('../models/token.model');
+const crypto = require('../utils/crypto');
+const mail = require('../utils/nodemailer');
+const jwt = require('jsonwebtoken');
 const mongodbHelper = require('../utils/mongodbHelper');
 
 const secretKey = process.env.SECRET_KEY;
@@ -19,43 +19,38 @@ module.exports = {
     async signup(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                const params = req.body;
-                console.log(params);
+                const { username, email, password, name } = req.body;
                 // Check username exists
-                let user = await User.findOne({
-                    username: params.username
-                }).lean();
+                let user = await User.findOne({ username }).lean();
                 if (user)
                     return res.status(406).json({
-                        status: "error",
-                        message: "Username already exists",
+                        status: 'error',
+                        message: 'Username already exists',
                     });
     
                 // Check email is used ?
-                user = await User.findOne({
-                    email: params.email
-                }).lean();
+                user = await User.findOne({ email }).lean();
                 if (user)
                     return res.status(406).json({
-                        status: "error",
-                        message: "User with given email already exist",
+                        status: 'error',
+                        message: 'User with given email already exist',
                     });
     
                 // Save account to database
                 user = await new User({
-                    username: params.username,
-                    email: params.email,
+                    username,
+                    email,
                     auth: {
-                        password: crypto.hash(params.password),
+                        password: crypto.hash(password),
                     },
-                    name: params.name,
+                    name,
                 }).save({
                     session
                 });
     
                 let token = jwt.sign({
-                        username: params.username,
-                        email: params.email
+                        username,
+                        email
                     },
                     secretKey, {
                         expiresIn: requestVerifyTokenLife,
@@ -65,21 +60,21 @@ module.exports = {
     
                 // Send mail
                 mail.sendVerify({
-                    to: params.email,
-                    username: params.username,
+                    to: email,
+                    username,
                     token,
                 });
             },
             successCallback() {
                 return res.status(201).json({
-                    status: "success",
-                    message: "Account is created",
+                    status: 'success',
+                    message: 'Account is created',
                 });
             },
             errorCallback(error) {
                 console.log(error.message);
                 res.status(500).json({
-                    status: "error",
+                    status: 'error',
                     message: error.message
                 });
             }
@@ -89,10 +84,10 @@ module.exports = {
     // [POST] /api/auth/request/verify-email
     async requestVerifyEmail(req, res) {
         try {
-            let params = req.body;
+            let { username, email } = req.body;
             let token = jwt.sign({
-                    username: params.username,
-                    email: params.email
+                    username,
+                    email
                 },
                 secretKey, {
                     expiresIn: requestVerifyTokenLife,
@@ -102,18 +97,18 @@ module.exports = {
 
             // Send mail
             mail.sendVerify({
-                to: params.email,
-                username: params.username,
+                to: email,
+                username: username,
                 token,
             });
             res.status(201).json({
-                status: "success",
-                message: "Verification email is send",
+                status: 'success',
+                message: 'Verification email is send',
             });
         } catch (error) {
             console.log(error.message);
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }
@@ -122,16 +117,13 @@ module.exports = {
     // [PATCH] /api/auth/verify-email
     async verifyEmail(req, res) {
         try {
-            const params = req.body;
-            console.log(params);
+            const { token } = req.body;
 
             // Check token is valid
             let tokenErr;
-            await jwt.verify(params.token, secretKey, {
+            await jwt.verify(token, secretKey, {
                 subject: 'verify-email'
             }, async (err, decoded) => {
-                console.log('error:', err);
-                console.log('decoded:', decoded);
                 if (err)
                     tokenErr = err;
                 else {
@@ -148,22 +140,21 @@ module.exports = {
                         user.auth.remainingTime = undefined;
                         await user.save();
                     }
-                    req.body.email = decoded.email;
                 }
             });
             if (tokenErr)
                 return res.status(400).json({
-                    status: "error",
-                    ...tokenErr
+                    status: 'error',
+                    message: 'Token is invalid'
                 });
             return res.status(200).json({
-                status: "success",
-                message: "Email is verified",
+                status: 'success',
+                message: 'Email is verified',
             });
         } catch (error) {
             console.log(error);
             return res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }
@@ -175,34 +166,39 @@ module.exports = {
             // Find user with id or email
             const {
                 username,
+                email,
                 password
             } = req.body;
             console.log(req.body);
             let user = await User.findOne({
-                $or: [{
-                    username
-                }, {
-                    email: username
-                }]
+                $and: [
+                    {
+                        $or: [
+                            { username }, 
+                            { email }
+                        ]
+                    },
+                    { 'auth.isAdmin': false }
+                ]
             }).lean();
 
-            if (!user || user.auth.isAdmin)
+            if (!user)
                 return res.status(401).json({
-                    status: "error",
-                    message: "Username or email is not found",
+                    status: 'error',
+                    message: 'Username or email is not found',
                 });
 
             // Check password
             if (!crypto.match(user.auth.password, password))
                 return res.status(401).json({
-                    status: "error",
-                    message: "Password is wrong",
+                    status: 'error',
+                    message: 'Password is wrong',
                 });
 
             if (user.auth.verified === false)
                 return res.status(307).json({
-                    status: "error",
-                    message: "Verify email of account",
+                    status: 'error',
+                    message: 'Verify email of account',
                     email: user.auth.email
                 });
 
@@ -222,9 +218,13 @@ module.exports = {
                 refreshToken,
                 payload
             }]);
+
+            user.auth = undefined;
+            user.deleted = undefined;
+
             res.status(200).json({
-                status: "success",
-                message: "Login successful",
+                status: 'success',
+                message: 'Login successful',
                 accessToken,
                 refreshToken,
                 data: user,
@@ -232,7 +232,7 @@ module.exports = {
         } catch (error) {
             console.log(error.message);
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }
@@ -241,22 +241,18 @@ module.exports = {
     // [POST] /api/auth/request/reset-password
     async requestResetPassword(req, res) {
         try {
-            const params = req.body;
-            console.log(params);
-            let user;
-            if (params.username)
-                user = await User.findOne({
-                    username: params.username
-                }).lean();
-            else
-                user = await User.findOne({
-                    email: params.email
-                }).lean();
+            const { username, email } = req.body;
+            let user = await User.findOne({
+                $or: [
+                    { username },
+                    { email }
+                ]
+            }).lean();
 
             if (!user)
                 return res.status(200).json({
-                    status: "error",
-                    message: "Not found an account with this username (or email)"
+                    status: 'error',
+                    message: 'Not found an account with this username (or email)'
                 });
 
             let token = jwt.sign({
@@ -274,14 +270,14 @@ module.exports = {
             });
 
             res.status(200).json({
-                status: "success",
-                message: "Reset password email is send",
+                status: 'success',
+                message: 'Reset password email is send',
                 email: user.email
             })
         } catch (error) {
             console.log(error.message);
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }
@@ -290,11 +286,10 @@ module.exports = {
     // [PATCH] /api/auth/reset-password
     async resetPassword(req, res) {
         try {
-            let params = req.body;
-            console.log(params);
+            let { token, newPassword } = req.body;
 
             let tokenErr;
-            await jwt.verify(params.token, secretKey, {
+            await jwt.verify(token, secretKey, {
                 subject: 'reset-password'
             }, async (err, decoded) => {
                 if (err)
@@ -303,23 +298,28 @@ module.exports = {
                     let user = await User.findOne({
                         username: decoded.username
                     });
-                    user.auth.password = crypto.hash(params.newPassword);
-                    await user.save();
+                    user.auth.password = crypto.hash(newPassword);
+                    let savedUser = await user.save();
+                    if (savedUser !== user)
+                        tokenErr = new Error('Password is not updated');
                 }
             });
-            if (tokenErr)
+            if (tokenErr) {
+                if (tokenErr.name === 'Error')
+                    throw tokenErr;
                 return res.status(400).json({
-                    status: "error",
-                    ...tokenErr
+                    status: 'error',
+                    message: 'Token is invalid or expired'
                 });
+            }
             res.status(200).json({
-                status: "success",
-                message: "Password is updated",
+                status: 'success',
+                message: 'Password is updated',
             });
         } catch (error) {
             console.log(error.message);
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }
@@ -331,11 +331,6 @@ module.exports = {
             let {
                 refreshToken
             } = req.body;
-            if (!refreshToken)
-                return res.status(200).json({
-                    status: 'error',
-                    message: 'Refresh token is invalid'
-                });
 
             let token = await Token.findOne({
                 refreshToken
@@ -349,10 +344,10 @@ module.exports = {
             let errorMessage;
             jwt.verify(refreshToken, refreshSecretKey, (err, decoded) => {
                 if (err) {
-                    if (err.name === "TokenExpiredError")
-                        errorMessage = "Expired refresh token. Login again to create new one";
+                    if (err.name === 'TokenExpiredError')
+                        errorMessage = 'Expired refresh token. Login again to create new one';
                     else
-                        errorMessage = "Invalid refresh token. Login again";
+                        errorMessage = 'Invalid refresh token. Login again';
                 }
             });
             if (errorMessage) {
@@ -377,7 +372,7 @@ module.exports = {
         } catch (error) {
             console.log(error);
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message
             });
         }

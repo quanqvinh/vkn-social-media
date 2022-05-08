@@ -1,16 +1,16 @@
-const mongoose = require("mongoose");
-const User = require("../models/user.model");
-const Notification = require("../models/notification.model");
-const Request = require("../models/request.model");
-const Auth = require("./auth.controller");
-const Crypto = require("../utils/crypto");
+const mongoose = require('mongoose');
+const User = require('../models/user.model');
+const Notification = require('../models/notification.model');
+const Request = require('../models/request.model');
+const Auth = require('./auth.controller');
+const Crypto = require('../utils/crypto');
 const {
     unlink
-} = require("fs/promises");
-const fs = require("fs");
-const resourceHelper = require("../utils/resourceHelper");
-const objectIdHelper = require("../utils/objectIdHelper");
-const mongodbHelper = require("../utils/mongodbHelper");
+} = require('fs/promises');
+const fs = require('fs');
+const resourceHelper = require('../utils/resourceHelper');
+const objectIdHelper = require('../utils/objectIdHelper');
+const mongodbHelper = require('../utils/mongodbHelper');
 
 module.exports = {
     // [GET] /api/v1/user/me/profile
@@ -21,12 +21,12 @@ module.exports = {
                 auth: 0,
             })
             .populate([
-                "posts",
+                'posts',
                 {
-                    path: "friends",
-                    select: "username name",
+                    path: 'friends',
+                    select: 'username name',
                 },
-                "notifications",
+                'notifications',
             ])
             .lean()
             .then((data) => {
@@ -40,8 +40,8 @@ module.exports = {
             .catch((err) => {
                 console.log(err);
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server",
+                    status: 'error',
+                    message: 'Error at server',
                 });
             });
     },
@@ -57,14 +57,14 @@ module.exports = {
                         auth: 0,
                     })
                     .populate([
-                        "posts",
+                        'posts',
                         {
-                            path: "friends",
-                            select: "username name",
+                            path: 'friends',
+                            select: 'username name',
                         },
                     ])
                     .lean(),
-                    User.findById(req.auth.userId).select("friends").lean(),
+                    User.findById(req.auth.userId).select('friends').lean(),
                 ])
                 .then(([data, mine]) => {
                     data.posts.forEach((post) => {
@@ -77,14 +77,14 @@ module.exports = {
                 })
                 .catch((err) => {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server",
+                        status: 'error',
+                        message: 'Error at server',
                     });
                 });
         } else {
             res.status(400).json({
-                status: "error",
-                message: "Bad request. User id is needed.",
+                status: 'error',
+                message: 'Bad request. User id is needed.',
             });
         }
     },
@@ -93,55 +93,32 @@ module.exports = {
     async editUserProfile(req, res) {
         mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                let infoData = req.body;
-                console.log(infoData);
+                let { username, name, bio, dob, gender } = req.body;
+
                 let updatedUser = await User.updateOne({
                     _id: req.auth.userId
-                }, {
-                    ...infoData,
-                }, {
-                    session
-                });
+                }, { username, name, bio, dob, gender }, { session });
                 console.log(
-                    "updatedUser.modifiedCount:",
+                    'updatedUser.modifiedCount:',
                     updatedUser.modifiedCount
                 );
                 if (updatedUser.modifiedCount < 1)
-                    throw new Error("Update data failed");
+                    throw new Error('Update data failed');
             },
             successCallback() {
                 res.status(200).json({
-                    status: "success",
-                    message: "User has been edited.",
+                    status: 'success',
+                    message: 'User has been edited.',
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server.",
+                    status: 'error',
+                    message: 'Error at server.',
                 });
             },
         });
-        // let id = req.auth.userId;
-        // let reqData = req.body;
-        // User.findOneAndUpdate({
-        //             _id: id,
-        //         },
-        //         reqData
-        //     )
-        //     .then((data) => {
-        //         res.status(200).json({
-        //             status: 'success',
-        //             message: 'User has been edited.',
-        //         });
-        //     })
-        //     .catch((err) => {
-        //         res.status(500).json({
-        //             status: 'error',
-        //             message: 'Error at server.',
-        //         });
-        //     });
     },
 
     // [POST] /api/v1/user/edit/email/request
@@ -166,19 +143,19 @@ module.exports = {
                     user.email = responseData.req.body.email;
                     await user.save();
                     res.status(200).json({
-                        status: "success",
-                        message: "Email has been updated.",
+                        status: 'success',
+                        message: 'Email has been updated.',
                     });
                 } else {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server.",
+                        status: 'error',
+                        message: 'Error at server.',
                     });
                 }
             }
         } catch (error) {
             res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: error.message,
             });
         }
@@ -193,33 +170,33 @@ module.exports = {
             } = req.body;
             let user = await User.findOne({
                 _id: req.auth.userId,
-                "auth.password": Crypto.hash(password),
+                'auth.password': Crypto.hash(password),
             }).lean();
             if (!user)
                 return res.status(400).json({
-                    status: "error",
-                    message: "Old password is incorrect",
+                    status: 'error',
+                    message: 'Old password is incorrect',
                 });
 
             let updatedUser = await User.updateOne({
                 _id: req.auth.userId
             }, {
                 $set: {
-                    "auth.password": Crypto.hash(newPassword)
+                    'auth.password': Crypto.hash(newPassword)
                 },
             });
 
-            console.log("updatedUser.modifiedCount:", updatedUser.modifiedCount);
+            console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
             if (updatedUser.modifiedCount < 1)
-                throw new Error("Update data failed");
+                throw new Error('Update data failed');
             return res.status(200).json({
-                status: "success"
+                status: 'success'
             });
         } catch (error) {
             console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server",
+                status: 'error',
+                message: 'Error at server',
             });
         }
     },
@@ -229,40 +206,39 @@ module.exports = {
         let id = req.auth.userId;
         console.log(id);
         if (id) {
-            User.delete({
-                    _id: id,
-                })
+            User.deleteById(id)
                 .then((data) => {
-                    res.status(200).json({
-                        status: "success",
-                        message: "User account has been moved to recycle bin.",
-                    });
+                    if (data.deletedCount === 1)
+                        res.status(200).json({
+                            status: 'success',
+                            message: 'User account has been moved to recycle bin.',
+                        });
                 })
                 .catch((err) => {
                     res.status(500).json({
-                        status: "error",
-                        message: "Error at server.",
+                        status: 'error',
+                        message: 'Error at server.',
                     });
                 });
         } else {
             res.status(400).json({
-                status: "error",
-                message: "Bad request. User id is needed.",
+                status: 'error',
+                message: 'Bad request. User id is needed.',
             });
         }
     },
 
     // [POST] /api/v1/user/upload/avatar
     async uploadProfilePicture(req, res) {
-        let file = resourceHelper.avatarResource + "/" + req.filename;
+        let file = resourceHelper.avatarResource + '/' + req.filename;
         let err;
         let deleteFileFunction = async function (filepath) {
             try {
                 await unlink(filepath);
-                console.log("deleted");
+                console.log('deleted');
             } catch (error) {
                 console.error(
-                    "there was an error when deleting file:",
+                    'there was an error when deleting file:',
                     error.message
                 );
                 err = error;
@@ -270,21 +246,21 @@ module.exports = {
         };
         if (err)
             return res.status(500).json({
-                status: "failed",
+                status: 'failed',
             });
         // check whether file exists
         fs.access(file, fs.constants.F_OK, (error) => {
             if (error) {
-                console.log("avatar does not exist in folder");
+                console.log('avatar does not exist in folder');
                 err = error;
-            } else if (file.includes("new-")) {
+            } else if (file.includes('new-')) {
                 // check whether there is a new avatar, then delete the old one
                 deleteFileFunction(
                     resourceHelper.createAvatarFile(req.auth.userId)
                 );
-                fs.rename(file, file.replace("new-", ""), (err) => {
+                fs.rename(file, file.replace('new-', ''), (err) => {
                     if (err) {
-                        console.log("error when changing name:", err.message);
+                        console.log('error when changing name:', err.message);
                         this.err = err;
                     }
                 });
@@ -293,10 +269,10 @@ module.exports = {
 
         if (err)
             return res.status(500).json({
-                status: "failed",
+                status: 'failed',
             });
         return res.status(201).json({
-            status: "success",
+            status: 'success',
         });
     },
 
@@ -317,7 +293,7 @@ module.exports = {
                         }
                     ]
                 })
-                .select("username name email").lean();
+                .select('username name email').lean();
             return res.status(200).json({
                 status: 'success',
                 result
@@ -325,8 +301,8 @@ module.exports = {
         } catch (error) {
             console.log(error);
             res.status(500).json({
-                status: "error",
-                message: "Error at server.",
+                status: 'error',
+                message: 'Error at server.',
             });
         }
     },
@@ -342,11 +318,11 @@ module.exports = {
 
                 let notification = await Notification.findOne({
                     user: req.auth.userId,
-                    type: "add_friend_request",
+                    type: 'add_friend_request',
                     tag: requestedUserId,
                 }).lean();
 
-                if (!notification) throw new Error("Notification is not found!");
+                if (!notification) throw new Error('Notification is not found!');
 
                 let [
                     requestedUser,
@@ -381,7 +357,7 @@ module.exports = {
                         session
                     }),
                     Request.deleteOne({
-                        type: "add_friend",
+                        type: 'add_friend',
                         from: requestedUserId,
                         to: req.auth.userId,
                     }, {
@@ -389,7 +365,7 @@ module.exports = {
                     }),
                 ]);
 
-                console.log("Accept add friend result");
+                console.log('Accept add friend result');
                 console.log(
                     `requestedUser.modifiedCount: ${requestedUser.modifiedCount}`
                 );
@@ -402,25 +378,25 @@ module.exports = {
                 console.log(
                     `deletedRequest.deletedCount: ${deletedRequest.deletedCount}`
                 );
-                console.log("OK");
+                console.log('OK');
                 if (
                     requestedUser.modifiedCount < 1 ||
                     receivedUser.modifiedCount < 1 ||
                     deletedNotification.deletedCount < 1 ||
                     deletedRequest.deletedCount < 1
                 )
-                    throw new Error("Contain not updated data");
+                    throw new Error('Contain not updated data');
             },
             successCallback() {
                 return res.status(200).json({
-                    status: "success"
+                    status: 'success'
                 });
             },
             errorCallback: (error) => {
                 console.log(error);
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server.",
+                    status: 'error',
+                    message: 'Error at server.',
                 });
             },
         });
@@ -468,7 +444,7 @@ module.exports = {
                     })
                 ]);
 
-                console.log("Decline add friend result");
+                console.log('Decline add friend result');
                 console.log(
                     `receivedUser.modifiedCount: ${receivedUser.modifiedCount}`
                 );
@@ -484,18 +460,18 @@ module.exports = {
                     deletedNotification.deletedCount < 1 ||
                     deletedRequest.deletedCount < 1
                 )
-                    throw new Error("Contain not updated data");
+                    throw new Error('Contain not updated data');
             },
             successCallback() {
                 return res.status(200).json({
-                    status: "success"
+                    status: 'success'
                 });
             },
             errorCallback: (error) => {
                 console.log(error);
                 res.status(500).json({
-                    status: "error",
-                    message: "Error at server.",
+                    status: 'error',
+                    message: 'Error at server.',
                 });
             },
         });
@@ -624,6 +600,12 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 const id = req.params.id;
+
+                let notification = await Notification.findById(id).select('user').lean();
+                if (!notification)
+                    throw new Error('Not found');
+                if (!objectIdHelper.compare(notification.user, req.auth.userId))
+                    throw new Error('Authorized');
 
                 let [updatedUser, deletedNotification] = await Promise.all([
                     User.updateOne({

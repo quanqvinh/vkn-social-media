@@ -73,10 +73,10 @@ module.exports = {
 
 	// [POST] /api/v1/post/new
 	async newPost(req, res) {
+		let { caption, postId } = req.body;
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
-				let { caption, postId } = req.body;
-				await Promise.all([
+				let [ savedPost, updatedUser ] = await Promise.all([
 					Post.create([{
 						_id: postId,
 						user: req.auth.userId,
@@ -86,6 +86,9 @@ module.exports = {
 						$push: { posts: postId }
 					}, { session })
 				]);
+
+				if (updatedUser.modifiedCount < 1)
+					throw new Error('Store data failed');
 			},
 			successCallback() {
 				return res.status(201).json({
@@ -93,6 +96,8 @@ module.exports = {
 				});
 			},
 			errorCallback(error) {
+				try { fs.rmdirSync(resourceHelper.createPostPath(postId), { recursive: true }); }
+				catch (error2) { error = error2; }
 				console.log(error);
 				res.status(500).json({
 					status: 'error',
@@ -149,81 +154,119 @@ module.exports = {
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
 				let { postId, content } = req.body;
-				if (!postId || !content)
-					return res.status(400).json({
-						status: 'error',
-						message: 'Parameters problem'
-					});
+
+				let report = await Report.findOne({
+					userId: req.auth.userId,
+					tag: postId
+				});
+				if (report) 
+					throw new Error('Only one report per post is allowed');
 				
 				let _id = new ObjectId();
-				let temp = await Promise.all([
+				let [ savedReport, updatedPost ] = await Promise.all([
 					Report.create([{
 						_id,
 						userId: req.auth.userId,
+						tag: postId,
 						content
 					}], { session }),
 					Post.updateOne({ _id: postId }, {
 						$push: { reports: _id }
 					}, { session })
 				]);
+
+				console.log(updatedPost.modifiedCount);
+				if (updatedPost.modifiedCount < 1)
+					throw new Error('Update data failed');
 			},
 			successCallback() {
-				res.status(200).json({
+				return res.status(200).json({
 					status: 'success'
 				});
 			},
 			errorCallback(error) {
 				console.log(error);
-				res.status(500).json({
-					status: 'error',
-					message: error.message
-				});
+				if (error.name === 'Error')
+					return res.status(401).json({
+						status: 'error',
+						message: error.message
+					})
+				else
+					return res.status(500).json({
+						status: 'error',
+						message: error.message
+					});
 			}
 		});
 	},
 
 	// [PUT] /api/v1/post
 	async updatePost(req, res) {
-		try {
-			let { postId, caption } = req.body;
-			let imageDir = resourceHelper.createPostPath(postId.toString());
-			if (fs.existsSync(imageDir + '-new')) {
-				fse.emptyDirSync(imageDir);
-				fse.copySync(imageDir + '-new', imageDir);
-				fs.rmSync(imageDir + '-new', { recursive: true, force: true });
-				console.log('Update image successful');
+		let { postId, caption } = req.body;
+		let imageDir;
+		mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let post = await Post.findById(postId).select('user').lean();
+				if (!post)
+					throw new Error('Not found');
+				if (!objectIdHelper.compare(post.user, req.auth.userId))
+					throw new Error('Unauthorized');
+					
+				imageDir = resourceHelper.createPostPath(postId.toString());
+				if (fs.existsSync(imageDir + '-new')) {
+					fse.emptyDirSync(imageDir);
+					fse.copySync(imageDir + '-new', imageDir);
+					fs.rmSync(imageDir + '-new', { recursive: true, force: true });
+					console.log('Update image successful');
+				}
+				let updatedPost = await Post.updateOne({ _id: postId }, { caption }, { session });
+				if (updatedPost.modifiedCount > 0)
+					console.log('Update caption successful');
+				else
+					throw new Error('Update caption failed');
+			},
+			successCallback() {
+				return res.status(200).json({ status: 'success' });
+			},
+			errorCallback(error) {
+				try { 
+					fs.rmdirSync(imageDir, { recursive: true }); 
+					fs.rmdirSync(imageDir + '-new', { recursive: true }); 
+				}
+				catch (error2) { error = error2; }
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: 'Error at server'
+				});
 			}
-			await Post.updateOne({ _id: postId }, { caption });
-			console.log('Update caption successful');
-			res.status(200).json({
-				status: 'success'
-			});
-		}
-		catch(err) {
-			res.status(500).json({
-				status: 'error',
-				message: err.message
-			});
-		}
+		});
 	},
 
 	// [DELETE] /api/v1/post/:id
 	async deletePost(req, res) {
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
-				let { id } = req.params;
-				fs.rmSync(resourceHelper.createPostPath(id.toString()), { 
-					force: true, 
-					recursive: true 
-				});
-				console.log('Deleted image resource');
-				let [ post, user ] = await Promise.all([
-					Post.findByIdAndDelete(id, { session })
-					.select('reports comments -_id').lean(),
+				let { postId } = req.params;
+
+				let [ post, updatedUser ] = await Promise.all([
+					Post.findByIdAndDelete(postId, { session })
+					.select('user reports comments -_id').lean(),
 					User.updateOne({ _id: req.auth.userId }, {
-						$pull: { posts: id }
+						$pull: { posts: postId }
 					}, { session })
 				]);
+
+				if (!post)
+					throw new Error('Not found');
+				console.log(post, req.auth.userId);
+				if (!objectIdHelper.compare(post.user, req.auth.userId))
+					throw new Error('Unauthorized');
+
+				console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
+				if (updatedUser.modifiedCount < 1)
+					throw new Error('Update data failed');
+
 				let [ reports, comments ] = await Promise.all([
 					Report.deleteMany({ 
 						_id: { $in: post.reports }
@@ -235,6 +278,12 @@ module.exports = {
 				console.log(`Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`);
 				console.log(`Deleted ${comments.deletedCount} comment${comments.deletedCount > 1 ? 's' : ''}`);
 				console.log('Delete post successful');
+				
+				fs.rmSync(resourceHelper.createPostPath(postId.toString()), { 
+					force: true, 
+					recursive: true 
+				});
+				console.log('Deleted image resource');
 			},
 			successCallback() {
 				res.status(200).json({
@@ -251,11 +300,11 @@ module.exports = {
 		})
 	},
 
-	// [PATCH] /api/v1/post/:id/like
+	// [PATCH] /api/v1/post/:postId/like
 	async likePost(req, res) {
 		try {
-			const { id } = req.params, userId = req.auth.userId;	
-			let post = await Post.findById(id);
+			const { postId } = req.params, userId = req.auth.userId;
+			let post = await Post.findById(postId);
 			let index = post.likes.findIndex((id) => objectIdHelper.compare(id, userId));
 			if (index === -1) {
 				post.likes.push(userId);
@@ -314,6 +363,13 @@ module.exports = {
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
 				let { postId, commentId } = req.query;
+
+				let comment = await Comment.findOne({ _id: commentId });
+				if (!comment)
+					throw new Error('Not found');
+				if (!objectIdHelper.compare(comment.commentBy, req.auth.userId))
+					throw new Error('Unauthorized');
+
 				let [ updatedPost, deletedComment ] = await Promise.all([
 					Post.updateOne({ _id: postId }, {
 						$pull: { comments: commentId }
@@ -346,6 +402,17 @@ module.exports = {
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
 				let { commentId, replyId } = req.query;
+
+				let comment = await Comment.findOne({ 
+					_id: commentId,
+					'replies._id': replyId
+				});
+				if (!comment)
+					throw new Error('Not found');
+				let reply = comment.replies.id(replyId);
+				if (!objectIdHelper.compare(reply.replyBy, req.auth.userId))
+					throw new Error('Unauthorized');
+
 				let updatedComment = await Comment.updateOne({ _id: commentId }, {
 					$pull: {
 						replies: { _id: new ObjectId(replyId) }

@@ -8,9 +8,9 @@ router.post('/new', uploadPost.array('images', 10), controller.newPost);
 router.post('/report', controller.reportPost);
 router.put('/', uploadPost.array('images', 10), controller.updatePost);
 router.patch('/comment/:commentId/like', controller.likeComment);
-router.patch('/:id/like', controller.likePost);
+router.patch('/:postId/like', controller.likePost);
 router.delete('/comment', controller.deleteComment);
 router.delete('/reply', controller.deleteReply);
-router.delete('/:id', controller.deletePost);
+router.delete('/:postId', controller.deletePost);
 
 module.exports = router;

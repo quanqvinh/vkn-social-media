@@ -7,6 +7,10 @@ const ReportSchema = new mongoose.Schema({
 		ref: 'User',
 		required: true
 	},
+	tag: {
+		type: mongoose.Types.ObjectId,
+		required: true
+	},
 	content: {
 		type: String,
 		required: true

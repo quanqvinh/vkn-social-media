@@ -4,7 +4,7 @@ const authRouter = require('./auth.router');
 const roomRouter = require('./room.router');
 const devRouter = require('./dev.router');
 
-const authenJwtMiddleware = require('../middlewares/authenJwt.middleware');
+const authenJwtMiddleware = require('../middlewares/authenJwt.middleware').api;
 
 module.exports = (app) => {
 	app.get('/fakeData', async (req, res) => {
