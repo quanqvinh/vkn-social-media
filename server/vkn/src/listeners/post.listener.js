@@ -9,6 +9,7 @@ module.exports = (io, socket) => {
 	socket.on('post:join_post_room', joinPostRoom);
 	socket.on('post:leave_post_room', leavePostRoom);
 	socket.on('post:like_post', likePost);
+	socket.on('post:like_comment', likeComment);
 	socket.on('post:comment_post', commentPost);
 	socket.on('post:reply_comment', replyComment);
 
@@ -33,7 +34,7 @@ module.exports = (io, socket) => {
 					relatedUsers: {
 						from: socket.handshake.auth.username
 					},
-					tag: postId
+					tag: [ postId ]
 				});
 
 				let [ savedNotification, updatedUser ] = await Promise.all([
@@ -60,6 +61,45 @@ module.exports = (io, socket) => {
 			}
 		})
 	}
+	
+	async function likeComment(payload) {
+		let { postId, commentId, commentOwnerId, commentOwnerUsername } = payload;
+		let notification;
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				notification = new Notification({
+					user: socket.handshake.auth.userId,
+					type: 'react_comment',
+					relatedUsers: {
+						from: socket.handshake.auth.username
+					},
+					tag: [ postId, commentId ]
+				});
+
+				let [ savedNotification, updatedUser ] = await Promise.all([
+					notification.save({ session }),
+					User.updateOne({ _id: commentOwnerId }, {
+						$push: { notifications: notification._id }
+					}, { session })
+				]);
+				
+				console.log(savedNotification !== notification);
+				console.log(updatedUser.modifiedCount);
+				if (savedNotification !== notification || updatedUser.modifiedCount < 1) 
+					throw new Error('Store data failed'); 
+			},
+			successCallback() {
+				if (commentOwnerId !== socket.handshake.auth.userId)
+					io.to(commentOwnerId).emit('user:print_notification', { 
+						notification: notification.toObject()
+					});
+			},
+			errorCallback(error) {
+				console.log(error);
+				socket.emit('error');
+			}
+		})
+	}
 
 	async function commentPost(payload) {
 		const { postId, postOwnerId, postOwnerUsername, content } = payload;
@@ -67,6 +107,7 @@ module.exports = (io, socket) => {
 		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
 				comment = new Comment({
+					post: postId,
 					commentBy: socket.handshake.auth.userId,
 					content
 				});
@@ -76,7 +117,7 @@ module.exports = (io, socket) => {
 					relatedUsers: {
 						from: socket.handshake.auth.username
 					},
-					tag: postId
+					tag: [ postId, comment._id ]
 				});
 
 				let [ savedComment, updatedPost, savedNotification, updatedUser ] = await Promise.all([
@@ -132,7 +173,7 @@ module.exports = (io, socket) => {
 						to: commentOwnerUsername,
 						from: postOwnerUsername
 					},
-					tag: commentId
+					tag: [ postId, commentId, reply._id ]
 				});
 				notificationOfCommentOwner = new Notification({
 					user: commentOwnerId,
@@ -142,7 +183,7 @@ module.exports = (io, socket) => {
 						to: commentOwnerUsername,
 						from: postOwnerUsername
 					},
-					tag: commentId
+					tag: [ postId, commentId, reply._id ]
 				});
 
 				let [ updatedComment, savedNotificationOfPostOwner, updatedPostOwner, savedNotificationOfCommentOwner, updatedCommentOwner ] = await Promise.all([
@@ -189,11 +230,11 @@ module.exports = (io, socket) => {
 				});
 				if (socket.handshake.auth.userId !== postOwnerId)
 					io.to(postOwnerId).emit('user:print_notification', { 
-						notification: notification.toObject()
+						notification: notificationOfPostOwner.toObject()
 					});
 				if (socket.handshake.auth.userId !== commentOwnerId)
 					io.to(commentOwnerId).emit('user:print_notification', { 
-						notification: notification.toObject()
+						notification: notificationOfCommentOwner.toObject()
 					});
 			},
 			errorCallback(error) {

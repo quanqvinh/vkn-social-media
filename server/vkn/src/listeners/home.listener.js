@@ -15,7 +15,7 @@ module.exports = async (io, socket) => {
     }
     
     socket.on('disconnect', () => {
-        io.to(listFriendsOnline).emit('home:friend_disconnect', userInfo);
+        io.to(listFriendsOnline.map(friend => friend._id)).emit('home:friend_disconnect', userInfo);
         console.log(`Socket ID ${socket.id} disconnect!`);
     });
 

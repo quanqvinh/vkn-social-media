@@ -244,14 +244,15 @@ module.exports = {
 				let message = room.messages.id(messageId), showWith;
 				if (message.showWith === 'all') {
 					if (req.auth.userId === room.chatMate[0].userId)
-						showWith = room.chatMate[1].userId;
+						showWith = room.chatMate[1]._id;
 					else 
-						showWith = room.chatMate[0].userId;
+						showWith = room.chatMate[0]._id;
 				}
 				else
 					showWith = 'nobody';
 
 				let updatedRoom;
+				console.log(showWith);
 				if (showWith !== 'nobody')
 					updatedRoom = await Room.updateOne({ 
 						_id: roomId,

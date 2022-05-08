@@ -28,10 +28,10 @@ const NotificationSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
-	tag: {
+	tag: [{
 		type: ObjectId,
 		require: true
-	}
+	}]
 }, {
 	timestamps: true,
 	versionKey: false
