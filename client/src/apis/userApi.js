@@ -21,6 +21,13 @@ const userApi = {
       });
    },
 
+   getRoomById: (roomId, params) => {
+      const url = `/room/${roomId}`;
+      return axiosClient.get(url, {
+         params,
+      });
+   },
+
    getById: (userId) => {
       const url = `user/${userId}`;
       return axiosClient.get(url);
@@ -36,6 +43,37 @@ const userApi = {
             "access-token": accessToken,
          },
       });
+   },
+
+   edit: (data) => {
+      const url = `/user/edit/info`;
+      return axiosClient.patch(url, { ...data });
+   },
+
+   editPassword: (data) => {
+      const url = `/user/edit/password`;
+      return axiosClient.patch(url, { ...data });
+   },
+
+   requestEditEmail: (data) => {
+      const url = `/user/edit/email/request`;
+      return axiosClient.post(url, { ...data });
+   },
+
+   editEmail: (token) => {
+      let accessToken = getCookie("accessToken");
+      const url = `/user/edit/email`;
+      return axiosClient.patch(url, {
+         headers: {
+            "access-token": accessToken,
+         },
+         token,
+      });
+   },
+
+   search: (params) => {
+      const url = `/user/search`;
+      return axiosClient.get(url, { params });
    },
 };
 

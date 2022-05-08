@@ -9,6 +9,7 @@ import { useState, useContext } from "react";
 import { useSelector } from "react-redux";
 import { memo } from "react";
 import { useRef } from "react";
+import userApi from "../../../apis/userApi";
 
 const ChatRoom = (props) => {
    const user = useSelector((state) => state.user);
@@ -16,7 +17,10 @@ const ChatRoom = (props) => {
    const [inputing, setInputing] = useState(false);
    const [inputContent, setInputContent] = useState("");
    const [listMessage, setListMessage] = useState([]);
+   const [currentPageMessages, setCurrentPageMessages] = useState(0);
+   const [isFetchMessage, setIsFetchMessage] = useState(false);
    const listRef = useRef([]);
+   const chatContentRef = useRef(null);
 
    const socket = useContext(SOCKET);
    const sendMessage = useCallback(() => {
@@ -32,6 +36,7 @@ const ChatRoom = (props) => {
          {
             content: inputContent,
             img: null,
+            sendBy: user.username,
             isMine: true,
          },
       ];
@@ -41,24 +46,6 @@ const ChatRoom = (props) => {
       handelLastestMessage(currentRoom.roomId, inputContent);
       setInputContent("");
    }, [listMessage, inputContent]);
-
-   useEffect(() => {
-      socket &&
-         socket.on("chat:print_message", ({ message }) => {
-            listRef.current = [...listRef.current, message];
-            setListMessage([...listRef.current]);
-         });
-   }, [socket]);
-
-   const handelKeyUp = (e) => {
-      if (e.keyCode === 13) {
-         try {
-            sendMessage();
-         } catch (error) {
-            console.log(error.message);
-         }
-      }
-   };
 
    const handelSendImage = useCallback(
       (e) => {
@@ -85,6 +72,7 @@ const ChatRoom = (props) => {
             {
                content: null,
                img: imgSrc,
+               sendBy: user.username,
                isMine: true,
             },
          ]);
@@ -94,6 +82,67 @@ const ChatRoom = (props) => {
       [listMessage, inputContent]
    );
 
+   useEffect(() => {
+      const fetchMessages = async () => {
+         try {
+            let res = await userApi.getRoomById(currentRoom.roomId, {
+               nMessage: currentPageMessages * 20,
+            });
+
+            if (res.status === "success") {
+               if (currentPageMessages === 0) {
+                  listRef.current = [];
+               }
+               if (res.data.messages.length === 0) {
+                  console.log("het tin nhan roi");
+                  return;
+               }
+               listRef.current = [...res.data.messages, ...listRef.current];
+               setListMessage([...listRef.current]);
+               setIsFetchMessage(false);
+            }
+
+            if (currentPageMessages === 0) {
+               const domNode = chatContentRef.current;
+               if (domNode) {
+                  domNode.scrollTop = domNode.scrollHeight;
+               }
+            }
+         } catch (error) {
+            console.log(error.message);
+         }
+      };
+      fetchMessages();
+   }, [currentPageMessages, currentRoom.roomId]);
+
+   useEffect(() => {
+      setCurrentPageMessages(0);
+   }, [currentRoom.roomId]);
+
+   useEffect(() => {
+      socket &&
+         socket.on("chat:print_message", ({ message }) => {
+            listRef.current = [...listRef.current, message];
+            setListMessage([...listRef.current]);
+         });
+   }, [socket]);
+
+   const handelKeyUp = (e) => {
+      if (e.keyCode === 13) {
+         try {
+            sendMessage();
+         } catch (error) {
+            console.log(error.message);
+         }
+      }
+   };
+
+   const handelScrollFetch = (e) => {
+      if (e.target.scrollTop === 0) {
+         setCurrentPageMessages(currentPageMessages + 1);
+         setIsFetchMessage(true);
+      }
+   };
    return (
       <div className="chat-room">
          <div className="header">
@@ -109,14 +158,19 @@ const ChatRoom = (props) => {
             <Option className="header__icon" />
          </div>
 
-         <div className="content">
+         <div
+            className="content"
+            ref={chatContentRef}
+            onScroll={(e) => handelScrollFetch(e)}
+         >
+            {isFetchMessage && <p>Loading...</p>}
             {listMessage?.length > 0 &&
                listMessage.map((message, index) => (
                   <div className="content__day" key={index}>
                      {/* <p className="content__day-time">
                         July 10, 2021, 11:27 am
                      </p> */}
-                     {message.isMine ? (
+                     {message.sendBy === user.username ? (
                         message.content !== null ? (
                            <p className="content__day-message">
                               {message.content}
