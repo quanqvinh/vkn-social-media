@@ -7,6 +7,13 @@ export const saveUser = (user) => {
    };
 };
 
+export const editUser = (data) => {
+   return {
+      type: "EDIT",
+      payload: data,
+   };
+};
+
 export const fetchProfileRequest = () => {
    return async (dispatch) => {
       try {

@@ -44,6 +44,32 @@ const userApi = {
          },
       });
    },
+
+   edit: (data) => {
+      const url = `/user/edit/info`;
+      return axiosClient.patch(url, { ...data });
+   },
+
+   editPassword: (data) => {
+      const url = `/user/edit/password`;
+      return axiosClient.patch(url, { ...data });
+   },
+
+   requestEditEmail: (data) => {
+      const url = `/user/edit/email/request`;
+      return axiosClient.post(url, { ...data });
+   },
+
+   editEmail: (token) => {
+      let accessToken = getCookie("accessToken");
+      const url = `/user/edit/email`;
+      return axiosClient.patch(url, {
+         headers: {
+            "access-token": accessToken,
+         },
+         token,
+      });
+   },
 };
 
 export default userApi;

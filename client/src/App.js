@@ -10,9 +10,11 @@ import { createContext, useEffect } from "react";
 import { useSelector, useStore } from "react-redux";
 import ProfilePage from "./views/ProfilePage/ProfilePage";
 import EditProfile from "./views/EditProfile/EditProfile";
+import EditPassword from "./views/EditProfile/EditPassword/EditPassword";
 import { io } from "socket.io-client";
 import { getCookie } from "./views/Global/cookie";
 import { useState } from "react";
+import EditEmail from "./views/EditProfile/EditEmail/EditEmail";
 
 export const SOCKET = createContext();
 function App() {
@@ -46,8 +48,14 @@ function App() {
                   <Route exact path={"/profile"}>
                      <ProfilePage />
                   </Route>
-                  <Route path={"/profile/edit"}>
+                  <Route exact path={"/profile/edit"}>
                      <EditProfile />
+                  </Route>
+                  <Route path={"/profile/edit/password"}>
+                     <EditPassword />
+                  </Route>
+                  <Route path={"/profile/edit/email"}>
+                     <EditEmail />
                   </Route>
                   <Route path="/login">
                      <Login />

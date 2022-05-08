@@ -11,9 +11,10 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import authApi from "../../apis/authApi";
-
+import userApi from "../../apis/userApi";
 import { useLocation, useHistory } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getCookie } from "../Global/cookie";
 
 const VerifyEmail = () => {
    const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +24,7 @@ const VerifyEmail = () => {
    let history = useHistory();
 
    const handelRedirect = () => {
-      history.push("/login");
+      getCookie("accessToken") ? history.push("/") : history.push("/login");
    };
 
    const card = (
@@ -96,7 +97,12 @@ const VerifyEmail = () => {
                token: token,
             };
             console.log(token);
-            let res = await authApi.verify(data); // res.message
+            if (getCookie("accessToken")) {
+               let res = await userApi.editEmail(token);
+               console.log(res);
+            } else {
+               let res = await authApi.verify(data); // res.message
+            }
             setIsVerified(true);
          } catch (error) {
             console.log(error.response.data.message);

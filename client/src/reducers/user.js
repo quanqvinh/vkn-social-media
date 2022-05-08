@@ -11,6 +11,11 @@ const userReducer = (state = initState, action) => {
       case "FETCH_PROFILE":
          state = action.payload;
          return { ...state };
+      case "EDIT":
+         let newState = state;
+         newState = { ...newState, ...action.payload };
+         sessionStorage.setItem("USER_INFO", JSON.stringify(newState));
+         return newState;
       default:
          return state;
    }

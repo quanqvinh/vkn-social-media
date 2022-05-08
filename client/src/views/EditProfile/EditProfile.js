@@ -1,66 +1,62 @@
 import "./editProfile.scss";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProfilePreview from "../Profile/ProfilePreview/ProfilePreview";
-import { useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import TextField from "@mui/material/TextField";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import userApi from "../../apis/userApi";
+import { editUser } from "../../actions/user";
+import LeftNav from "./LeftNav/LeftNav";
 
 const EditProfile = () => {
+   const dispatch = useDispatch();
+   const [isEdit, setIsEdit] = useState(false);
    const user = useSelector((state) => state.user);
    const [formInfos, setFormInfos] = useState({
       name: user.name,
       username: user.username,
       bio: user.bio,
-      dob: new Date(),
-      gender: user.gender,
+      dob: user.dob,
+      gender: user.gender || "Male",
    });
 
    const handelSubmit = (e) => {
       e.preventDefault();
-      console.log(formInfos);
+      const editProfile = async () => {
+         try {
+            let res = await userApi.edit(formInfos);
+            console.log(res);
+            if (res.status.includes("success")) {
+               let action = editUser(formInfos);
+               dispatch(action);
+               setIsEdit(!isEdit);
+            }
+         } catch (error) {
+            console.log(error.message);
+         }
+      };
+      editProfile();
    };
+
+   console.log("edit profile");
    return (
       <>
          <Header />
          <div className="edit-profile-container">
             <div className="edit-profile__body">
                <div className="body__left">
-                  <ul className="body__left-options">
-                     <NavLink
-                        exact
-                        to="/profile/edit"
-                        activeClassName="body__left-options--active"
-                     >
-                        <li className="body__left-options-edit-profile ">
-                           Edit Profile
-                        </li>
-                     </NavLink>
-
-                     <NavLink
-                        to="/profile/edit/password"
-                        activeClassName="body__left-options--active"
-                     >
-                        <li className="body__left-options-change-password">
-                           Change Password
-                        </li>
-                     </NavLink>
-                     <NavLink
-                        to="/profile/edit/email"
-                        activeClassName="body__left-options--active"
-                     >
-                        <li className="body__left-options-change-email">
-                           Change Email
-                        </li>
-                     </NavLink>
-                  </ul>
+                  <LeftNav />
                </div>
                <div className="body__right">
                   <ProfilePreview
+                     image={
+                        process.env.REACT_APP_STATIC_URL +
+                        `/avatars/${user._id}.png`
+                     }
                      username={user.username}
                      name="Change Profile Photo"
                      iconSize="medium"
