@@ -21,7 +21,6 @@ function App() {
 
    useEffect(() => {
       if (!JSON.parse(sessionStorage.getItem("USER_INFO"))) return;
-      console.log("create socket");
       const socket = io("http://localhost:7070", {
          auth: {
             "access-token": getCookie("accessToken"),
