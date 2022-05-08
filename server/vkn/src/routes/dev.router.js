@@ -4,12 +4,22 @@ const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const Room = require('../models/room.model');
 const Post = require('../models/post.model');
+const Message = require('../models/schemas/message.schema').model;
 const ObjectId = mongoose.Types.ObjectId;
 const { faker } = require('@faker-js/faker');
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 } 
+
+router.get('/getMessage', async (req, res) => {
+	let { roomId, messageId } = req.query;
+	// let room = await Room.findOne({ _id: roomId });
+	let message = (await Room.findOne({ _id: roomId })).messages.id(messageId);
+	// message.content = 'Change';
+	// await message.save();
+	res.json(message);
+});
 
 router.get('/post', async (req, res) => {
 	let post = await Post.findById('625d19bceb278ba2d063b0c4');

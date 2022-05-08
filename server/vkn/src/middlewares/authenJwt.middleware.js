@@ -14,9 +14,9 @@ module.exports = (req, res, next) => {
 		});
 	}
 	else {
-		return res.status(403).json({
+		return res.status(401).json({
 			status: 'error',
-			message: 'No token is provided'
+			message: 'Unauthorized'
 		});
 	}
 };

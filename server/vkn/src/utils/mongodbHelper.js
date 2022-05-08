@@ -4,7 +4,7 @@ module.exports = {
 	async executeTransactionWithRetry({ executeCallback, successCallback, errorCallback }) {
 		try {
 			const session = await mongoose.startSession();
-			let i, retryTime = 5;;
+			let i, retryTime = 20;
 			for (i = 0; i < retryTime; i++) {
 				try {
 					session.startTransaction();
@@ -15,8 +15,9 @@ module.exports = {
 				catch (error) {
 					await session.abortTransaction();
 					if (error.hasErrorLabel && (error.hasErrorLabel('UnknownTransactionCommitResult') || error.hasErrorLabel('TransientTransactionError'))) {
+						console.log(error);
 						console.log('Retrying transaction ...');
-						await new Promise(resolve => setTimeout(resolve, 100));
+						await new Promise(resolve => setTimeout(resolve, 50));
 						continue;
 					} 
 					throw error;

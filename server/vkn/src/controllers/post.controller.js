@@ -209,7 +209,7 @@ module.exports = {
 
 	// [DELETE] /api/v1/post/:id
 	async deletePost(req, res) {
-		mongodbHelper.executeTransactionWithRetry({
+		await mongodbHelper.executeTransactionWithRetry({
 			async executeCallback(session) {
 				let { id } = req.params;
 				fs.rmSync(resourceHelper.createPostPath(id.toString()), { 
@@ -265,18 +265,109 @@ module.exports = {
 				post.likes.splice(index, 1);
 				post.numberOfLikes--;
 			}
-			post.save();
+			await post.save();
 			res.status(200).json({ 
 				status: 'success',
 				message: index === -1 ? 'liked post' : 'unliked post'
 			});
 		}
-		catch(err) {
-			console.log(err);
+		catch(error) {
+			console.log(error);
 			res.status(500).json({
 				status: 'error',
-				message: err.message
+				message: error.message
 			});
 		}
+	},
+
+	// [PATCH] /api/v1/post/comment/:commentId/like
+	async likeComment(req, res) {
+		try {
+			const { commentId } = req.params, userId = req.auth.userId;	
+			let comment = await Comment.findById(commentId);
+			let index = comment.likes.findIndex((id) => objectIdHelper.compare(id, userId));
+			if (index === -1) {
+				comment.likes.push(userId);
+				comment.numberOfLikes++;
+			}
+			else {
+				comment.likes.splice(index, 1);
+				comment.numberOfLikes--;
+			}
+			await comment.save();
+			res.status(200).json({ 
+				status: 'success',
+				message: index === -1 ? 'liked comment' : 'unliked comment'
+			});
+		}
+		catch(error) {
+			console.log(error);
+			res.status(500).json({
+				status: 'error',
+				message: error.message 
+			});
+		}
+	},
+
+	// [DELETE] /api/v1/post/comment
+	async deleteComment(req, res) {
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let { postId, commentId } = req.query;
+				let [ updatedPost, deletedComment ] = await Promise.all([
+					Post.updateOne({ _id: postId }, {
+						$pull: { comments: commentId }
+					}, { session }),
+					Comment.deleteOne({ _id: commentId }, { session })
+				]);
+				
+				console.log('updatedPost.modifiedCount:', updatedPost.modifiedCount);
+				console.log('deletedComment.deletedCount:', deletedComment.deletedCount);
+				if (updatedPost.modifiedCount < 1 || deletedComment.deletedCount < 1)
+					throw new Error('Update data failed!');
+			},
+			successCallback() {
+				res.status(200).json({ 
+					status: 'success'
+				});
+			},
+			errorCallback(error) {
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: error.message 
+				});
+			}
+		});
+	},
+
+	// [DELETE] /api/v1/post/reply
+	async deleteReply(req, res) {
+		await mongodbHelper.executeTransactionWithRetry({
+			async executeCallback(session) {
+				let { commentId, replyId } = req.query;
+				let updatedComment = await Comment.updateOne({ _id: commentId }, {
+					$pull: {
+						replies: { _id: new ObjectId(replyId) }
+					}
+				}, { session });
+
+				console.log('updatedComment.modifiedCount:', updatedComment.modifiedCount);
+				if (updatedComment.modifiedCount < 1)
+					throw new Error('Update data failed');
+			},
+			successCallback() {
+				res.status(200).json({ 
+					status: 'success'
+				});
+			},
+			errorCallback(error) {
+				console.log(error);
+				res.status(500).json({
+					status: 'error',
+					message: error.message 
+				});
+			}
+		});
 	}
 };

@@ -26,7 +26,7 @@ module.exports = (() => {
 						relatedUsers: {
 							from: socket.handshake.auth.username
 						},
-						tag: socket.handshake.auth.userId
+						tag: [ socket.handshake.auth.userId ]
 					});
 
 					let request = new Request({
