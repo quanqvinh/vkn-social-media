@@ -7,14 +7,7 @@
         "test": "node src/server.js",
         "start": "nodemon --inspect src/server.js",
         "prettier": "prettier --write .",
-        "pretty-quick": "pretty-quick --staged",
-        "prepare": "husky install"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run pretty-quick",
-            "pre-push": "npm run pretty-quick"
-        }
+        "pretty-quick": "pretty-quick --staged"
     },
     "author": "",
     "license": "ISC",
@@ -35,7 +28,6 @@
     },
     "devDependencies": {
         "@faker-js/faker": "^6.2.0",
-        "husky": "^8.0.0",
         "morgan": "^1.10.0",
         "nodemon": "^2.0.15",
         "prettier": "^2.6.2",

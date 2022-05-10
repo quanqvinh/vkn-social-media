@@ -1,0 +1,30 @@
+{
+  "name": "vkn-social-media",
+  "version": "1.0.0",
+  "description": "Build social-media using MERN stack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quanqvinh/vkn-social-media.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/quanqvinh/vkn-social-media/issues"
+  },
+  "homepage": "https://github.com/quanqvinh/vkn-social-media#readme",
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "prettier": "^2.6.2",
+    "pretty-quick": "^3.1.3"
+  }
+}
