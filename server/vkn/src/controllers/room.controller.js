@@ -12,37 +12,46 @@ async function loadMessage(req, res) {
         let numberOfMessage = req.query.nMessage;
 
         let [countMessage, data] = await Promise.all([
-            Room.aggregate([{
+            Room.aggregate([
+                {
                     $match: {
                         _id: ObjectId(roomId),
                     },
-                }, {
+                },
+                {
                     $project: {
                         _id: 0,
                         chatMate: 1,
                         count: {
-                            $size: "$messages"
+                            $size: '$messages',
                         },
                     },
                 },
             ]),
-            Room.aggregate([{
+            Room.aggregate([
+                {
                     $match: {
                         _id: ObjectId(roomId),
                     },
-                }, {
+                },
+                {
                     $project: {
                         messages: {
-                            $slice: [{
+                            $slice: [
+                                {
                                     $filter: {
-                                        input: "$messages",
+                                        input: '$messages',
                                         cond: {
-                                            $or: [{
-                                                    $eq: ["$$this.showWith", "all"],
+                                            $or: [
+                                                {
+                                                    $eq: [
+                                                        '$$this.showWith',
+                                                        'all',
+                                                    ],
                                                 },
                                                 {
                                                     $eq: [
-                                                        "$$this.showWith",
+                                                        '$$this.showWith',
                                                         req.auth.userId,
                                                     ],
                                                 },
@@ -55,26 +64,29 @@ async function loadMessage(req, res) {
                             ],
                         },
                     },
-                }, {
+                },
+                {
                     $project: {
                         _id: 0,
-                        "messages.showWith": 0,
+                        'messages.showWith': 0,
                     },
                 },
             ]),
         ]);
-        
+
         countMessage = countMessage[0];
         data = data[0];
 
         if (!objectIdHelper.include(countMessage.chatMate, req.auth.userId))
             throw new Error('Unauthorized');
-        
+
         if (numberOfMessage >= countMessage.count) {
             return res.status(200).json({
-                status: "success",
+                status: 'success',
                 data: [],
-                roomId: req.originalUrl.includes('room/check') ? roomId : undefined
+                roomId: req.originalUrl.includes('room/check')
+                    ? roomId
+                    : undefined,
             });
         } else if (numberOfMessage + numberOfLoadMessage > countMessage.count)
             data.messages.splice(
@@ -82,18 +94,18 @@ async function loadMessage(req, res) {
                 numberOfMessage + numberOfLoadMessage - countMessage.count
             );
         return res.status(200).json({
-            status: "success",
+            status: 'success',
             data: data,
-            roomId: req.originalUrl.includes('room/check') ? roomId : undefined
+            roomId: req.originalUrl.includes('room/check') ? roomId : undefined,
         });
     } catch (err) {
         console.log(err);
         return res.status(500).json({
-            status: "error",
+            status: 'error',
             message: err.message,
         });
     }
-};
+}
 
 module.exports = {
     // [GET] /api/v1/room
@@ -103,104 +115,120 @@ module.exports = {
                 .select('username name rooms')
                 .lean();
 
-            if (!user)
-                throw new Error('Not found user');
+            if (!user) throw new Error('Not found user');
 
             if (user.rooms.length === 0)
                 return res.status(200).json({
-                    status: "success",
+                    status: 'success',
                     data: user,
                 });
 
-            user = await User.aggregate([{
-                $match: {
-                    _id: ObjectId(req.auth.userId),
+            user = await User.aggregate([
+                {
+                    $match: {
+                        _id: ObjectId(req.auth.userId),
+                    },
                 },
-            }, {
-                $lookup: {
-                    from: "rooms",
-                    localField: "rooms",
-                    foreignField: "_id",
-                    as: "rooms",
+                {
+                    $lookup: {
+                        from: 'rooms',
+                        localField: 'rooms',
+                        foreignField: '_id',
+                        as: 'rooms',
+                    },
                 },
-            }, {
-                $unwind: "$rooms",
-            }, {
-                $lookup: {
-                    from: "users",
-                    localField: "rooms.chatMate",
-                    foreignField: "_id",
-                    as: "rooms.chatMate",
+                {
+                    $unwind: '$rooms',
                 },
-            }, {
-                $unwind: "$rooms.chatMate",
-            }, {
-                $match: {
-                    "rooms.chatMate._id": {
-                        $not: {
-                            $eq: ObjectId(req.auth.userId),
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'rooms.chatMate',
+                        foreignField: '_id',
+                        as: 'rooms.chatMate',
+                    },
+                },
+                {
+                    $unwind: '$rooms.chatMate',
+                },
+                {
+                    $match: {
+                        'rooms.chatMate._id': {
+                            $not: {
+                                $eq: ObjectId(req.auth.userId),
+                            },
                         },
                     },
                 },
-            }, {
-                $project: {
-                    username: 1,
-                    name: 1,
-                    rooms: {
-                        _id: 1,
-                        updatedAt: 1,
-                        chatMate: {
+                {
+                    $project: {
+                        username: 1,
+                        name: 1,
+                        rooms: {
                             _id: 1,
-                            username: 1,
-                            name: 1,
-                        },
-                        messages: {
-                            $slice: [{
-                                    $filter: {
-                                        input: "$rooms.messages",
-                                        cond: {
-                                            $or: [{
-                                                    $eq: ["$$this.showWith", "all"],
-                                                },
-                                                {
-                                                    $eq: [
-                                                        "$$this.showWith",
-                                                        req.auth.userId,
-                                                    ],
-                                                },
-                                            ],
+                            updatedAt: 1,
+                            chatMate: {
+                                _id: 1,
+                                username: 1,
+                                name: 1,
+                            },
+                            messages: {
+                                $slice: [
+                                    {
+                                        $filter: {
+                                            input: '$rooms.messages',
+                                            cond: {
+                                                $or: [
+                                                    {
+                                                        $eq: [
+                                                            '$$this.showWith',
+                                                            'all',
+                                                        ],
+                                                    },
+                                                    {
+                                                        $eq: [
+                                                            '$$this.showWith',
+                                                            req.auth.userId,
+                                                        ],
+                                                    },
+                                                ],
+                                            },
                                         },
                                     },
-                                },
-                                -1,
-                                1,
-                            ],
+                                    -1,
+                                    1,
+                                ],
+                            },
                         },
                     },
                 },
-            }, {
-                $project: {
-                    "rooms.messages.showWith": 0,
-                },
-            }, {
-                $group: {
-                    _id: "$_id",
-                    username: {
-                        $first: "$username",
-                    },
-                    name: {
-                        $first: "$name",
-                    },
-                    rooms: {
-                        $push: "$rooms",
+                {
+                    $project: {
+                        'rooms.messages.showWith': 0,
                     },
                 },
-            }, ]);
+                {
+                    $group: {
+                        _id: '$_id',
+                        username: {
+                            $first: '$username',
+                        },
+                        name: {
+                            $first: '$name',
+                        },
+                        rooms: {
+                            $push: '$rooms',
+                        },
+                    },
+                },
+            ]);
 
-            user[0].rooms = user[0].rooms.filter(room => room.messages.length > 0);
+            user[0].rooms = user[0].rooms.filter(
+                room => room.messages.length > 0
+            );
 
             return res.status(200).json({
-                status: "success",
+                status: 'success',
                 data: user[0],
             });
         } catch (error) {
@@ -208,10 +236,10 @@ module.exports = {
             if (error.name === 'Error')
                 return res.status(200).json({
                     status: 'error',
-                    message: error.message
+                    message: error.message,
                 });
             return res.status(500).json({
-                status: "error",
+                status: 'error',
                 message: 'Error at server',
             });
         }
@@ -219,7 +247,7 @@ module.exports = {
 
     // [GET] /api/v1/room/:roomId
     loadMessage,
-    
+
     // [GET] /api/v1/room/check
     async checkRoom(req, res) {
         try {
@@ -229,7 +257,8 @@ module.exports = {
                 .populate('rooms')
                 .lean();
 
-            let roomId = null, room = null;
+            let roomId = null,
+                room = null;
             user.rooms.some(room => {
                 if (objectIdHelper.include(room.chatMate, userId)) {
                     roomId = room._id;
@@ -237,16 +266,15 @@ module.exports = {
                 }
                 return false;
             });
-            
+
             if (roomId === null) {
                 roomId = new ObjectId();
                 res.status(200).json({
                     status: 'success',
                     data: null,
-                    roomId
+                    roomId,
                 });
-            }
-            else {
+            } else {
                 req.params.roomId = roomId;
                 req.query.nMessage = 0;
                 return await loadMessage(req, res);
@@ -255,7 +283,7 @@ module.exports = {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: error.message
+                message: error.message,
             });
         }
     },
@@ -264,76 +292,86 @@ module.exports = {
     async deleteMessage(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                const {
-                    roomId,
-                    messageId
-                } = req.query;
+                const { roomId, messageId } = req.query;
 
                 let room = await Room.findOne({
-                        _id: roomId
-                    })
+                    _id: roomId,
+                })
                     .select('chatMate messages')
                     .populate({
                         path: 'chatMate',
-                        select: 'username'
+                        select: 'username',
                     });
-                
-                if (!objectIdHelper.include(room.chatMate.filter(chatMate => chatMate._id), req.auth.userId))
+
+                if (
+                    !objectIdHelper.include(
+                        room.chatMate.filter(chatMate => chatMate._id),
+                        req.auth.userId
+                    )
+                )
                     throw new Error('Unauthorized');
-                
+
                 let message = room.messages.id(messageId),
                     showWith;
                 if (message.showWith === 'all') {
                     if (req.auth.userId === room.chatMate[0].userId)
                         showWith = room.chatMate[1]._id;
-                    else
-                        showWith = room.chatMate[0]._id;
-                } else
-                    showWith = 'nobody';
+                    else showWith = room.chatMate[0]._id;
+                } else showWith = 'nobody';
 
                 let updatedRoom;
                 console.log(showWith);
                 if (showWith !== 'nobody')
-                    updatedRoom = await Room.updateOne({
-                        _id: roomId,
-                        'messages._id': messageId
-                    }, {
-                        $set: {
-                            'messages.$.showWith': showWith
+                    updatedRoom = await Room.updateOne(
+                        {
+                            _id: roomId,
+                            'messages._id': messageId,
+                        },
+                        {
+                            $set: {
+                                'messages.$.showWith': showWith,
+                            },
+                        },
+                        {
+                            session,
                         }
-                    }, {
-                        session
-                    });
+                    );
                 else
-                    updatedRoom = await Room.updateOne({
-                        _id: roomId
-                    }, {
-                        $pull: {
-                            messages: {
-                                _id: new ObjectId(messageId)
-                            }
-                        }
-                    }, { session });
+                    updatedRoom = await Room.updateOne(
+                        {
+                            _id: roomId,
+                        },
+                        {
+                            $pull: {
+                                messages: {
+                                    _id: new ObjectId(messageId),
+                                },
+                            },
+                        },
+                        { session }
+                    );
 
-                console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+                console.log(
+                    'updatedRoom.modifiedCount:',
+                    updatedRoom.modifiedCount
+                );
                 if (updatedRoom.modifiedCount < 1)
                     throw new Error('Delete data failed');
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success'
+                    status: 'success',
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 let message = 'Error at server';
-                if (error.name === 'Error')
-                    message = error.message;
+                if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
                     status: 'error',
-                    message
+                    message,
                 });
-            }
+            },
         });
     },
 
@@ -341,44 +379,49 @@ module.exports = {
     async recallMessage(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                const {
-                    roomId,
-                    messageId
-                } = req.query;
+                const { roomId, messageId } = req.query;
 
-                let room = await Room.findById(roomId).select('chatMate').lean();
+                let room = await Room.findById(roomId)
+                    .select('chatMate')
+                    .lean();
                 if (!objectIdHelper.include(room.chatMate, req.auth.userId))
                     return new Error('Unauthorized');
 
-                let updatedRoom = await Room.updateOne({
-                    _id: roomId
-                }, {
-                    $pull: {
-                        messages: {
-                            _id: new ObjectId(messageId)
-                        }
-                    }
-                }, { session });
+                let updatedRoom = await Room.updateOne(
+                    {
+                        _id: roomId,
+                    },
+                    {
+                        $pull: {
+                            messages: {
+                                _id: new ObjectId(messageId),
+                            },
+                        },
+                    },
+                    { session }
+                );
 
-                console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+                console.log(
+                    'updatedRoom.modifiedCount:',
+                    updatedRoom.modifiedCount
+                );
                 if (updatedRoom.modifiedCount < 1)
                     throw new Error('Delete data failed');
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success'
+                    status: 'success',
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 let message = 'Error at server';
-                if (error.name === 'Error')
-                    message = error.message;
+                if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
                     status: 'error',
-                    message
+                    message,
                 });
-            }
+            },
         });
     },
 
@@ -386,46 +429,61 @@ module.exports = {
     async deleteRoom(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                let {
-                    roomId
-                } = req.params;
+                let { roomId } = req.params;
                 let room = await Room.findById(roomId);
-                if (!room)
-                    throw new Error('Room not found');
+                if (!room) throw new Error('Room not found');
                 if (!objectIdHelper.include(room.chatMate, req.auth.userId))
                     throw new Error('Unauthorized');
-                let other = room.chatMate[objectIdHelper.compare(req.auth.userId, room.chatMate[0]._id) ? 1 : 0]._id;
+                let other =
+                    room.chatMate[
+                        objectIdHelper.compare(
+                            req.auth.userId,
+                            room.chatMate[0]._id
+                        )
+                            ? 1
+                            : 0
+                    ]._id;
 
-                let updatedRoom = await Room.updateOne({
-                    _id: roomId
-                }, {
-                    $set: {
-                        'messages.$[i].showWith': other.toString()
+                let updatedRoom = await Room.updateOne(
+                    {
+                        _id: roomId,
+                    },
+                    {
+                        $set: {
+                            'messages.$[i].showWith': other.toString(),
+                        },
+                    },
+                    {
+                        arrayFilters: [
+                            {
+                                'i.showWith': 'all',
+                            },
+                        ],
+                        session,
                     }
-                }, {
-                    arrayFilters: [{
-                        'i.showWith': 'all'
-                    }],
-                    session
-                });
+                );
                 console.log(updatedRoom);
 
-                updatedRoom = await Room.updateOne({
-                    _id: roomId
-                }, {
-                    $pull: {
-                        messages: {
-                            showWith: req.auth.userId
-                        }
+                updatedRoom = await Room.updateOne(
+                    {
+                        _id: roomId,
+                    },
+                    {
+                        $pull: {
+                            messages: {
+                                showWith: req.auth.userId,
+                            },
+                        },
+                    },
+                    {
+                        session,
                     }
-                }, {
-                    session
-                });
+                );
                 console.log(updatedRoom);
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success'
+                    status: 'success',
                 });
             },
             errorCallback(error) {
@@ -433,14 +491,14 @@ module.exports = {
                 if (error.name === 'Error')
                     return res.status(403).json({
                         status: 'error',
-                        message: error.message
+                        message: error.message,
                     });
                 else
                     return res.status(500).json({
                         status: 'error',
-                        message: 'Error at server'
+                        message: 'Error at server',
                     });
-            }
+            },
         });
-    }
+    },
 };

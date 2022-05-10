@@ -17,15 +17,14 @@ app.use(express.json());
 app.use(morgan('tiny'));
 route(app);
 
-
 // Socket.IO
 const server = require('http').Server(app);
 const io = require('socket.io')(server, {
-   cors: {
-      // origin: process.env.CLIENT_DOMAIN,
-      origin: '*',
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-   }
+    cors: {
+        // origin: process.env.CLIENT_DOMAIN,
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    },
 });
 const socketHandler = require('./listeners');
 
@@ -34,5 +33,5 @@ socketHandler(io);
 const port = process.env.PORT;
 const host = process.env.HOST;
 server.listen(port, host, () => {
-   console.log(`Server is listening at http://${host}:${port}/api/v1`);
+    console.log(`Server is listening at http://${host}:${port}/api/v1`);
 });
