@@ -7,6 +7,7 @@ const Post = require('../models/post.model');
 const Message = require('../models/schemas/message.schema').model;
 const ObjectId = mongoose.Types.ObjectId;
 const { faker } = require('@faker-js/faker');
+const mongodbHelper = require('../utils/mongodbHelper');
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -240,6 +241,27 @@ router.get('/room', async (req, res) => {
 	// 	})
 
 	res.json(user);
+});
+
+router.get('/room/message/deleteAll', async (req, res) => {
+	await mongodbHelper.executeTransactionWithRetry({
+		async executeCallback(session) {
+			let { roomId } = req.query;
+			let updatedRoom = await Room.updateOne({ _id: roomId }, {
+				messages: []
+			}, { session });
+			if (updatedRoom.modifiedCount < 1)
+				throw new Error('Update data failed');
+			console.log(updatedRoom);
+		},
+		successCallback() {
+			res.json({ status: 'success' });
+		},
+		errorCallback(error) {
+			console.log(error);
+			res.json(error);
+		}
+	})
 });
 
 module.exports = router;

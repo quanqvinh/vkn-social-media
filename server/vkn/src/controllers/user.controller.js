@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const Notification = require('../models/notification.model');
 const Request = require('../models/request.model');
+const Post = require('../models/post.model');
+const Comment = require('../models/comment.model');
 const Auth = require('./auth.controller');
 const Crypto = require('../utils/crypto');
 const {
@@ -11,6 +13,7 @@ const fs = require('fs');
 const resourceHelper = require('../utils/resourceHelper');
 const objectIdHelper = require('../utils/objectIdHelper');
 const mongodbHelper = require('../utils/mongodbHelper');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = {
     // [GET] /api/v1/user/me/profile
@@ -52,10 +55,8 @@ module.exports = {
         console.log(req.auth.userId);
         if (id) {
             Promise.all([
-                    User.findById(id, {
-                        rooms: 0,
-                        auth: 0,
-                    })
+                    User.findById(id)
+                    .select('-rooms -auth')
                     .populate([
                         'posts',
                         {
@@ -67,6 +68,11 @@ module.exports = {
                     User.findById(req.auth.userId).select('friends').lean(),
                 ])
                 .then(([data, mine]) => {
+                    if (!data)
+                        return res.status(400).json({
+                            status: 'error',
+                            message: 'Data not found'
+                        });
                     data.posts.forEach((post) => {
                         post.imgs = resourceHelper.getListPostImages(
                             post._id.toString()
@@ -76,6 +82,7 @@ module.exports = {
                     res.status(200).json(data);
                 })
                 .catch((err) => {
+                    console.log(err);
                     res.status(500).json({
                         status: 'error',
                         message: 'Error at server',
@@ -401,7 +408,7 @@ module.exports = {
             },
         });
     },
-
+    
     // [POST] /api/v1/user/friends/decline-request
     async declineAddFriendRequest(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
@@ -595,6 +602,33 @@ module.exports = {
         });
     },
 
+    // [GET] /api/v1/user/notifications
+    async getAllNotification(req, res) {
+        try {
+            let user = await User.findById(req.auth.userId)
+                .select('notifications')
+                .populate({
+                    path: 'notifications',
+                    select: '-user',
+                    options: {
+                        sort: { createdAt: -1 }
+                    }
+                });
+
+            return res.status(200).json({
+                status: 'success',
+                data: user.notifications
+            });
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Error at server'
+            })
+        }
+    },
+
     // [DELETE] /api/v1/user/notification/:id
     async deleteNotification(req, res) {
         await mongodbHelper.executeTransactionWithRetry({
@@ -641,6 +675,117 @@ module.exports = {
                     message: 'Error at server.',
                 });
             }
-        })
-    }
+        });
+    },
+
+    // [GET] /api/v1/user/notification/check
+    async checkNotification(req, res) {
+        let { notificationId } = req.query;
+        let user = undefined, post = undefined, comment = undefined, reply = undefined;
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+
+                let me = await User.findById(req.auth.userId)
+                    .select('notifications')
+                    .populate({
+                        path: 'notifications',
+                        match: { _id: ObjectId(notificationId) },
+                        select: '-user'
+                    }).lean();
+
+                if (me.notifications.length === 0)
+                    throw new Error('Notification not found');
+                
+                let notification = me.notifications[0];
+                let tag = notification.tag;
+                let postPipeline = [
+                    {
+                        path: 'user',
+                        select: 'username friends'
+                    },
+                    {
+                        path: 'likes',
+                        select: 'username'
+                    },
+                    {
+                        path: 'comments',
+                        populate: {
+                            path: 'commentBy',
+                            select: 'username'
+                        },
+                        select: 'commentBy content'
+                    }
+                ];
+
+                switch (notification.type) {
+                    case 'add_friend_request': 
+                        user = await User.findById(tag[0]);
+                        if (!user) throw new Error('Requested user is not found');
+                        break;
+                    case 'react_post': 
+                        post = await Post.findById(tag[0])
+                            .populate(postPipeline)
+                            .select('-reports').lean();
+                        if (!post) throw new Error('Post is not found');    
+                        break;
+                    case 'react_comment': 
+                    case 'comment': 
+                        post = await Post.findById(tag[0])
+                            .populate(postPipeline)
+                            .select('-reports').lean();
+                        if (!post) throw new Error('Post is not found');    
+                        if (objectIdHelper.include(post.comments.map(comment => comment._id), tag[1]))
+                            comment = null;
+                        else
+                            comment = await Comment.findById(tag[1]).lean();
+                        break;
+                    case 'reply': 
+                        post = await Post.findById(tag[0])
+                            .populate(postPipeline)
+                            .select('-reports').lean();
+                        if (!post) throw new Error('Post is not found');    
+                        if (!objectIdHelper.include(post.comments.map(comment => comment._id), tag[1]))
+                            comment = null;
+                        else {
+                            comment = await Comment.findById(tag[1]).lean();
+                            if (!objectIdHelper.include(comment.replies.map(reply => reply._id), tag[2]))
+                                reply = null;
+                            else
+                                reply = comment.replies.id(tag[2]);
+                        }
+                        break;
+                    default:
+                        throw new Error('Notification error');
+                }
+
+                let updatedNotification = await Notification.updateOne(
+                    { _id: notification._id }, 
+                    { isChecked: true },
+                    { session }
+                );
+                console.log(updatedNotification);
+            },
+            successCallback() {
+                return res.status(200).json({
+                    status: 'success',
+                    user,
+                    post, 
+                    comment,
+                    reply
+                });
+            },
+            errorCallback(error) {
+                console.log(error);
+                if (error.name === 'Error')
+                    return res.status(400).json({
+                        status: 'error',
+                        message: error.message
+                    });
+                return res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server'
+                });
+            }
+        });
+    },
 };

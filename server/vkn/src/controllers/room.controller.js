@@ -4,6 +4,97 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const objectIdHelper = require('../utils/objectIdHelper');
 const mongodbHelper = require('../utils/mongodbHelper');
 
+let numberOfLoadMessage = 20;
+
+async function loadMessage(req, res) {
+    try {
+        let roomId = req.params.roomId;
+        let numberOfMessage = req.query.nMessage;
+
+        let [countMessage, data] = await Promise.all([
+            Room.aggregate([{
+                    $match: {
+                        _id: ObjectId(roomId),
+                    },
+                }, {
+                    $project: {
+                        _id: 0,
+                        chatMate: 1,
+                        count: {
+                            $size: "$messages"
+                        },
+                    },
+                },
+            ]),
+            Room.aggregate([{
+                    $match: {
+                        _id: ObjectId(roomId),
+                    },
+                }, {
+                    $project: {
+                        messages: {
+                            $slice: [{
+                                    $filter: {
+                                        input: "$messages",
+                                        cond: {
+                                            $or: [{
+                                                    $eq: ["$$this.showWith", "all"],
+                                                },
+                                                {
+                                                    $eq: [
+                                                        "$$this.showWith",
+                                                        req.auth.userId,
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                },
+                                -numberOfMessage - numberOfLoadMessage,
+                                numberOfLoadMessage,
+                            ],
+                        },
+                    },
+                }, {
+                    $project: {
+                        _id: 0,
+                        "messages.showWith": 0,
+                    },
+                },
+            ]),
+        ]);
+        
+        countMessage = countMessage[0];
+        data = data[0];
+
+        if (!objectIdHelper.include(countMessage.chatMate, req.auth.userId))
+            throw new Error('Unauthorized');
+        
+        if (numberOfMessage >= countMessage.count) {
+            return res.status(200).json({
+                status: "success",
+                data: [],
+                roomId: req.originalUrl.includes('room/check') ? roomId : undefined
+            });
+        } else if (numberOfMessage + numberOfLoadMessage > countMessage.count)
+            data.messages.splice(
+                countMessage.count - numberOfMessage,
+                numberOfMessage + numberOfLoadMessage - countMessage.count
+            );
+        return res.status(200).json({
+            status: "success",
+            data: data,
+            roomId: req.originalUrl.includes('room/check') ? roomId : undefined
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            status: "error",
+            message: err.message,
+        });
+    }
+};
+
 module.exports = {
     // [GET] /api/v1/room
     async getRooms(req, res) {
@@ -11,6 +102,9 @@ module.exports = {
             let user = await User.findById(req.auth.userId)
                 .select('username name rooms')
                 .lean();
+
+            if (!user)
+                throw new Error('Not found user');
 
             if (user.rooms.length === 0)
                 return res.status(200).json({
@@ -109,127 +203,54 @@ module.exports = {
                 status: "success",
                 data: user[0],
             });
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.log(error);
+            if (error.name === 'Error')
+                return res.status(200).json({
+                    status: 'error',
+                    message: error.message
+                });
             return res.status(500).json({
                 status: "error",
-                message: err.message,
+                message: 'Error at server',
             });
         }
     },
 
     // [GET] /api/v1/room/:roomId
-    async loadMessage(req, res) {
-        try {
-            let roomId = req.params.roomId;
-            let numberOfMessage = req.query.nMessage;
-            let numberOfLoadMessage = 20;
-
-            let [countMessage, data] = await Promise.all([
-                Room.aggregate([{
-                        $match: {
-                            _id: ObjectId(roomId),
-                        },
-                    }, {
-                        $project: {
-                            _id: 0,
-                            count: {
-                                $size: "$messages"
-                            },
-                        },
-                    },
-                ]),
-                Room.aggregate([{
-                        $match: {
-                            _id: ObjectId(roomId),
-                        },
-                    }, {
-                        $project: {
-                            messages: {
-                                $slice: [{
-                                        $filter: {
-                                            input: "$messages",
-                                            cond: {
-                                                $or: [{
-                                                        $eq: ["$$this.showWith", "all"],
-                                                    },
-                                                    {
-                                                        $eq: [
-                                                            "$$this.showWith",
-                                                            req.auth.userId,
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        },
-                                    },
-                                    -numberOfMessage - numberOfLoadMessage,
-                                    numberOfLoadMessage,
-                                ],
-                            },
-                        },
-                    }, {
-                        $project: {
-                            _id: 0,
-                            "messages.showWith": 0,
-                        },
-                    },
-                ]),
-            ]);
-
-            countMessage = countMessage[0];
-            data = data[0];
-
-            if (numberOfMessage == countMessage.count) {
-                return res.status(200).json({
-                    status: "success",
-                    data: null,
-                });
-            } else if (numberOfMessage + numberOfLoadMessage > countMessage.count)
-                data.messages.splice(
-                    countMessage.count - numberOfMessage,
-                    numberOfMessage + numberOfLoadMessage - countMessage.count
-                );
-            res.status(200).json({
-                status: "success",
-                data: data,
-            });
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                status: "error",
-                message: err.message,
-            });
-        }
-    },
-
+    loadMessage,
+    
     // [GET] /api/v1/room/check
     async checkRoom(req, res) {
         try {
-            let {
-                userId
-            } = req.query;
+            let { userId } = req.query;
             let user = await User.findById(req.auth.userId)
                 .select('rooms')
                 .populate('rooms')
                 .lean();
 
-            let roomData = null,
-                roomId = undefined;
+            let roomId = null, room = null;
             user.rooms.some(room => {
                 if (objectIdHelper.include(room.chatMate, userId)) {
-                    roomData = room;
+                    roomId = room._id;
                     return true;
                 }
                 return false;
-            })
-            if (roomData == null)
-                roomId = new ObjectId();
-            res.json({
-                status: 'success',
-                data: roomData,
-                roomId
             });
+            
+            if (roomId === null) {
+                roomId = new ObjectId();
+                res.status(200).json({
+                    status: 'success',
+                    data: null,
+                    roomId
+                });
+            }
+            else {
+                req.params.roomId = roomId;
+                req.query.nMessage = 0;
+                return await loadMessage(req, res);
+            }
         } catch (error) {
             console.log(error);
             res.status(500).json({

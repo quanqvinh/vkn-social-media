@@ -14,7 +14,7 @@ module.exports = {
 	// [GET] /api/v1/post/new-feed
 	async newFeed(req, res) {
 		try {
-			let populatePost = { 
+			let populatePostPipeline = { 
 				path: 'posts',
 				populate: { 
 					path: 'comments',
@@ -34,9 +34,12 @@ module.exports = {
 				.populate([
 					{
 						path: 'friends',
-						populate: populatePost
+						populate: populatePostPipeline
 					},
-					populatePost, 'notifications'
+					populatePostPipeline, {
+						path: 'notifications',
+						match: { isChecked: false }
+					}
 				]).lean();
 			
 			let posts = {
@@ -58,7 +61,7 @@ module.exports = {
 			newFeed.sort((a, b) => Math.random() - 0.5);
 			res.status(200).json({
 				status: 'success',
-				notifications: user.notifications,
+				uncheckedNotifications: user.notifications.length,
 				posts: newFeed,
 			});
 		}
