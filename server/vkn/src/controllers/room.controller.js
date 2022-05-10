@@ -224,7 +224,7 @@ module.exports = {
             ]);
 
             user[0].rooms = user[0].rooms.filter(
-                (room) => room.messages.length > 0
+                room => room.messages.length > 0
             );
 
             return res.status(200).json({
@@ -259,7 +259,7 @@ module.exports = {
 
             let roomId = null,
                 room = null;
-            user.rooms.some((room) => {
+            user.rooms.some(room => {
                 if (objectIdHelper.include(room.chatMate, userId)) {
                     roomId = room._id;
                     return true;
@@ -305,7 +305,7 @@ module.exports = {
 
                 if (
                     !objectIdHelper.include(
-                        room.chatMate.filter((chatMate) => chatMate._id),
+                        room.chatMate.filter(chatMate => chatMate._id),
                         req.auth.userId
                     )
                 )

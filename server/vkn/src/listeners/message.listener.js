@@ -30,7 +30,7 @@ async function validateRoom(roomId, user1, user2) {
 module.exports = (io, socket) => {
     let { username, userId, roomId, content } = payload;
     let message;
-    socket.on('chat:send_message', async (payload) => {
+    socket.on('chat:send_message', async payload => {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 message = new Message({
@@ -92,7 +92,7 @@ module.exports = (io, socket) => {
         });
     });
 
-    socket.on('chat:send_image', async (payload) => {
+    socket.on('chat:send_image', async payload => {
         let { username, userId, roomId, image } = payload;
         let message,
             roomResource = resourceHelper.createRoomImageFile(roomId);

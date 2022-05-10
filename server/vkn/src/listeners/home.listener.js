@@ -13,14 +13,14 @@ module.exports = async (io, socket) => {
 
     if (listFriendsOnline.length > 0) {
         socket.emit('home:list_friend_online', listFriendsOnline);
-        io.to(listFriendsOnline.map((friend) => friend._id)).emit(
+        io.to(listFriendsOnline.map(friend => friend._id)).emit(
             'home:friend_connect',
             userInfo
         );
     }
 
     socket.on('disconnect', () => {
-        io.to(listFriendsOnline.map((friend) => friend._id)).emit(
+        io.to(listFriendsOnline.map(friend => friend._id)).emit(
             'home:friend_disconnect',
             userInfo
         );
@@ -60,7 +60,7 @@ module.exports = async (io, socket) => {
                 },
             },
         ]);
-        return user[0].friends.filter((friend) =>
+        return user[0].friends.filter(friend =>
             io.sockets.adapter.rooms.has(friend.username)
         );
     }

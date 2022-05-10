@@ -15,10 +15,10 @@ module.exports = (function () {
             return obj1.toString() === obj2.toString();
         },
         include(array, value) {
-            return array.some((id) => this.compare(id, value));
+            return array.some(id => this.compare(id, value));
         },
         listString(array) {
-            return array.map((id) => id.toString());
+            return array.map(id => id.toString());
         },
         compareArray(array1, array2) {
             return (

@@ -30,15 +30,15 @@ module.exports = {
                 'notifications',
             ])
             .lean()
-            .then((data) => {
-                data.posts.forEach((post) => {
+            .then(data => {
+                data.posts.forEach(post => {
                     post.imgs = resourceHelper.getListPostImages(
                         post._id.toString()
                     );
                 });
                 res.status(200).json(data);
             })
-            .catch((err) => {
+            .catch(err => {
                 console.log(err);
                 res.status(500).json({
                     status: 'error',
@@ -71,7 +71,7 @@ module.exports = {
                             status: 'error',
                             message: 'Data not found',
                         });
-                    data.posts.forEach((post) => {
+                    data.posts.forEach(post => {
                         post.imgs = resourceHelper.getListPostImages(
                             post._id.toString()
                         );
@@ -82,7 +82,7 @@ module.exports = {
                     );
                     res.status(200).json(data);
                 })
-                .catch((err) => {
+                .catch(err => {
                     console.log(err);
                     res.status(500).json({
                         status: 'error',
@@ -222,7 +222,7 @@ module.exports = {
         console.log(id);
         if (id) {
             User.deleteById(id)
-                .then((data) => {
+                .then(data => {
                     if (data.deletedCount === 1)
                         res.status(200).json({
                             status: 'success',
@@ -230,7 +230,7 @@ module.exports = {
                                 'User account has been moved to recycle bin.',
                         });
                 })
-                .catch((err) => {
+                .catch(err => {
                     res.status(500).json({
                         status: 'error',
                         message: 'Error at server.',
@@ -265,7 +265,7 @@ module.exports = {
                 status: 'failed',
             });
         // check whether file exists
-        fs.access(file, fs.constants.F_OK, (error) => {
+        fs.access(file, fs.constants.F_OK, error => {
             if (error) {
                 console.log('avatar does not exist in folder');
                 err = error;
@@ -274,7 +274,7 @@ module.exports = {
                 deleteFileFunction(
                     resourceHelper.createAvatarFile(req.auth.userId)
                 );
-                fs.rename(file, file.replace('new-', ''), (err) => {
+                fs.rename(file, file.replace('new-', ''), err => {
                     if (err) {
                         console.log('error when changing name:', err.message);
                         this.err = err;
@@ -422,7 +422,7 @@ module.exports = {
                     status: 'success',
                 });
             },
-            errorCallback: (error) => {
+            errorCallback: error => {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
@@ -505,7 +505,7 @@ module.exports = {
                     status: 'success',
                 });
             },
-            errorCallback: (error) => {
+            errorCallback: error => {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
@@ -817,7 +817,7 @@ module.exports = {
                         if (!post) throw new Error('Post is not found');
                         if (
                             objectIdHelper.include(
-                                post.comments.map((comment) => comment._id),
+                                post.comments.map(comment => comment._id),
                                 tag[1]
                             )
                         )
@@ -832,7 +832,7 @@ module.exports = {
                         if (!post) throw new Error('Post is not found');
                         if (
                             !objectIdHelper.include(
-                                post.comments.map((comment) => comment._id),
+                                post.comments.map(comment => comment._id),
                                 tag[1]
                             )
                         )
@@ -841,7 +841,7 @@ module.exports = {
                             comment = await Comment.findById(tag[1]).lean();
                             if (
                                 !objectIdHelper.include(
-                                    comment.replies.map((reply) => reply._id),
+                                    comment.replies.map(reply => reply._id),
                                     tag[2]
                                 )
                             )

@@ -10,7 +10,7 @@ const { faker } = require('@faker-js/faker');
 const mongodbHelper = require('../utils/mongodbHelper');
 
 function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 router.get('/getMessage', async (req, res) => {
@@ -112,8 +112,8 @@ router.get('/room', async (req, res) => {
         undefined: () => 0,
         boolean: () => 4,
         number: () => 8,
-        string: (item) => 2 * item.length,
-        object: (item) =>
+        string: item => 2 * item.length,
+        object: item =>
             !item
                 ? 0
                 : Object.keys(item).reduce(
@@ -122,7 +122,7 @@ router.get('/room', async (req, res) => {
                   ),
     };
 
-    const sizeOf = (value) => typeSizes[typeof value](value);
+    const sizeOf = value => typeSizes[typeof value](value);
     let t0, t1;
     t0 = performance.now();
     let user = await User.findById('624000cb773430adfd378d86')

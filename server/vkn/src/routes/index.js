@@ -6,7 +6,7 @@ const devRouter = require('./dev.router');
 
 const authenJwtMiddleware = require('../middlewares/authenJwt.middleware').api;
 
-module.exports = (app) => {
+module.exports = app => {
     app.get('/fakeData', async (req, res) => {
         const { faker } = require('@faker-js/faker');
         const Room = require('../models/room.model');

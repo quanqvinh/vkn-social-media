@@ -27,7 +27,7 @@ module.exports = {
                     ) {
                         console.log(error);
                         console.log('Retrying transaction ...');
-                        await new Promise((resolve) => setTimeout(resolve, 50));
+                        await new Promise(resolve => setTimeout(resolve, 50));
                         continue;
                     }
                     throw error;

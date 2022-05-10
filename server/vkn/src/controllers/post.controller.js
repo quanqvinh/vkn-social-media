@@ -45,14 +45,14 @@ module.exports = {
                 .lean();
 
             let posts = {
-                myPosts: user.posts.map((post) => ({
+                myPosts: user.posts.map(post => ({
                     username: user.username,
                     ...post,
                     imgs: resourceHelper.getListPostImages(post._id.toString()),
                 })),
                 friendPosts: (function () {
-                    let allFriendPosts = user.friends.map((friend) =>
-                        friend.posts.map((post) => ({
+                    let allFriendPosts = user.friends.map(friend =>
+                        friend.posts.map(post => ({
                             username: friend.username,
                             ...post,
                             imgs: resourceHelper.getListPostImages(
@@ -369,7 +369,7 @@ module.exports = {
             const { postId } = req.params,
                 userId = req.auth.userId;
             let post = await Post.findById(postId);
-            let index = post.likes.findIndex((id) =>
+            let index = post.likes.findIndex(id =>
                 objectIdHelper.compare(id, userId)
             );
             if (index === -1) {
@@ -399,7 +399,7 @@ module.exports = {
             const { commentId } = req.params,
                 userId = req.auth.userId;
             let comment = await Comment.findById(commentId);
-            let index = comment.likes.findIndex((id) =>
+            let index = comment.likes.findIndex(id =>
                 objectIdHelper.compare(id, userId)
             );
             if (index === -1) {
