@@ -175,12 +175,7 @@ module.exports = {
             const { username, email, password } = req.body;
             console.log(req.body);
             let user = await User.findOne({
-                $and: [
-                    {
-                        $or: [{ username }, { email }],
-                    },
-                    { 'auth.isAdmin': false },
-                ],
+                $or: [{ username }, { email }],
             }).lean();
 
             if (!user)
@@ -222,6 +217,7 @@ module.exports = {
                 },
             ]);
 
+            if (user.auth.isAdmin) user.isAdmin = true;
             user.auth = undefined;
             user.deleted = undefined;
 

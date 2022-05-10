@@ -13,7 +13,9 @@ module.exports = {
                         status: 'error',
                         message: 'Unauthorized access',
                     });
-                req.auth = decoded;
+                if (decoded.isAdmin)
+                    next(new Error('Admin is not allowed to access'));
+                else req.auth = decoded;
                 next();
             });
         } else {
