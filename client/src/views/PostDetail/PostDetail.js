@@ -14,15 +14,14 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const PostDetail = (props) => {
-   const user = useSelector((state) => state.user);
-   const { closePost, post } = props;
+   const { closePost, post, owner } = props;
    const [postOwner, setPostOwner] = useState({});
 
    const handelClosePost = (e) => {
       if (!e.target.classList.contains("post__overlay")) return;
       closePost();
    };
-   console.log(post);
+   const user = useSelector((state) => state.user);
 
    useEffect(() => {
       const fetchUser = async () => {
@@ -35,8 +34,6 @@ const PostDetail = (props) => {
       };
       fetchUser();
    }, []);
-
-   console.log("post owner", postOwner);
 
    const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
       <button
@@ -86,6 +83,7 @@ const PostDetail = (props) => {
                      {post.imgs?.length > 0 &&
                         post.imgs.map((img) => (
                            <img
+                              style={{ width: 690, height: 690 }}
                               key={img}
                               src={
                                  process.env.REACT_APP_STATIC_URL +
@@ -106,7 +104,10 @@ const PostDetail = (props) => {
                      <ProfilePreview
                         username={postOwner.username}
                         iconSize="medium"
-                        image={avatar}
+                        image={
+                           process.env.REACT_APP_STATIC_URL +
+                           `/avatars/${postOwner._id}.png`
+                        }
                      />
                      <MoreHorizIcon className="right__header-options" />
                   </div>
@@ -114,18 +115,21 @@ const PostDetail = (props) => {
                      <div className="right__body-list-messages">
                         <>
                            <div className="message">
-                              <Comment user={user} caption={post.caption} />
+                              <Comment
+                                 user={postOwner}
+                                 caption={post.caption}
+                              />
                            </div>
                         </>
                         {Array(3)
                            .fill(0)
                            .map((v, i) => (
                               <div className="message" key={i}>
-                                 <Comment user={user} />
+                                 <Comment user={postOwner} />
 
                                  <div className="message-list-reply">
                                     <Comment
-                                       user={user}
+                                       user={postOwner}
                                        hideSubComments={true}
                                     />
                                  </div>

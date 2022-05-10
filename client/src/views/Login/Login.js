@@ -58,6 +58,7 @@ export default function Login() {
             setCookie("refreshToken", refreshToken, 3);
             sessionStorage.setItem("USER_INFO", null);
 
+            console.log(res);
             if (res.status === "success") history.push("/");
          } catch (error) {
             if (error.response) {

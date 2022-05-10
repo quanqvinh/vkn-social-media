@@ -160,7 +160,7 @@ function Nav() {
                         ></circle>
                      </svg>
 
-                     <Link to="/profile" className="nav__profile">
+                     <Link to={`/profile/${user._id}`} className="nav__profile">
                         Profile
                      </Link>
                   </li>

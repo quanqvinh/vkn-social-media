@@ -1,21 +1,20 @@
 import React from "react";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 
 const LeftNav = ({ handelSetChildForm }) => {
-   const history = useHistory();
-
+   const { id } = useParams();
    return (
       <ul className="body__left-options">
          <NavLink
             exact
-            to="/profile/edit"
+            to={`/profile/${id}/edit`}
             activeClassName="body__left-options--active"
          >
             <li className="body__left-options-edit-profile ">Edit Profile</li>
          </NavLink>
 
          <NavLink
-            to="/profile/edit/password"
+            to={`/profile/${id}/edit/password`}
             activeClassName="body__left-options--active"
          >
             <li className="body__left-options-change-password">
@@ -23,7 +22,7 @@ const LeftNav = ({ handelSetChildForm }) => {
             </li>
          </NavLink>
          <NavLink
-            to="/profile/edit/email"
+            to={`/profile/${id}/edit/email`}
             activeClassName="body__left-options--active"
          >
             <li className="body__left-options-change-email">Change Email</li>

@@ -6,11 +6,12 @@ import Footer from "../Footer/Footer";
 import image from "../../assets/images/profile.jpg";
 import { useSelector } from "react-redux";
 
-function Sidebar(props) {
+function Sidebar({ listOnline }) {
    const user = useSelector((state) => state.user);
+
    return (
       <Sticky topOffset={-80}>
-         <div className="sidebar">
+         <div className="sidebar__user">
             <ProfilePreview
                username={user.username}
                name={user.name || "null"}
@@ -21,7 +22,7 @@ function Sidebar(props) {
                }
                storyBorder={true}
             />
-            <ListsOnline />
+            <ListsOnline listOnline={listOnline} />
 
             <Footer />
          </div>

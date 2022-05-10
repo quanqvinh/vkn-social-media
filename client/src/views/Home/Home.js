@@ -2,7 +2,7 @@ import "./home.scss";
 import Posts from "../Posts/Posts";
 import Sidebar from "../SideBar/SideBar";
 import Header from "../Header/Header";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useStore } from "react-redux";
 import { fetchProfileRequest } from "../../actions/user";
 import { getCookie } from "../Global/cookie";
@@ -67,7 +67,7 @@ const Home = () => {
          <main>
             <div className="container">
                <Posts />
-               <Sidebar />
+               <Sidebar listOnline={listOnline} />
             </div>
          </main>
       </>

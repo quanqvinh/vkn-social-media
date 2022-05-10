@@ -8,6 +8,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 import postApi from "../../apis/postApi";
+import { useSelector } from "react-redux";
 
 const NewPost = (props) => {
    const { username, iconSize, image, resetCurrentOption } = props;
@@ -16,6 +17,7 @@ const NewPost = (props) => {
       imgs: [],
       fileImgs: null,
    });
+   const user = useSelector((state) => state.user);
 
    const [caption, setCaption] = useState("");
 
@@ -96,8 +98,8 @@ const NewPost = (props) => {
          }
       };
       addPost();
-
       resetCurrentOption("newPost");
+      window.location.reload();
    };
 
    return (
@@ -147,9 +149,13 @@ const NewPost = (props) => {
 
                <div className="post__body-content">
                   <ProfilePreview
-                     username={username}
+                     name={user.name}
+                     username={user.username}
                      iconSize={iconSize}
-                     image={image}
+                     image={
+                        process.env.REACT_APP_STATIC_URL +
+                        `/avatars/${user._id}.png`
+                     }
                   />
                   <textarea
                      aria-label="Write a caption..."
