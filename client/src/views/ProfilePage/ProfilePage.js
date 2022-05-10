@@ -1,18 +1,22 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import "./profilePage.scss";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ModeCommentIcon from "@mui/icons-material/ModeComment";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import PostDetail from "../PostDetail/PostDetail";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import userApi from "../../apis/userApi";
 import avatarDefault from "../../assets/images/avatar_default.png";
-
+import { SOCKET } from "../../App";
 const $ = document.querySelector.bind(document);
 
 const ProfilePage = () => {
+   const socket = useContext(SOCKET);
+   const { id } = useParams();
+   const [user, setUser] = useState(null);
+   const owner = useSelector((state) => state.user);
    const [postSelected, setPostSelected] = useState({
       isSelected: false,
       post: null,
@@ -23,11 +27,18 @@ const ProfilePage = () => {
       setPostSelected({ isSelected: false, post: null });
    }, [postSelected]);
 
-   const user = useSelector((state) => state.user);
-
    useEffect(() => {
-      setPosts([...user.posts]);
-   }, []);
+      const fetchUser = async () => {
+         try {
+            let res = await userApi.getById(id);
+            res && setUser(res);
+            setPosts([...res.posts]);
+         } catch (error) {
+            console.log(error);
+         }
+      };
+      fetchUser();
+   }, [id]);
 
    const openModal = () => {
       const overlay = $(".overlay");
@@ -69,6 +80,21 @@ const ProfilePage = () => {
       console.log(avatarDefault);
       e.target.src = avatarDefault;
    };
+
+   const checkFriend = (fId) => {
+      for (let i = 0; i < user.friends.length; i++) {
+         if (i === fId) return true;
+      }
+      return false;
+   };
+
+   const handleAddFriend = () => {
+      socket.emit("user:add_friend_request", {
+         receivedUserId: user._id,
+         receivedUsername: user.username,
+      });
+   };
+
    return (
       <>
          <Header />
@@ -89,85 +115,103 @@ const ProfilePage = () => {
                Cancel
             </p>
          </div>
-         <div className="profile-container">
-            <div className="profile__header">
-               <div className="header__left">
-                  <img
-                     onError={(e) => defaltAvatar(e)}
-                     src={
-                        process.env.REACT_APP_STATIC_URL +
-                        `/avatars/${user._id}.png`
-                     }
-                     alt="avatar"
-                     onClick={openModal}
-                  />
-               </div>
-               <div className="header__right">
-                  <div className="right__header">
-                     <p className="right__header-username">{user.username}</p>
-                     <Link
-                        to="/profile/edit"
-                        className="right__header-btn-edit"
-                     >
-                        Edit Profile
-                     </Link>
+         {user !== null && (
+            <div className="profile-container">
+               <div className="profile__header">
+                  <div className="header__left">
+                     <img
+                        onError={(e) => defaltAvatar(e)}
+                        src={
+                           process.env.REACT_APP_STATIC_URL +
+                           `/avatars/${user._id}.png`
+                        }
+                        alt="avatar"
+                        onClick={openModal}
+                     />
                   </div>
-                  <div className="right__body">
-                     <span className="right__body-posts">
-                        <span>{user.posts.length}</span> posts
-                     </span>
-                     <span className="right__body-friends">
-                        <span>{user.friends.length}</span> friends
-                     </span>
+                  <div className="header__right">
+                     <div className="right__header">
+                        <p className="right__header-username">
+                           {user.username}
+                        </p>
+                        {user._id === owner._id ? (
+                           <Link
+                              to={`/profile/${id}/edit`}
+                              className="right__header-btn-edit"
+                           >
+                              Edit Profile
+                           </Link>
+                        ) : checkFriend(id) ? (
+                           <p className="right__header-btn-edit">Unfriend</p>
+                        ) : (
+                           <p
+                              className="right__header-btn-edit"
+                              onClick={handleAddFriend}
+                           >
+                              Add Friend
+                           </p>
+                        )}
+                     </div>
+                     <div className="right__body">
+                        <span className="right__body-posts">
+                           <span>{user.posts.length}</span> posts
+                        </span>
+                        <span className="right__body-friends">
+                           <span>{user.friends.length || 0}</span> friends
+                        </span>
+                     </div>
+                     <span className="header__right-name">{user.name}</span>
                   </div>
-                  <span className="header__right-name">{user.name}</span>
-               </div>
-            </div>
-
-            <div
-               className={`profile__body ${
-                  postSelected.isSelected ? "profile__body--open-post" : ""
-               }`}
-            >
-               <div className="list-posts">
-                  {posts?.length &&
-                     posts.map((post) => (
-                        <div
-                           className="post"
-                           key={post._id}
-                           onClick={() =>
-                              setPostSelected({ isSelected: true, post })
-                           }
-                        >
-                           <div className="post__img">
-                              <img
-                                 src={
-                                    process.env.REACT_APP_STATIC_URL +
-                                    `/posts/${post._id}/${post.imgs[0]}`
-                                 }
-                                 alt="postImage"
-                              />
-                           </div>
-                           <div className="post__overlay">
-                              <div className="post__react">
-                                 <FavoriteIcon />
-                                 <span>{post.likes.length}</span>
-                              </div>
-                              <div className="post__comments">
-                                 <ModeCommentIcon />
-                                 <span>{post.comments.length}</span>
-                              </div>
-                           </div>
-                        </div>
-                     ))}
                </div>
 
-               {postSelected.isSelected && (
-                  <PostDetail post={postSelected.post} closePost={closePost} />
-               )}
+               <div
+                  className={`profile__body ${
+                     postSelected.isSelected ? "profile__body--open-post" : ""
+                  }`}
+               >
+                  <div className="list-posts">
+                     {posts?.length &&
+                        posts.map((post) => (
+                           <div
+                              className="post"
+                              key={post._id}
+                              onClick={() =>
+                                 setPostSelected({ isSelected: true, post })
+                              }
+                           >
+                              <div className="post__img">
+                                 <img
+                                    src={
+                                       process.env.REACT_APP_STATIC_URL +
+                                       `/posts/${post._id}/${post.imgs[0]}`
+                                    }
+                                    alt="postImage"
+                                 />
+                              </div>
+                              <div className="post__overlay">
+                                 <div className="post__react">
+                                    <FavoriteIcon />
+                                    <span>{post.likes.length}</span>
+                                 </div>
+                                 <div className="post__comments">
+                                    <ModeCommentIcon />
+                                    <span>{post.comments.length}</span>
+                                 </div>
+                              </div>
+                           </div>
+                        ))}
+                  </div>
+
+                  {postSelected.isSelected && (
+                     <PostDetail
+                        post={postSelected.post}
+                        closePost={closePost}
+                     />
+                  )}
+               </div>
+               <Footer className="profile__footer" />
             </div>
-            <Footer className="profile__footer" />
-         </div>
+         )}
       </>
    );
 };

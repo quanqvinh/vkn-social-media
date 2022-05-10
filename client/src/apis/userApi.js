@@ -22,15 +22,24 @@ const userApi = {
    },
 
    getRoomById: (roomId, params) => {
+      let accessToken = getCookie("accessToken");
       const url = `/room/${roomId}`;
       return axiosClient.get(url, {
+         headers: {
+            "access-token": accessToken,
+         },
          params,
       });
    },
 
    getById: (userId) => {
+      let accessToken = getCookie("accessToken");
       const url = `user/${userId}`;
-      return axiosClient.get(url);
+      return axiosClient.get(url, {
+         headers: {
+            "access-token": accessToken,
+         },
+      });
    },
 
    changeAvatar: (data) => {
@@ -47,7 +56,13 @@ const userApi = {
 
    edit: (data) => {
       const url = `/user/edit/info`;
-      return axiosClient.patch(url, { ...data });
+      let accessToken = getCookie("accessToken");
+      return axiosClient.patch(url, {
+         headers: {
+            "access-token": accessToken,
+         },
+         ...data,
+      });
    },
 
    editPassword: (data) => {

@@ -1,8 +1,4 @@
 import "./nav.scss";
-import { ReactComponent as Home } from "../../../assets/images/home.svg";
-import { ReactComponent as Inbox } from "../../../assets/images/inbox.svg";
-import { ReactComponent as Notifications } from "../../../assets/images/notifications.svg";
-import { ReactComponent as NewPostIcon } from "../../../assets/images/newPost.svg";
 import NewPost from "../../NewPost/NewPost";
 import ProfileIcon from "../../Profile/ProfilePreview/ProfileIcon";
 
@@ -12,9 +8,30 @@ import { Link } from "react-router-dom";
 import { getCookie, setCookie } from "../../Global/cookie";
 import { NavLink } from "react-router-dom";
 import { SOCKET } from "../../../App";
-import { useContext } from "react";
-
+import { useContext, useRef } from "react";
+import ProfilePreview from "../../Profile/ProfilePreview/ProfilePreview";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import AddIcon from "@mui/icons-material/Add";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import ChatIcon from "@mui/icons-material/Chat";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import HomeIcon from "@mui/icons-material/Home";
 const $ = document.querySelector.bind(document);
+const clickOutsideRef = (content_ref, toggle_ref) => {
+   document.addEventListener("mousedown", (e) => {
+      // user click toggle
+      if (toggle_ref.current && toggle_ref.current.contains(e.target)) {
+         toggle_ref.current.classList.toggle("notification--open");
+      } else {
+         // user click outside toggle and content
+         if (content_ref.current && !content_ref.current.contains(e.target)) {
+            toggle_ref.current.classList.remove("notification--open");
+         }
+      }
+   });
+};
 
 function Nav() {
    const user = useSelector((state) => state.user);
@@ -22,8 +39,10 @@ function Nav() {
    const [currentOption, setCurrentOption] = useState({
       newPost: false,
       notification: false,
-      parentPage: "home",
    });
+   const statePage = useRef(sessionStorage.getItem("STATE_PAGE"));
+   const notificationRef = useRef(null);
+   const notificationContentRef = useRef(null);
 
    const socket = useContext(SOCKET);
 
@@ -34,73 +53,113 @@ function Nav() {
       socket.disconnect();
    };
 
-   const handelClick = (e) => {
-      let target = e.target.closest("svg").getAttribute("aria-label");
-      let curOption;
-      const parentPageElement = $(".navLink--active").getAttribute("href");
-      let parentPage = "home";
-
-      switch (target) {
-         case "New Post":
-            curOption = "newPost";
-            break;
-         default:
-            curOption = "notification";
-            break;
-      }
-
-      if (parentPageElement === "/inbox") {
-         parentPage = "inbox";
-      }
-
-      const newOptions = Object.assign(
-         ...Object.keys(currentOption).map((k) => ({ [k]: false }))
-      );
-
+   const handelClickNotification = () => {
       setCurrentOption({
-         ...newOptions,
-         [curOption]: true,
-         parentPage,
+         ...currentOption,
+         notification: !currentOption.notification,
+         newPost: false,
       });
    };
 
-   const resetCurrentOption = (option) => {
-      switch (option) {
-         case "newPost":
-            setCurrentOption({
-               ...currentOption,
-               newPost: false,
-            });
-            break;
-         default:
-            setCurrentOption({
-               ...currentOption,
-               notification: false,
-            });
-            break;
-      }
+   const handelClickNewPost = () => {
+      setCurrentOption({
+         ...currentOption,
+         newPost: !currentOption.newPost,
+         notification: false,
+      });
    };
 
+   const handelClickInbox = () => {
+      sessionStorage.setItem("STATE_PAGE", "inbox");
+   };
+
+   const handelClickHome = () => {
+      sessionStorage.setItem("STATE_PAGE", "home");
+   };
+
+   clickOutsideRef(notificationContentRef, notificationRef);
+
+   console.log(
+      notificationRef?.current?.classList.contains("notification--open")
+   );
    return (
       <>
          <div className="menu">
             <NavLink exact to="/" activeClassName="navLink--active">
-               <Home className="icon" />
+               {statePage.current === "home" ? (
+                  <HomeIcon
+                     className={"icon icon--active"}
+                     onClick={() => handelClickHome()}
+                  />
+               ) : (
+                  <HomeOutlinedIcon
+                     className={"icon"}
+                     onClick={() => handelClickHome()}
+                  />
+               )}
             </NavLink>
             <NavLink to="/inbox" activeClassName="navLink--active">
-               <Inbox className="icon" />
+               {statePage.current === "inbox" ? (
+                  <ChatIcon
+                     className={"icon icon--active"}
+                     onClick={() => handelClickInbox()}
+                  />
+               ) : (
+                  <ChatBubbleOutlineOutlinedIcon
+                     className={"icon"}
+                     onClick={() => handelClickInbox()}
+                  />
+               )}
             </NavLink>
-            <NewPostIcon
-               className={`icon ${currentOption.newPost ? "icon--active" : ""}`}
-               onClick={(e) => handelClick(e)}
-            />
+            {currentOption.newPost ? (
+               <AddBoxIcon
+                  className={"icon icon--active"}
+                  onClick={() => handelClickNewPost()}
+               />
+            ) : (
+               <AddIcon
+                  className={"icon"}
+                  onClick={() => handelClickNewPost()}
+               />
+            )}
 
-            <Notifications
-               className={`icon ${
-                  currentOption.notification ? "icon--active" : ""
-               }`}
-               onClick={(e) => handelClick(e)}
-            />
+            <div className="notification" ref={notificationRef}>
+               <FavoriteIcon
+                  className={"icon icon--active"}
+                  onClick={() => handelClickNotification()}
+               />
+               <FavoriteBorderIcon
+                  className={"icon icon--dont-active"}
+                  onClick={() => handelClickNotification()}
+               />
+               <div className="arrow"></div>
+               <ul
+                  className="dropdown dropdown__notification"
+                  ref={notificationContentRef}
+               >
+                  {Array(7)
+                     .fill(0)
+                     .map((item, index) => (
+                        <li className="dropdown__notification-item">
+                           <ProfilePreview
+                              username={user.username}
+                              name={"liked your comment"}
+                              iconSize="medium"
+                              image={
+                                 process.env.REACT_APP_STATIC_URL +
+                                 `/avatars/${user._id}.png`
+                              }
+                           />
+                           <div className="dropdown__notification-item-action">
+                              <button className="btn btn-accept">Accept</button>
+                              <button className="btn btn-decline">
+                                 Decline
+                              </button>
+                           </div>
+                        </li>
+                     ))}
+               </ul>
+            </div>
 
             <div className="profile" onClick={() => setIsDropDown(!isDropDown)}>
                <ProfileIcon
@@ -160,7 +219,7 @@ function Nav() {
                         ></circle>
                      </svg>
 
-                     <Link to="/profile" className="nav__profile">
+                     <Link to={`/profile/${user._id}`} className="nav__profile">
                         Profile
                      </Link>
                   </li>
@@ -174,7 +233,7 @@ function Nav() {
          </div>
          {currentOption?.newPost && (
             <NewPost
-               resetCurrentOption={resetCurrentOption}
+               handelClickNewPost={handelClickNewPost}
                username={user.username}
                iconSize="small"
                image={user.image}

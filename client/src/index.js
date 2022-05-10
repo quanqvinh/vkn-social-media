@@ -5,6 +5,12 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import store from "./store";
 import { Provider } from "react-redux";
+import "./assets/boxicons-2.0.7/css/boxicons.min.css";
+
+import "./assets/styles/grid.css";
+import "./assets/styles/theme.css";
+
+document.title = "VKN Social Media";
 
 ReactDOM.render(
    <Provider store={store}>

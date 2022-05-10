@@ -11,7 +11,9 @@ const Comment = (props) => {
          <ProfilePreview
             username={user.username}
             iconSize="medium"
-            image={avatar}
+            image={
+               process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`
+            }
             hideAccountName={true}
          />
          <div className="message__content">

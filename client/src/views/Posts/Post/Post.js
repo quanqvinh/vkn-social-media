@@ -6,10 +6,13 @@ import Comment from "./Comment";
 import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import PostDetail from "../../PostDetail/PostDetail";
 
 function Post(props) {
    const {
+      handelLike,
+      post,
       avatar,
       id,
       storyBorder,
@@ -21,18 +24,10 @@ function Post(props) {
       content,
    } = props;
 
-   const [isShowCmt, setIsShowCmt] = useState(false);
+   const [like, setLike] = useState(likedByNumber);
+   const [isShowPost, setIsShowPost] = useState(false);
    const [isCmt, setIsCmt] = useState(false);
    const [comment, setComment] = useState("");
-
-   const handelShowCmts = () => {
-      setIsShowCmt(!isShowCmt);
-   };
-
-   const handelCmt = (e) => {
-      setComment(e.target.value);
-      setIsCmt(true);
-   };
 
    const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
       <button
@@ -72,6 +67,15 @@ function Post(props) {
       nextArrow: <SlickArrowRight />,
       prevArrow: <SlickArrowLeft />,
    };
+
+   const handelViewPostDetail = () => {
+      setIsShowPost(!isShowPost);
+   };
+
+   const handelLikePost = useCallback((like) => {
+      setLike(like);
+   }, []);
+
    return (
       <div className="card">
          <header>
@@ -79,7 +83,7 @@ function Post(props) {
                image={avatar}
                iconSize="medium"
                storyBorder={storyBorder}
-               username={accountName}
+               username={post.username}
             />
             <PostButton className="cardButton" />
          </header>
@@ -87,6 +91,8 @@ function Post(props) {
             {imgs?.length > 0 &&
                imgs.map((img) => (
                   <img
+                     style={{ height: 600 }}
+                     onClick={handelViewPostDetail}
                      key={img}
                      src={
                         process.env.REACT_APP_STATIC_URL + `/posts/${id}/${img}`
@@ -95,54 +101,24 @@ function Post(props) {
                   />
                ))}
          </Slider>
-         {/* <img className="cardImage" src={image} alt="card content" /> */}
-         <PostMenu />
+         <PostMenu
+            postId={post._id}
+            handelLikePost={handelLikePost}
+            like={like}
+         />
          <div className="likedBy">
             <span>
-               {likedByNumber} {likedByNumber > 1 ? "likes" : "like"}
+               {like} {like > 1 ? "likes" : "like"}
             </span>
          </div>
          <div className="post__author">
-            {/* <span className="post__author-username">{accountName}</span> */}
-            <span className="post__author-username">kien108</span>
+            <span className="post__author-username">{accountName}</span>
             <span className="post__author-content">{content}</span>
          </div>
-         <span className="view__comments" onClick={handelShowCmts}>
-            {comments?.length > 0 ? `View all ${comments.length} comments` : ""}
-         </span>
-         {isShowCmt && (
-            <div className="comments">
-               {comments.map((comment) => {
-                  return (
-                     <Comment
-                        key={comment.id}
-                        accountName={comment.user}
-                        comment={comment.text}
-                     />
-                  );
-               })}
-            </div>
+         <div className="timePosted">{hours} hours ago</div>
+         {isShowPost && (
+            <PostDetail post={post} closePost={handelViewPostDetail} />
          )}
-
-         <div className="timePosted">{hours} HOURS AGO</div>
-         <div className="addComment">
-            <textarea
-               onChange={(e) => handelCmt(e)}
-               value={comment}
-               className="commentText"
-               aria-label="Add a comment…"
-               placeholder="Add a comment…"
-               autoComplete="off"
-               autoCorrect="off"
-            ></textarea>
-            <div
-               className={`postText ${
-                  isCmt && comment ? "postText--active" : ""
-               }`}
-            >
-               Post
-            </div>
-         </div>
       </div>
    );
 }

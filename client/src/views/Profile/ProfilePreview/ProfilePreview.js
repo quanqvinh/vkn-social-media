@@ -1,10 +1,11 @@
 import "./profilePreview.scss";
 import ProfileIcon from "./ProfileIcon";
-import users from "../../../data/users";
 import { memo } from "react";
+import { useHistory } from "react-router-dom";
 
 function ProfilePreview(props) {
    const {
+      userId,
       username,
       name,
       urlText,
@@ -18,12 +19,20 @@ function ProfilePreview(props) {
       room,
    } = props;
 
-   let accountName = username
-      ? username
-      : users[Math.floor(Math.random() * users.length)].username;
+   const history = useHistory();
 
    const handelGetToRoom = () => {
-      if (!(src === "ListChat")) return;
+      if (!(src === "ListChat")) {
+         if (history.location.pathname.includes("profile")) {
+            history.push(`/profile/${userId}`);
+            const searchList = document.querySelector(".search__list");
+            searchList.classList.remove("search__list--open");
+            return;
+         }
+         history.push(`profile/${userId}`);
+         return;
+      }
+
       let selectedRoom = {
          chatMate: room.chatMate,
          roomId: room._id,
@@ -41,11 +50,9 @@ function ProfilePreview(props) {
             storyBorder={storyBorder}
             image={image}
          />
-         {(accountName || name) && !hideAccountName && (
+         {username && !hideAccountName && (
             <div className="textContainer">
-               <span className={`accountName ${captionSize}`}>
-                  {accountName}
-               </span>
+               <span className={`accountName ${captionSize}`}>{username}</span>
                <span className={`name ${captionSize}`}>{name}</span>
             </div>
          )}

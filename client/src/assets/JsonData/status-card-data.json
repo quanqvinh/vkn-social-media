@@ -1,0 +1,17 @@
+[
+   {
+      "icon": "bx bxs-user-pin",
+      "count": "108",
+      "title": "Users"
+   },
+   {
+      "icon": "bx bx-news",
+      "count": "23",
+      "title": "New Posts"
+   },
+   {
+      "icon": "bx bxs-message-dots",
+      "count": "1008",
+      "title": "Comments"
+   }
+]

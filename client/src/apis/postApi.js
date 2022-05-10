@@ -27,6 +27,14 @@ const postApi = {
       });
    },
 
+   like: (postId) => {
+      const url = `/post/${postId}/like`;
+      let accessToken = getCookie("accessToken");
+      return axiosClient.patch(url, {
+         headers: { "access-token": accessToken },
+      });
+   },
+
    add: (data) => {
       const url = "/post/new";
       return axiosClient.post(url, data, {

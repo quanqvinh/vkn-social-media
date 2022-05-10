@@ -128,11 +128,12 @@
    .post__body {
       display: grid;
       grid-template-columns: 520px 340px;
-      height: 524px;
+      height: 524px !important;
       padding-left: 2px;
 
       &-img {
-         height: 524px;
+         height: 524px !important;
+         width: 524px;
          position: relative;
 
          &:hover .slick-arrow {
@@ -143,6 +144,7 @@
             display: block;
             width: 100%;
             height: 524px;
+            border-radius: 6px;
          }
       }
 
@@ -158,7 +160,7 @@
             outline: none;
             overflow: auto;
             resize: none;
-            font-size: 1rem;
+            font-size: 0.9rem;
             height: 300px;
             color: #252525;
             padding: 0 4px;

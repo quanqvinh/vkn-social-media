@@ -15,6 +15,7 @@ import { io } from "socket.io-client";
 import { getCookie } from "./views/Global/cookie";
 import { useState } from "react";
 import EditEmail from "./views/EditProfile/EditEmail/EditEmail";
+import Layout from "./components/layout/Layout";
 
 export const SOCKET = createContext();
 function App() {
@@ -31,6 +32,9 @@ function App() {
          },
       });
       setSocket(socket);
+      socket.on("user:print_notification", (payload) => {
+         console.log(payload);
+      });
    }, [user]);
 
    return (
@@ -44,17 +48,16 @@ function App() {
                   <Route path={"/inbox"}>
                      <Inbox />
                   </Route>
-
-                  <Route exact path={"/profile"}>
+                  <Route exact path={"/profile/:id"}>
                      <ProfilePage />
                   </Route>
-                  <Route exact path={"/profile/edit"}>
+                  <Route exact path={"/profile/:id/edit"}>
                      <EditProfile />
                   </Route>
-                  <Route path={"/profile/edit/password"}>
+                  <Route path={"/profile/:id/edit/password"}>
                      <EditPassword />
                   </Route>
-                  <Route path={"/profile/edit/email"}>
+                  <Route path={"/profile/:id/edit/email"}>
                      <EditEmail />
                   </Route>
                   <Route path="/login">
@@ -65,6 +68,9 @@ function App() {
                   </Route>
                   <Route path="/auth/verify-email">
                      <VerifyEmail />
+                  </Route>
+                  <Route path="/dashboard">
+                     <Layout />
                   </Route>
                </Switch>
             </div>

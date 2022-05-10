@@ -9,11 +9,13 @@ function Posts(props) {
    const user = useSelector((state) => state.user);
    const [posts, setPosts] = useState([]);
    const [listImg, setListImg] = useState([]);
+   const [isLike, setIsLike] = useState(false);
 
    useEffect(() => {
       const fetchPost = async () => {
          try {
             const res = await postApi.newFeeds();
+            console.log(res);
             res?.status === "success" && setPosts([...res.posts]);
          } catch (error) {
             console.log(error.message);
@@ -22,7 +24,7 @@ function Posts(props) {
       if (sessionStorage.getItem("USER_INFO")) {
          fetchPost();
       }
-   }, []);
+   }, [isLike]);
 
    function isEmpty(obj) {
       for (var key in obj) {
@@ -31,6 +33,10 @@ function Posts(props) {
       return true;
    }
 
+   const handelLike = () => {
+      setIsLike(!isLike);
+   };
+
    return (
       <div className="cards">
          {!isEmpty(user) &&
@@ -38,6 +44,8 @@ function Posts(props) {
             posts?.length > 0 &&
             posts.map((post) => (
                <Post
+                  handelLike={handelLike}
+                  post={post}
                   avatar={
                      process.env.REACT_APP_STATIC_URL +
                      `/avatars/${post.user}.png`
@@ -49,7 +57,6 @@ function Posts(props) {
                   id={post._id}
                   imgs={post.imgs}
                   comments={post.comments}
-                  likedByText="dadatlacak"
                   likedByNumber={post.numberOfLikes}
                   hours={post.createdAt}
                />

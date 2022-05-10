@@ -3,16 +3,20 @@ import Nav from "./Navigation/Nav";
 import logo from "../../assets/images/instagramLogo.png";
 import searchIcon from "../../assets/images/searchIcon.png";
 
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import ProfilePreview from "../Profile/ProfilePreview/ProfilePreview";
 import userApi from "../../apis/userApi";
+
+const $ = document.querySelector.bind(document);
+
 function Header() {
    const [isSearch, setIsSearch] = useState(false);
    const [searchQuery, setSearchQuery] = useState("");
    const [listSearch, setListSearch] = useState([]);
    const listSearchElement = useRef(null);
    const debounceRef = useRef(null);
+
    const handelSearch = (e) => {
       setSearchQuery(e.target.value);
       const search = async () => {
@@ -42,11 +46,19 @@ function Header() {
 
    const handelSearchBlur = () => {
       setIsSearch(!isSearch);
-      const domNode = listSearchElement.current;
-      if (domNode) {
-         domNode.classList.remove("search__list--open");
-      }
    };
+
+   useEffect(() => {
+      const appElement = $(".App");
+      appElement.onclick = (e) => {
+         if (e.target.closest(".search")) return;
+         const domNode = listSearchElement.current;
+         if (domNode) {
+            domNode.classList.remove("search__list--open");
+         }
+      };
+   }, []);
+
    return (
       <div className="navigation">
          <div className="container">
@@ -77,6 +89,7 @@ function Header() {
                         listSearch.map((user) => (
                            <ProfilePreview
                               key={user._id}
+                              userId={user._id}
                               image={
                                  process.env.REACT_APP_STATIC_URL +
                                  `/avatars/${user._id}.png`
