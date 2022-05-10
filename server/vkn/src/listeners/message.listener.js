@@ -7,7 +7,8 @@ const objectIdHelper = require('../utils/objectIdHelper');
 const mongodbHelper = require('../utils/mongodbHelper');
 
 async function validateRoom(roomId, user1, user2) {
-    let room = await Room.aggregate([{
+    let room = await Room.aggregate([
+        {
             $match: {
                 _id: ObjectId(roomId),
             },
@@ -21,10 +22,8 @@ async function validateRoom(roomId, user1, user2) {
     console.log(room);
     if (room.length === 0) return null;
     let chatMate = room[0].chatMate;
-    if (objectIdHelper.compareArray(chatMate, [user1, user2]))
-        return true;
-    if (objectIdHelper.compareArray(chatMate, [user2, user1]))
-        return true;
+    if (objectIdHelper.compareArray(chatMate, [user1, user2])) return true;
+    if (objectIdHelper.compareArray(chatMate, [user2, user1])) return true;
     return false;
 }
 
@@ -34,36 +33,47 @@ module.exports = (io, socket) => {
     socket.on('chat:send_message', async (payload) => {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                
                 message = new Message({
                     sendBy: socket.handshake.auth.username,
                     content,
                 });
 
-                let validate = await validateRoom(roomId, userId, socket.handshake.auth.userId);
+                let validate = await validateRoom(
+                    roomId,
+                    userId,
+                    socket.handshake.auth.userId
+                );
                 if (validate === null) {
-                    let savedRoom = await Room.create([{
-                        _id: roomId,
-                        chatMate: [userId, socket.handshake.auth.userId],
-                        messages: [message]
-                    }], { session });
+                    let savedRoom = await Room.create(
+                        [
+                            {
+                                _id: roomId,
+                                chatMate: [
+                                    userId,
+                                    socket.handshake.auth.userId,
+                                ],
+                                messages: [message],
+                            },
+                        ],
+                        { session }
+                    );
 
-                    if (!savedRoom)
-                        throw new Error('Create room failed');
+                    if (!savedRoom) throw new Error('Create room failed');
                     return;
-                }
-                else if (validate === false)
-                    throw new Error('Unauthorized');
-    
-    
-                let updatedRoom = await Room.updateOne({
-                    _id: roomId
-                }, {
-                    $push: {
-                        messages: message
+                } else if (validate === false) throw new Error('Unauthorized');
+
+                let updatedRoom = await Room.updateOne(
+                    {
+                        _id: roomId,
                     },
-                }, { session });
-    
+                    {
+                        $push: {
+                            messages: message,
+                        },
+                    },
+                    { session }
+                );
+
                 if (updatedRoom.modifiedCount < 1)
                     throw new Error('Add new message failed');
             },
@@ -72,19 +82,20 @@ module.exports = (io, socket) => {
                     roomId,
                     userId,
                     username: socket.handshake.auth.username,
-                    message: message._doc
+                    message: message._doc,
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            }
+            },
         });
     });
 
     socket.on('chat:send_image', async (payload) => {
         let { username, userId, roomId, image } = payload;
-        let message, roomResource = resourceHelper.createRoomImageFile(roomId);
+        let message,
+            roomResource = resourceHelper.createRoomImageFile(roomId);
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 message = new Message({
@@ -93,37 +104,50 @@ module.exports = (io, socket) => {
                 });
                 let imageBase64 = image.split(';base64,')[1];
 
-                let validate = await validateRoom(roomId, userId, socket.handshake.auth.userId);
+                let validate = await validateRoom(
+                    roomId,
+                    userId,
+                    socket.handshake.auth.userId
+                );
                 if (validate === null) {
-                    let savedRoom = await Room.create([{
-                        _id: roomId,
-                        chatMate: [userId, socket.handshake.auth.userId],
-                        messages: [message]
-                    }], { session });
+                    let savedRoom = await Room.create(
+                        [
+                            {
+                                _id: roomId,
+                                chatMate: [
+                                    userId,
+                                    socket.handshake.auth.userId,
+                                ],
+                                messages: [message],
+                            },
+                        ],
+                        { session }
+                    );
 
-                    if (!savedRoom)
-                        throw new Error('Create room failed');
+                    if (!savedRoom) throw new Error('Create room failed');
                     return;
-                }
-                else if (validate === false)
-                    throw new Error('Unauthorized');
+                } else if (validate === false) throw new Error('Unauthorized');
 
-                let updatedRoom = await Room.updateOne({
-                    _id: roomId
-                }, {
-                    $push: {
-                        messages: message
+                let updatedRoom = await Room.updateOne(
+                    {
+                        _id: roomId,
                     },
-                }, { session });
-    
+                    {
+                        $push: {
+                            messages: message,
+                        },
+                    },
+                    { session }
+                );
+
                 if (updatedRoom.modifiedCount < 1)
                     throw new Error('Add new message failed');
 
-                if (!fs.existsSync(roomResource)) 
-                    fs.mkdirSync(roomResource);
+                if (!fs.existsSync(roomResource)) fs.mkdirSync(roomResource);
                 fs.writeFileSync(
                     roomResource + `/${message._id.toString()}.png`,
-                    imageBase64, { encoding: 'base64' }
+                    imageBase64,
+                    { encoding: 'base64' }
                 );
             },
             successCallback() {
@@ -131,7 +155,7 @@ module.exports = (io, socket) => {
                     roomId,
                     userId,
                     username: socket.handshake.auth.username,
-                    message: message._doc
+                    message: message._doc,
                 });
             },
             errorCallback(error) {
@@ -140,16 +164,19 @@ module.exports = (io, socket) => {
                     fs.rmSync(filePath, {
                         force: true,
                         recursive: true,
-                        maxRetries: 5
+                        maxRetries: 5,
                     });
-                if (fs.existsSync(roomResource) && fse.emptyDirSync(roomResource))
+                if (
+                    fs.existsSync(roomResource) &&
+                    fse.emptyDirSync(roomResource)
+                )
                     fs.rmdirSync(roomResource, {
                         recursive: true,
-                        maxRetries: 5
+                        maxRetries: 5,
                     });
                 console.log(error);
                 socket.emit('error');
-            }
+            },
         });
     });
 };

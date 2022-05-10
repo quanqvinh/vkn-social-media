@@ -5,17 +5,17 @@ const userHandlerRegister = require('./user.listener');
 const homeHandlerRegister = require('./home.listener');
 
 module.exports = (io) => {
-	io.use(authenMiddleware);
-	io.on('connection', (socket) => {
-		console.log(`Socket ID ${socket.id} connect!`);
-		socket.join(socket.handshake.auth.username);
-		socket.join(socket.handshake.auth.userId);
+    io.use(authenMiddleware);
+    io.on('connection', (socket) => {
+        console.log(`Socket ID ${socket.id} connect!`);
+        socket.join(socket.handshake.auth.username);
+        socket.join(socket.handshake.auth.userId);
 
-		homeHandlerRegister(io, socket);
-		messageHandlerRegister(io, socket);
-		userHandlerRegister(io, socket);
-		postHandlerRegister(io, socket);
-	});
+        homeHandlerRegister(io, socket);
+        messageHandlerRegister(io, socket);
+        userHandlerRegister(io, socket);
+        postHandlerRegister(io, socket);
+    });
 };
 
 /* All event emit to sockets <<<<<<<<<<<<<<<<
