@@ -5,7 +5,13 @@
     "main": "index.js",
     "scripts": {
         "prepare": "husky install",
+        "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm run pretty-quick"
+        }
     },
     "repository": {
         "type": "git",
@@ -19,6 +25,7 @@
     "homepage": "https://github.com/quanqvinh/vkn-social-media#readme",
     "devDependencies": {
         "husky": "^8.0.1",
+        "prettier": "^2.6.2",
         "pretty-quick": "^3.1.3"
     }
 }
