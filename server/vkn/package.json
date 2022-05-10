@@ -7,7 +7,8 @@
         "test": "node src/server.js",
         "start": "nodemon --inspect src/server.js",
         "prettier": "prettier --write .",
-        "pretty-quick": "pretty-quick --staged"
+        "pretty-quick": "pretty-quick --staged",
+        "prepare": "husky install"
     },
     "husky": {
         "hooks": {
