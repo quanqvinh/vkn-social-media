@@ -57,6 +57,7 @@ export default function Login() {
             setCookie("accessToken", accessToken, 3);
             setCookie("refreshToken", refreshToken, 3);
             sessionStorage.setItem("USER_INFO", null);
+            sessionStorage.setItem("STATE_PAGE", "home");
 
             console.log(res);
             if (res.status === "success") history.push("/");

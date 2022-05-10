@@ -11,7 +11,7 @@ import postApi from "../../apis/postApi";
 import { useSelector } from "react-redux";
 
 const NewPost = (props) => {
-   const { username, iconSize, image, resetCurrentOption } = props;
+   const { iconSize, handelClickNewPost } = props;
    const [selectImgs, setSelectImgs] = useState({
       isImgFilled: false,
       imgs: [],
@@ -98,16 +98,13 @@ const NewPost = (props) => {
          }
       };
       addPost();
-      resetCurrentOption("newPost");
+      handelClickNewPost();
       window.location.reload();
    };
 
    return (
       <>
-         <div
-            className="over-lay"
-            onClick={() => resetCurrentOption("newPost")}
-         ></div>
+         <div className="over-lay" onClick={handelClickNewPost}></div>
          <div className="post-container">
             <div className="post__header">
                <p className="post__header-title">Create New Post</p>

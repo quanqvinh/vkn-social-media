@@ -32,14 +32,10 @@ function App() {
          },
       });
       setSocket(socket);
+      socket.on("user:print_notification", (payload) => {
+         console.log(payload);
+      });
    }, [user]);
-
-   useEffect(() => {
-      socket &&
-         socket.on("user:print_notification", (payload) => {
-            console.log(payload);
-         });
-   }, [socket]);
 
    return (
       <Router>
