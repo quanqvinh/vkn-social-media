@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "start": "npm run server-build",
-        "server-build": "cd server && npm start",
-        "client-build": "cd client && npm start",
+        "api": "cd server && npm start",
+        "web": "cd client && npm start",
         "prepare": "husky install",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
