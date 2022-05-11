@@ -4,7 +4,7 @@
     "description": "Build social-media using MERN stack",
     "main": "index.js",
     "scripts": {
-        "start": "npm run server-build",
+        "start": "npm run api",
         "api": "cd server && npm start",
         "web": "cd client && npm start",
         "postinstall": "cd server && npm install --force",
