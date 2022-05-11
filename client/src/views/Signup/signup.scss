@@ -1,42 +1,42 @@
-@import "../Login/login.scss";
+@import '../Login/login.scss';
 
 .signup__container {
-   width: 100%;
-   display: flex;
-   justify-content: center;
-   align-items: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-   .form__area {
-      flex-basis: 470px;
+  .form__area {
+    flex-basis: 470px;
 
-      .input__error {
-         color: red;
-         font-size: 13px;
-         text-align: start;
-         padding-left: 8px;
-         transition: 0.2s ease-in-out;
-      }
+    .input__error {
+      color: red;
+      font-size: 13px;
+      text-align: start;
+      padding-left: 8px;
+      transition: 0.2s ease-in-out;
+    }
 
-      .input--error {
-         border-color: red;
-      }
-   }
+    .input--error {
+      border-color: red;
+    }
+  }
 
-   h4 {
-      color: $font-color-secondary;
-      font-weight: bold;
-      margin: 0 40px 10px;
-   }
+  h4 {
+    color: $font-color-secondary;
+    font-weight: bold;
+    margin: 0 40px 10px;
+  }
 
-   .primary-insta-btn {
-      margin: 0.5rem 0;
-      font-size: 14px;
-   }
+  .primary-insta-btn {
+    margin: 0.5rem 0;
+    font-size: 14px;
+  }
 
-   .policies {
-      text-align: center;
-      color: rgb(165, 165, 165);
-      margin: 10px 40px;
-      font-size: 12px;
-   }
+  .policies {
+    text-align: center;
+    color: rgb(165, 165, 165);
+    margin: 10px 40px;
+    font-size: 12px;
+  }
 }

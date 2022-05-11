@@ -5,6 +5,7 @@
   "bracketSpacing": true,
   "arrowParens": "avoid",
   "bracketSameLine": true,
+  "proseWrap": "never",
   "overrides": [
     {
       "files": ["*.{js,json}"],

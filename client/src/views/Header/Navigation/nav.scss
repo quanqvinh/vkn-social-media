@@ -1,244 +1,244 @@
-@import "../../../assets/styles/variables";
+@import '../../../assets/styles/variables';
 
 a.navLink--active {
-   svg {
-      color: #000 !important;
-   }
+  svg {
+    color: #000 !important;
+  }
 }
 
 .menu {
-   display: flex;
+  display: flex;
 
-   .icon {
-      margin-right: 1em;
-      width: 30px;
-      height: 30px;
-      transition: 0.5s ease all;
+  .icon {
+    margin-right: 1em;
+    width: 30px;
+    height: 30px;
+    transition: 0.5s ease all;
 
-      &:hover {
-         opacity: 0.1;
-         color: black !important;
-      }
+    &:hover {
+      opacity: 0.1;
+      color: black !important;
+    }
 
-      &:active {
-         transform: translateY(6px);
-      }
-      &--active {
-         color: #000;
-      }
+    &:active {
+      transform: translateY(6px);
+    }
+    &--active {
+      color: #000;
+    }
 
-      &--tempDisable {
-         color: #fff;
-      }
+    &--tempDisable {
+      color: #fff;
+    }
 
-      &:hover {
-         cursor: pointer;
-         opacity: 0.7;
-      }
-   }
+    &:hover {
+      cursor: pointer;
+      opacity: 0.7;
+    }
+  }
 
-   .profileIcon {
-      margin-top: -3px;
-   }
+  .profileIcon {
+    margin-top: -3px;
+  }
 
-   .profile__option {
+  .profile__option {
+    display: none;
+    position: relative;
+    top: 100%;
+    right: -25px;
+
+    .icon--active {
       display: none;
-      position: relative;
-      top: 100%;
-      right: -25px;
+    }
 
-      .icon--active {
-         display: none;
+    .arrow {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -3px;
+      right: 31px;
+
+      background: #fff;
+      border: 1px solid #fff;
+      box-shadow: 0px 0px 4px #888;
+
+      height: 14px;
+      width: 14px;
+
+      transform: rotate(45deg);
+    }
+
+    .dropdown {
+      position: absolute;
+      z-index: 10;
+      top: 5px;
+      right: 0;
+      width: 200px;
+
+      box-shadow: 0px 1px 4px #888;
+      border-radius: 4px;
+      background-color: #fff;
+      list-style: none;
+
+      li {
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        padding: 8px 17px;
+        font-size: 13px;
+        cursor: pointer;
+
+        a {
+          font-weight: 400;
+          color: $font-color-primary;
+          font-size: 13px;
+          width: 100%;
+          text-align: left;
+        }
+
+        &:hover {
+          background-color: #fafafa;
+        }
+
+        &:last-child {
+          border-top: 2px solid #ccc;
+        }
+
+        .nav__profile {
+          margin-left: 8px;
+        }
       }
+    }
+  }
 
+  .notification {
+    position: relative;
+
+    .icon--active {
+      display: none;
+    }
+
+    &--open {
       .arrow {
-         content: "";
-         display: block;
-         position: absolute;
-         top: -3px;
-         right: 31px;
-
-         background: #fff;
-         border: 1px solid #fff;
-         box-shadow: 0px 0px 4px #888;
-
-         height: 14px;
-         width: 14px;
-
-         transform: rotate(45deg);
-      }
-
-      .dropdown {
-         position: absolute;
-         z-index: 10;
-         top: 5px;
-         right: 0;
-         width: 200px;
-
-         box-shadow: 0px 1px 4px #888;
-         border-radius: 4px;
-         background-color: #fff;
-         list-style: none;
-
-         li {
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            padding: 8px 17px;
-            font-size: 13px;
-            cursor: pointer;
-
-            a {
-               font-weight: 400;
-               color: $font-color-primary;
-               font-size: 13px;
-               width: 100%;
-               text-align: left;
-            }
-
-            &:hover {
-               background-color: #fafafa;
-            }
-
-            &:last-child {
-               border-top: 2px solid #ccc;
-            }
-
-            .nav__profile {
-               margin-left: 8px;
-            }
-         }
-      }
-   }
-
-   .notification {
-      position: relative;
-
-      .icon--active {
-         display: none;
-      }
-
-      &--open {
-         .arrow {
-            display: block !important;
-         }
-
-         .dropdown__notification {
-            display: block !important;
-
-            .profile {
-               width: 100%;
-            }
-         }
-
-         .icon--active {
-            display: block;
-         }
-
-         .icon--dont-active {
-            display: none;
-         }
-      }
-      .arrow {
-         content: "";
-         display: none;
-         position: absolute;
-         top: 33px;
-         right: 32px;
-         background: #fff;
-         border: 1px solid #fff;
-         box-shadow: 0px 0px 4px #888;
-         height: 14px;
-         width: 14px;
-         transform: rotate(45deg);
+        display: block !important;
       }
 
       .dropdown__notification {
-         display: none;
-         position: absolute;
-         z-index: 10;
-         top: 40px;
-         right: 0;
-         width: 490px;
-         height: 380px;
-         overflow-y: scroll;
-         box-shadow: 0px 1px 4px #888;
-         border-radius: 4px;
-         background-color: #fff;
+        display: block !important;
 
-         &::-webkit-scrollbar {
-            width: 5px;
-         }
-         &::-webkit-scrollbar-thumb {
-            background: rgb(140, 140, 140);
-            border-radius: 4px;
-         }
+        .profile {
+          width: 100%;
+        }
+      }
 
-         &-item {
-            display: flex;
-            padding: 10px 15px;
-            cursor: pointer;
+      .icon--active {
+        display: block;
+      }
 
-            .profile {
-               gap: 35px;
-               width: 300px;
-               .textContainer {
-                  flex-direction: row;
-                  align-items: center;
-                  font-size: 13px;
+      .icon--dont-active {
+        display: none;
+      }
+    }
+    .arrow {
+      content: '';
+      display: none;
+      position: absolute;
+      top: 33px;
+      right: 32px;
+      background: #fff;
+      border: 1px solid #fff;
+      box-shadow: 0px 0px 4px #888;
+      height: 14px;
+      width: 14px;
+      transform: rotate(45deg);
+    }
 
-                  .name {
-                     margin-top: 0;
-                     margin-left: 4px;
-                     font-weight: 300;
-                     color: #111;
-                  }
-               }
+    .dropdown__notification {
+      display: none;
+      position: absolute;
+      z-index: 10;
+      top: 40px;
+      right: 0;
+      width: 490px;
+      height: 380px;
+      overflow-y: scroll;
+      box-shadow: 0px 1px 4px #888;
+      border-radius: 4px;
+      background-color: #fff;
 
-               .profileIcon {
-                  width: 45px;
-                  height: 45px;
-               }
+      &::-webkit-scrollbar {
+        width: 5px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgb(140, 140, 140);
+        border-radius: 4px;
+      }
+
+      &-item {
+        display: flex;
+        padding: 10px 15px;
+        cursor: pointer;
+
+        .profile {
+          gap: 35px;
+          width: 300px;
+          .textContainer {
+            flex-direction: row;
+            align-items: center;
+            font-size: 13px;
+
+            .name {
+              margin-top: 0;
+              margin-left: 4px;
+              font-weight: 300;
+              color: #111;
             }
+          }
+
+          .profileIcon {
+            width: 45px;
+            height: 45px;
+          }
+        }
+
+        &:hover {
+          background-color: #fafafa;
+        }
+
+        &-action {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+          justify-content: center;
+
+          .btn {
+            height: 33px;
+            border: none;
+            border-radius: 4px;
+            padding: 0px 15px;
+            cursor: pointer;
+            transition: all 0.2s linear;
+            font-weight: 500;
+            font-family: $font;
+            color: #000;
+            box-shadow: 0 0 1px #ccc inset;
 
             &:hover {
-               background-color: #fafafa;
+              cursor: pointer;
+              opacity: 0.8;
             }
 
-            &-action {
-               display: flex;
-               gap: 4px;
-               align-items: center;
-               justify-content: center;
-
-               .btn {
-                  height: 33px;
-                  border: none;
-                  border-radius: 4px;
-                  padding: 0px 15px;
-                  cursor: pointer;
-                  transition: all 0.2s linear;
-                  font-weight: 500;
-                  font-family: $font;
-                  color: #000;
-                  box-shadow: 0 0 1px #ccc inset;
-
-                  &:hover {
-                     cursor: pointer;
-                     opacity: 0.8;
-                  }
-
-                  &:active {
-                     transform: translateY(2px);
-                  }
-
-                  &-accept {
-                     background-color: $primary-text-color;
-                     color: white;
-                  }
-               }
+            &:active {
+              transform: translateY(2px);
             }
-         }
+
+            &-accept {
+              background-color: $primary-text-color;
+              color: white;
+            }
+          }
+        }
       }
-   }
+    }
+  }
 }

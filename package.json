@@ -8,11 +8,6 @@
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run pretty-quick"
-        }
-    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/quanqvinh/vkn-social-media.git"
