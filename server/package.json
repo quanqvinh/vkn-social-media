@@ -4,8 +4,9 @@
     "description": "RESTful API server using NodeJS. ExpressJS framework to create web application  and Socket.io framework to realtime communications",
     "main": "src/server.js",
     "scripts": {
-        "test": "node src/server.js",
-        "start": "nodemon --inspect src/server.js",
+        "test": "nodemon --inspect src/server.js",
+        "build": "npm test",
+        "start": "node src/server.js",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
     },
