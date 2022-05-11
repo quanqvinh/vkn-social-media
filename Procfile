@@ -1,2 +1,2 @@
-web: npm run client-build
-api: npm run server-build
+web: npm run web
+api: npm run api
