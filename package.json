@@ -6,7 +6,7 @@
     "scripts": {
         "start": "npm run server-build",
         "server-build": "cd server && npm i --force && npm start",
-        "client-build": "cd client && npm i && npm start",
+        "client-build": "cd client && npm i --force && npm start",
         "prepare": "husky install",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"

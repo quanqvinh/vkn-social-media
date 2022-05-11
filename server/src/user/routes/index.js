@@ -89,4 +89,10 @@ module.exports = app => {
     app.use('/v1/room', authenJwtMiddleware, roomRouter);
 
     app.use('/v1/dev', devRouter);
+    app.use('/', (req, res) =>
+        res.json({
+            status: 'Connect successful',
+            message: 'Welcome to VKN API',
+        })
+    );
 };
