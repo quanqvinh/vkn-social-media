@@ -7,8 +7,7 @@
         "start": "npm run server-build",
         "server-build": "cd server && npm start",
         "client-build": "cd client && npm start",
-        "build": "npm install --force",
-        "heroku-postbuild": "npm install --force",
+        "postinstall": "npm install --force",
         "prepare": "husky install",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
