@@ -1,4 +1,4 @@
-require('dotenv').config({ silent: process.env.NODE_ENV === 'production' });
+if (process.env.NODE_ENV === 'development') require('dotenv').config();
 
 const db = require('./config/database');
 db.connect(process.env.STRING_CONNECTION);
