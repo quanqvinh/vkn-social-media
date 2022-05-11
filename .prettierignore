@@ -4,3 +4,4 @@ coverage
 
 # Ignore all hbs files:
 *.hbs
+node_modules/*
