@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const ObjectId = require('mongoose').Types.ObjectId;
-const resourceHelper = require('../../utils/resourceHelper');
+const resourceHelper = require('../../../utils/resourceHelper');
 
 const storagePost = multer.diskStorage({
     destination: (req, file, cb) => {

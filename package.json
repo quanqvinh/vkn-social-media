@@ -4,10 +4,11 @@
     "description": "Build social-media using MERN stack",
     "main": "index.js",
     "scripts": {
-        "start": "npm run api",
-        "api": "cd server && npm start",
         "web": "cd client && npm start",
-        "postinstall": "cd server && npm install --force",
+        "api-user": "cd server && npm run start-user",
+        "api-admin": "cd server && npm run start-admin",
+        "setup": "cd server && npm install --force && cd ../client && npm install --force",
+        "postinstall": "cd server && npm install --force && cd ../client && npm install --force",
         "prepare": "husky install",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"

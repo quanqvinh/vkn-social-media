@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const User = require('../../models/user.model');
-const Comment = require('../../models/comment.model');
-const Post = require('../../models/post.model');
-const Report = require('../../models/report.model');
+const User = require('../../../models/user.model');
+const Comment = require('../../../models/comment.model');
+const Post = require('../../../models/post.model');
+const Report = require('../../../models/report.model');
 // const fs = require('fs');
 // const fse = require('fs-extra');
 

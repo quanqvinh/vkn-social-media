@@ -1,13 +1,13 @@
 const router = require('express').Router();
 
 const mongoose = require('mongoose');
-const User = require('../../models/user.model');
-const Room = require('../../models/room.model');
-const Post = require('../../models/post.model');
-const Message = require('../../models/schemas/message.schema').model;
+const User = require('../../../models/user.model');
+const Room = require('../../../models/room.model');
+const Post = require('../../../models/post.model');
+const Message = require('../../../models/schemas/message.schema').model;
 const ObjectId = mongoose.Types.ObjectId;
 const { faker } = require('@faker-js/faker');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

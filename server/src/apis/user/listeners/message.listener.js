@@ -1,10 +1,10 @@
 const fs = require('fs');
-const Room = require('../../models/room.model');
-const Message = require('../../models/schemas/message.schema').model;
+const Room = require('../../../models/room.model');
+const Message = require('../../../models/schemas/message.schema').model;
 const ObjectId = require('mongoose').Types.ObjectId;
-const resourceHelper = require('../../utils/resourceHelper');
-const objectIdHelper = require('../../utils/objectIdHelper');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const resourceHelper = require('../../../utils/resourceHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 async function validateRoom(roomId, user1, user2) {
     let room = await Room.aggregate([

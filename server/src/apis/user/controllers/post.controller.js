@@ -1,14 +1,14 @@
-const User = require('../../models/user.model');
-const Comment = require('../../models/comment.model');
-const Notification = require('../../models/notification.model');
-const Post = require('../../models/post.model');
-const Report = require('../../models/report.model');
+const User = require('../../../models/user.model');
+const Comment = require('../../../models/comment.model');
+const Notification = require('../../../models/notification.model');
+const Post = require('../../../models/post.model');
+const Report = require('../../../models/report.model');
 const fs = require('fs');
 const fse = require('fs-extra');
-const resourceHelper = require('../../utils/resourceHelper');
+const resourceHelper = require('../../../utils/resourceHelper');
 const ObjectId = require('mongoose').Types.ObjectId;
-const objectIdHelper = require('../../utils/objectIdHelper');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 module.exports = {
     // [GET] /v1/post/new-feed

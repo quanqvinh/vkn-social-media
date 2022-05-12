@@ -1,8 +1,8 @@
-const User = require('../../models/user.model');
-const Room = require('../../models/room.model');
+const User = require('../../../models/user.model');
+const Room = require('../../../models/room.model');
 const ObjectId = require('mongoose').Types.ObjectId;
-const objectIdHelper = require('../../utils/objectIdHelper');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 let numberOfLoadMessage = 20;
 

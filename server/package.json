@@ -2,11 +2,12 @@
     "name": "vkn-server",
     "version": "1.0.0",
     "description": "RESTful API server using NodeJS. ExpressJS framework to create web application  and Socket.io framework to realtime communications",
-    "main": "src/server.js",
+    "main": "server.js",
     "scripts": {
-        "test": "nodemon --inspect src/server.js",
-        "build": "npm test",
-        "start": "node src/server.js",
+        "test-user": "nodemon --inspect src/apis/user/server.js",
+        "test-admin": "nodemon --inspect src/apis/admin/server.js",
+        "start-user": "node src/apis/user/server.js",
+        "start-admin": "node src/apis/admin/server.js",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
     },

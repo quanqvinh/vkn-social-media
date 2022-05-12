@@ -1,6 +1,6 @@
-const User = require('../../models/user.model');
+const User = require('../../../models/user.model');
 const ObjectId = require('mongoose').Types.ObjectId;
-const objectIdHelper = require('../../utils/objectIdHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
 
 module.exports = async (io, socket) => {
     let listFriendsOnline = await getListFriendsOnline(

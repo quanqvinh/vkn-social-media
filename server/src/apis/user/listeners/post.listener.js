@@ -1,9 +1,9 @@
-const User = require('../../models/user.model');
-const Post = require('../../models/post.model');
-const Comment = require('../../models/comment.model');
-const Reply = require('../../models/schemas/reply.schema').model;
-const Notification = require('../../models/notification.model');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const User = require('../../../models/user.model');
+const Post = require('../../../models/post.model');
+const Comment = require('../../../models/comment.model');
+const Reply = require('../../../models/schemas/reply.schema').model;
+const Notification = require('../../../models/notification.model');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 module.exports = (io, socket) => {
     socket.on('post:join_post_room', joinPostRoom);

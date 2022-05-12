@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const User = require('../../models/user.model');
-const Token = require('../../models/token.model');
-const crypto = require('../../utils/crypto');
-const mail = require('../../utils/nodemailer');
+const User = require('../../../models/user.model');
+const Token = require('../../../models/token.model');
+const crypto = require('../../../utils/crypto');
+const mail = require('../../../utils/nodemailer');
 const jwt = require('jsonwebtoken');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 const secretKey = process.env.SECRET_KEY;
 const refreshSecretKey = process.env.REFRESH_SECRET_KEY;

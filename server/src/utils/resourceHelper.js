@@ -4,9 +4,9 @@ const path = require('path');
 const ext = '.png';
 
 module.exports = {
-    postResource: path.join(__dirname, '../../../resources/images/posts'),
-    avatarResource: path.join(__dirname, '../../../resources/images/avatars'),
-    messageResource: path.join(__dirname, '../../../resources/images/messages'),
+    postResource: path.join(__dirname, '../../resources/images/posts'),
+    avatarResource: path.join(__dirname, '../../resources/images/avatars'),
+    messageResource: path.join(__dirname, '../../resources/images/messages'),
     createPostPath(postId) {
         return path.join(this.postResource, postId);
     },

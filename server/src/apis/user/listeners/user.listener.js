@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const Notification = require('../../models/notification.model');
-const Request = require('../../models/request.model');
-const User = require('../../models/user.model');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const Notification = require('../../../models/notification.model');
+const Request = require('../../../models/request.model');
+const User = require('../../../models/user.model');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 module.exports = (() => {
     return (io, socket) => {

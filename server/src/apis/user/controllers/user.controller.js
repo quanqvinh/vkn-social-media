@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
-const User = require('../../models/user.model');
-const Notification = require('../../models/notification.model');
-const Request = require('../../models/request.model');
-const Post = require('../../models/post.model');
-const Comment = require('../../models/comment.model');
+const User = require('../../../models/user.model');
+const Notification = require('../../../models/notification.model');
+const Request = require('../../../models/request.model');
+const Post = require('../../../models/post.model');
+const Comment = require('../../../models/comment.model');
 const Auth = require('./auth.controller');
-const Crypto = require('../../utils/crypto');
+const Crypto = require('../../../utils/crypto');
 const { unlink } = require('fs/promises');
 const fs = require('fs');
-const resourceHelper = require('../../utils/resourceHelper');
-const objectIdHelper = require('../../utils/objectIdHelper');
-const mongodbHelper = require('../../utils/mongodbHelper');
+const resourceHelper = require('../../../utils/resourceHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = {
