@@ -38,33 +38,33 @@ const cors = require('cors');
     });
 })();
 
-(function createAdminServer() {
-    // ExpressJS
-    const app = express();
-    const route = require('./admin/routes');
+// (function createAdminServer() {
+//     // ExpressJS
+//     const app = express();
+//     const route = require('./admin/routes');
 
-    app.use(cors());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(morgan('tiny'));
-    route(app);
+//     app.use(cors());
+//     app.use(express.urlencoded({ extended: true }));
+//     app.use(express.json());
+//     app.use(morgan('tiny'));
+//     route(app);
 
-    // Socket.IO
-    const server = require('http').Server(app);
-    const io = require('socket.io')(server, {
-        cors: {
-            // origin: process.env.CLIENT_DOMAIN,
-            origin: '*',
-            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        },
-    });
-    const socketHandler = require('./admin/listeners');
+//     // Socket.IO
+//     const server = require('http').Server(app);
+//     const io = require('socket.io')(server, {
+//         cors: {
+//             // origin: process.env.CLIENT_DOMAIN,
+//             origin: '*',
+//             methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+//         },
+//     });
+//     const socketHandler = require('./admin/listeners');
 
-    socketHandler(io);
+//     socketHandler(io);
 
-    const port = process.env.ADMIN_PORT;
-    const host = process.env.HOST;
-    server.listen(port, host, () => {
-        console.log(`Admin server is listening at http://${host}:${port}/v1`);
-    });
-})();
+//     const port = process.env.ADMIN_PORT;
+//     const host = process.env.HOST;
+//     server.listen(port, host, () => {
+//         console.log(`Admin server is listening at http://${host}:${port}/v1`);
+//     });
+// })();
