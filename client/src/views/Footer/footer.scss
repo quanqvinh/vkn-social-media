@@ -1,29 +1,29 @@
-@import "../../assets/styles/variables";
+@import '../../assets/styles/variables';
 
 .footer {
-   color: $font-color-footer;
-   font-size: 0.7em;
-   margin-top: 2em;
+  color: $font-color-footer;
+  font-size: 0.7em;
+  margin-top: 2em;
 
-   .links {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 0 0 2em 0;
-      padding: 0;
-      list-style: none;
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 2em 0;
+    padding: 0;
+    list-style: none;
 
-      li {
-         &:after {
-            content: "\2022";
-            margin: 0 0.25em 0 0.25em;
-         }
-
-         &:last-child:after {
-            content: "";
-         }
+    li {
+      &:after {
+        content: '\2022';
+        margin: 0 0.25em 0 0.25em;
       }
-   }
 
-   .copyRight {
-   }
+      &:last-child:after {
+        content: '';
+      }
+    }
+  }
+
+  .copyRight {
+  }
 }

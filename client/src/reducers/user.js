@@ -1,6 +1,6 @@
-let initState = sessionStorage.getItem("USER_INFO")
-   ? JSON.parse(sessionStorage.getItem("USER_INFO"))
-   : {};
+let initState = sessionStorage.getItem('USER_INFO')
+    ? JSON.parse(sessionStorage.getItem('USER_INFO'))
+    : {};
 
 const userReducer = (state = initState, action) => {
    switch (action.type) {
@@ -9,7 +9,6 @@ const userReducer = (state = initState, action) => {
             ...action.payload,
          });
       case "FETCH_PROFILE":
-         console.log(initState);
          state = action.payload;
          return { ...state };
       case "EDIT":

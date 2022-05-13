@@ -1,67 +1,67 @@
-@import "../../../assets/styles/variables";
+@import '../../../assets/styles/variables';
 
 .profile {
-   display: flex;
-   align-items: center;
-   font-size: 0.8em;
-   margin-bottom: 0.85em;
-   user-select: none;
+  display: flex;
+  align-items: center;
+  font-size: 0.8em;
+  margin-bottom: 0.85em;
+  user-select: none;
 
-   &--chat {
-      padding: 8px 20px;
-      cursor: pointer;
-      transition: 0.1s all linear;
-      margin-bottom: 0;
+  &--chat {
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: 0.1s all linear;
+    margin-bottom: 0;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    .accountName {
       &:hover {
-         background-color: rgba(0, 0, 0, 0.05);
+        cursor: pointer;
       }
-      .accountName {
-         &:hover {
-            cursor: pointer;
-         }
+    }
+  }
+
+  .textContainer {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1em;
+    min-width: 176px;
+    text-align: start;
+    font-size: 13.7px;
+    justify-content: center;
+    line-height: 18px;
+
+    .accountName {
+      font-weight: 500;
+      display: block;
+
+      &:hover {
+        cursor: pointer;
       }
-   }
+    }
 
-   .textContainer {
-      display: flex;
-      flex-direction: column;
-      margin-left: 1em;
-      min-width: 176px;
-      text-align: start;
-      font-size: 13.7px;
-      justify-content: center;
-      line-height: 18px;
+    .name {
+      color: $font-color-secondary;
+      display: block;
+      min-width: 200px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 
-      .accountName {
-         font-weight: 500;
-         display: block;
-
-         &:hover {
-            cursor: pointer;
-         }
-      }
-
-      .name {
-         color: $font-color-secondary;
-         display: block;
-         min-width: 200px;
-         max-width: 200px;
-         white-space: nowrap;
-         overflow: hidden;
-         text-overflow: ellipsis;
-      }
-   }
-
-   a {
-      text-align: right;
-      width: 100%;
-   }
+  a {
+    text-align: right;
+    width: 100%;
+  }
 }
 
 .small {
-   font-size: 12px;
+  font-size: 12px;
 }
 
 .big {
-   font-size: 15px;
+  font-size: 15px;
 }

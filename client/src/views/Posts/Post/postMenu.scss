@@ -1,25 +1,25 @@
 .cardMenu {
-   display: flex;
-   justify-content: space-between;
-   margin: 1em 0;
+  display: flex;
+  justify-content: space-between;
+  margin: 1em 0;
 
-   .interactions {
-      display: flex;
-      padding-left: 1em;
-   }
+  .interactions {
+    display: flex;
+    padding-left: 1em;
+  }
 
-   .icon {
-      margin-right: 1em;
-      width: 25px;
-      height: 23px;
-      color: transparent;
-      transition: 0.5 ease all;
-      &:hover {
-         cursor: pointer;
-         opacity: 0.7;
-      }
-      &:active {
-         transform: translateY(3px);
-      }
-   }
+  .icon {
+    margin-right: 1em;
+    width: 25px;
+    height: 23px;
+    color: transparent;
+    transition: 0.5 ease all;
+    &:hover {
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    &:active {
+      transform: translateY(3px);
+    }
+  }
 }

@@ -1,10 +1,11 @@
-import "./App.scss";
-import Home from "./views/Home/Home";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Login from "./views/Login/Login";
-import Signup from "./views/Signup/Signup";
-import VerifyEmail from "./views/VerifyEmail/VerifyEmail";
-import Inbox from "./views/Inbox/Inbox";
+import './App.scss';
+import Home from './views/Home/Home';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Login from './views/Login/Login';
+import Signup from './views/Signup/Signup';
+import VerifyEmail from './views/VerifyEmail/VerifyEmail';
+import Inbox from './views/Inbox/Inbox';
+
 
 import { createContext, useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
@@ -18,10 +19,9 @@ import EditEmail from "./views/EditProfile/EditEmail/EditEmail";
 import Layout from "./components/layout/Layout";
 import { addNotifications } from "./actions/notification";
 
+
 export const SOCKET = createContext();
-const notificationQuantityElement = document.querySelector(
-   ".notification-quantity"
-);
+
 function App() {
    const user = useSelector((state) => state.user);
    const dispatch = useDispatch();

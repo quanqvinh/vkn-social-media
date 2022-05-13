@@ -1,22 +1,22 @@
 .badge {
-    padding: 6px 11px;
-    color: var(--txt-white);
-    border-radius: 10px;
-    box-shadow: var(--box-shadow);
+  padding: 6px 11px;
+  color: var(--txt-white);
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
 }
 
 .badge-danger {
-    background-color: var(--main-color-red);
+  background-color: var(--main-color-red);
 }
 
 .badge-success {
-    background-color: var(--main-color-green);
+  background-color: var(--main-color-green);
 }
 
 .badge-primary {
-    background-color: var(--main-color-blue);
+  background-color: var(--main-color-blue);
 }
 
 .badge-warning {
-    background-color: var(--main-color-orange);
+  background-color: var(--main-color-orange);
 }

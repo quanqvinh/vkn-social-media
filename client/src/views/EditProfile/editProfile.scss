@@ -1,197 +1,197 @@
-@import "../../assets/styles/variables.scss";
+@import '../../assets/styles/variables.scss';
 .edit-profile-container {
-   width: 940px;
-   max-width: 100%;
-   margin: 0 auto;
-   margin-top: 63px;
-   padding: 30px 0px 0px;
+  width: 940px;
+  max-width: 100%;
+  margin: 0 auto;
+  margin-top: 63px;
+  padding: 30px 0px 0px;
 
-   .edit-profile__body {
-      background-color: #fff;
-      display: grid;
-      grid-template-columns: 0.25fr 0.75fr;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+  .edit-profile__body {
+    background-color: #fff;
+    display: grid;
+    grid-template-columns: 0.25fr 0.75fr;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 
-      .body__left {
-         border-right: 1px solid #ccc;
-         text-align: left;
+    .body__left {
+      border-right: 1px solid #ccc;
+      text-align: left;
 
-         &-options {
-            list-style: none;
+      &-options {
+        list-style: none;
 
-            &--active li {
-               color: #222121;
-               font-weight: 500;
-               border-left: 1.8px solid rgba($color: #000000, $alpha: 0.9);
-            }
+        &--active li {
+          color: #222121;
+          font-weight: 500;
+          border-left: 1.8px solid rgba($color: #000000, $alpha: 0.9);
+        }
 
-            a {
-               display: block;
-               height: 100%;
-            }
+        a {
+          display: block;
+          height: 100%;
+        }
 
-            &-change-email,
-            &-change-password,
-            &-edit-profile {
-               padding: 16px 16px 16px 30px;
-               font-size: 0.93rem;
-               cursor: pointer;
-               transition: 0.3s all ease;
-               user-select: none;
-               color: #383838;
-               font-weight: 400;
+        &-change-email,
+        &-change-password,
+        &-edit-profile {
+          padding: 16px 16px 16px 30px;
+          font-size: 0.93rem;
+          cursor: pointer;
+          transition: 0.3s all ease;
+          user-select: none;
+          color: #383838;
+          font-weight: 400;
 
-               &:hover {
-                  background-color: rgba($color: #000000, $alpha: 0.05);
-               }
-               &:active {
-                  transform: translateX(1px);
-               }
-            }
-         }
+          &:hover {
+            background-color: rgba($color: #000000, $alpha: 0.05);
+          }
+          &:active {
+            transform: translateX(1px);
+          }
+        }
+      }
+    }
+
+    .body__right {
+      display: flex;
+      flex-direction: column;
+      padding: 30px;
+      gap: 10px;
+
+      &-notify {
+        color: red;
+        font-size: 0.9rem;
+        margin-left: 15px;
       }
 
-      .body__right {
-         display: flex;
-         flex-direction: column;
-         padding: 30px;
-         gap: 10px;
-
-         &-notify {
-            color: red;
-            font-size: 0.9rem;
-            margin-left: 15px;
-         }
-
-         .profile {
-            gap: 17px;
-            div {
-               cursor: pointer;
-               img {
-                  width: 45px;
-                  height: 45px;
-               }
-               &:first-child {
-                  min-width: 193px;
-                  img {
-                     margin-left: auto;
-                  }
-               }
+      .profile {
+        gap: 17px;
+        div {
+          cursor: pointer;
+          img {
+            width: 45px;
+            height: 45px;
+          }
+          &:first-child {
+            min-width: 193px;
+            img {
+              margin-left: auto;
             }
-            .textContainer {
-               line-height: unset;
-               .accountName {
-                  font-size: 18px;
-                  color: #000;
-                  font-weight: 400;
-               }
-               .name {
-                  color: $primary-btn-color;
-                  font-size: 13px;
-                  letter-spacing: -0.2px;
-                  font-weight: 600;
-                  cursor: pointer;
-                  transition: all linear 0.3s;
+          }
+        }
+        .textContainer {
+          line-height: unset;
+          .accountName {
+            font-size: 18px;
+            color: #000;
+            font-weight: 400;
+          }
+          .name {
+            color: $primary-btn-color;
+            font-size: 13px;
+            letter-spacing: -0.2px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all linear 0.3s;
 
-                  &:hover {
-                     opacity: 0.7;
-                  }
-                  &:active {
-                     transform: translateY(2px);
-                  }
-               }
+            &:hover {
+              opacity: 0.7;
             }
-         }
+            &:active {
+              transform: translateY(2px);
+            }
+          }
+        }
+      }
 
-         .right__form {
+      .right__form {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        .form__password,
+        .form__gender,
+        .form__dob,
+        .form__email,
+        .form__bio,
+        .form__username,
+        .form__name {
+          display: flex;
+          gap: 30px;
+          font-size: 15px;
+          letter-spacing: -0.3px;
+          margin-bottom: 16px;
+
+          &-label {
+            text-align: right;
+            min-width: 194px;
+            font-weight: 500;
+          }
+
+          &-content {
             display: flex;
+            flex-grow: 1;
             flex-direction: column;
-            justify-content: flex-start;
+            padding-right: 30px;
+            max-width: 355px;
 
-            .form__password,
-            .form__gender,
-            .form__dob,
-            .form__email,
-            .form__bio,
-            .form__username,
-            .form__name {
-               display: flex;
-               gap: 30px;
-               font-size: 15px;
-               letter-spacing: -0.3px;
-               margin-bottom: 16px;
-
-               &-label {
-                  text-align: right;
-                  min-width: 194px;
-                  font-weight: 500;
-               }
-
-               &-content {
-                  display: flex;
-                  flex-grow: 1;
-                  flex-direction: column;
-                  padding-right: 30px;
-                  max-width: 355px;
-
-                  select,
-                  input,
-                  textarea {
-                     display: inline-block;
-                     border: 1px solid #ccc;
-                     padding: 8px 12px;
-                     border-radius: 4px;
-                     font-size: 15px;
-                     font-weight: 300;
-                  }
-                  textarea {
-                     font-weight: 400;
-                     resize: none;
-                  }
-
-                  &-description {
-                     font-size: 12px;
-                     text-align: left;
-                     color: #878787;
-                     font-weight: 300;
-                     margin-top: 16px;
-
-                     span {
-                        font-size: 13.5px;
-                        display: block;
-                        font-weight: 600;
-                     }
-                  }
-               }
+            select,
+            input,
+            textarea {
+              display: inline-block;
+              border: 1px solid #ccc;
+              padding: 8px 12px;
+              border-radius: 4px;
+              font-size: 15px;
+              font-weight: 300;
+            }
+            textarea {
+              font-weight: 400;
+              resize: none;
             }
 
-            .form__submit {
-               display: block;
-               border: none;
-               border-radius: 4px;
-               width: 80px;
-               padding: 8px 6px;
-               margin-left: 223px;
-               background-color: $primary-btn-color;
-               color: white;
-               font-weight: 500;
-               font-size: 14px;
-               cursor: pointer;
-               transition: all linear 0.3s;
+            &-description {
+              font-size: 12px;
+              text-align: left;
+              color: #878787;
+              font-weight: 300;
+              margin-top: 16px;
 
-               &:hover {
-                  opacity: 0.7;
-               }
-               &:active {
-                  transform: translateY(2px);
-               }
+              span {
+                font-size: 13.5px;
+                display: block;
+                font-weight: 600;
+              }
             }
-         }
+          }
+        }
+
+        .form__submit {
+          display: block;
+          border: none;
+          border-radius: 4px;
+          width: 80px;
+          padding: 8px 6px;
+          margin-left: 223px;
+          background-color: $primary-btn-color;
+          color: white;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all linear 0.3s;
+
+          &:hover {
+            opacity: 0.7;
+          }
+          &:active {
+            transform: translateY(2px);
+          }
+        }
       }
-   }
+    }
+  }
 }
 
 .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
-   padding: 8px 14px !important;
+  padding: 8px 14px !important;
 }

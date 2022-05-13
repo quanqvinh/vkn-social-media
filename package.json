@@ -1,0 +1,33 @@
+{
+    "name": "vkn-social-media",
+    "version": "1.0.0",
+    "description": "Build social-media using MERN stack",
+    "main": "index.js",
+    "scripts": {
+        "start": "npm run api",
+        "api": "cd server && npm start",
+        "web": "cd client && npm start",
+        "postinstall": "cd server && npm install --force",
+        "prepare": "husky install",
+        "prettier": "prettier --write .",
+        "pretty-quick": "pretty-quick --staged"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/quanqvinh/vkn-social-media.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/quanqvinh/vkn-social-media/issues"
+    },
+    "homepage": "https://github.com/quanqvinh/vkn-social-media#readme",
+    "devDependencies": {
+        "husky": "^8.0.1",
+        "prettier": "^2.6.2",
+        "pretty-quick": "^3.1.3"
+    },
+    "dependencies": {
+        "@azz/prettier-config": "^1.0.0"
+    }
+}
