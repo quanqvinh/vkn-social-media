@@ -11,28 +11,31 @@ async function loadMessage(req, res) {
         let roomId = req.params.roomId;
         let numberOfMessage = req.query.nMessage;
 
+        if (!(roomId && numberOfMessage))
+            return res.status(400).json({ message: 'Missing parameters' });
+
         let [countMessage, data] = await Promise.all([
             Room.aggregate([
                 {
                     $match: {
-                        _id: ObjectId(roomId),
-                    },
+                        _id: ObjectId(roomId)
+                    }
                 },
                 {
                     $project: {
                         _id: 0,
                         chatMate: 1,
                         count: {
-                            $size: '$messages',
-                        },
-                    },
-                },
+                            $size: '$messages'
+                        }
+                    }
+                }
             ]),
             Room.aggregate([
                 {
                     $match: {
-                        _id: ObjectId(roomId),
-                    },
+                        _id: ObjectId(roomId)
+                    }
                 },
                 {
                     $project: {
@@ -46,32 +49,32 @@ async function loadMessage(req, res) {
                                                 {
                                                     $eq: [
                                                         '$$this.showWith',
-                                                        'all',
-                                                    ],
+                                                        'all'
+                                                    ]
                                                 },
                                                 {
                                                     $eq: [
                                                         '$$this.showWith',
-                                                        req.auth.userId,
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    },
+                                                        req.auth.userId
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
                                 },
                                 -numberOfMessage - numberOfLoadMessage,
-                                numberOfLoadMessage,
-                            ],
-                        },
-                    },
+                                numberOfLoadMessage
+                            ]
+                        }
+                    }
                 },
                 {
                     $project: {
                         _id: 0,
-                        'messages.showWith': 0,
-                    },
-                },
-            ]),
+                        'messages.showWith': 0
+                    }
+                }
+            ])
         ]);
 
         countMessage = countMessage[0];
@@ -86,7 +89,7 @@ async function loadMessage(req, res) {
                 data: [],
                 roomId: req.originalUrl.includes('room/check')
                     ? roomId
-                    : undefined,
+                    : undefined
             });
         } else if (numberOfMessage + numberOfLoadMessage > countMessage.count)
             data.messages.splice(
@@ -96,13 +99,13 @@ async function loadMessage(req, res) {
         return res.status(200).json({
             status: 'success',
             data: data,
-            roomId: req.originalUrl.includes('room/check') ? roomId : undefined,
+            roomId: req.originalUrl.includes('room/check') ? roomId : undefined
         });
     } catch (err) {
         console.log(err);
         return res.status(500).json({
             status: 'error',
-            message: err.message,
+            message: err.message
         });
     }
 }
@@ -120,45 +123,45 @@ module.exports = {
             if (user.rooms.length === 0)
                 return res.status(200).json({
                     status: 'success',
-                    data: user,
+                    data: user
                 });
 
             user = await User.aggregate([
                 {
                     $match: {
-                        _id: ObjectId(req.auth.userId),
-                    },
+                        _id: ObjectId(req.auth.userId)
+                    }
                 },
                 {
                     $lookup: {
                         from: 'rooms',
                         localField: 'rooms',
                         foreignField: '_id',
-                        as: 'rooms',
-                    },
+                        as: 'rooms'
+                    }
                 },
                 {
-                    $unwind: '$rooms',
+                    $unwind: '$rooms'
                 },
                 {
                     $lookup: {
                         from: 'users',
                         localField: 'rooms.chatMate',
                         foreignField: '_id',
-                        as: 'rooms.chatMate',
-                    },
+                        as: 'rooms.chatMate'
+                    }
                 },
                 {
-                    $unwind: '$rooms.chatMate',
+                    $unwind: '$rooms.chatMate'
                 },
                 {
                     $match: {
                         'rooms.chatMate._id': {
                             $not: {
-                                $eq: ObjectId(req.auth.userId),
-                            },
-                        },
-                    },
+                                $eq: ObjectId(req.auth.userId)
+                            }
+                        }
+                    }
                 },
                 {
                     $project: {
@@ -170,7 +173,7 @@ module.exports = {
                             chatMate: {
                                 _id: 1,
                                 username: 1,
-                                name: 1,
+                                name: 1
                             },
                             messages: {
                                 $slice: [
@@ -182,45 +185,45 @@ module.exports = {
                                                     {
                                                         $eq: [
                                                             '$$this.showWith',
-                                                            'all',
-                                                        ],
+                                                            'all'
+                                                        ]
                                                     },
                                                     {
                                                         $eq: [
                                                             '$$this.showWith',
-                                                            req.auth.userId,
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        },
+                                                            req.auth.userId
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
                                     },
                                     -1,
-                                    1,
-                                ],
-                            },
-                        },
-                    },
+                                    1
+                                ]
+                            }
+                        }
+                    }
                 },
                 {
                     $project: {
-                        'rooms.messages.showWith': 0,
-                    },
+                        'rooms.messages.showWith': 0
+                    }
                 },
                 {
                     $group: {
                         _id: '$_id',
                         username: {
-                            $first: '$username',
+                            $first: '$username'
                         },
                         name: {
-                            $first: '$name',
+                            $first: '$name'
                         },
                         rooms: {
-                            $push: '$rooms',
-                        },
-                    },
-                },
+                            $push: '$rooms'
+                        }
+                    }
+                }
             ]);
 
             user[0].rooms = user[0].rooms.filter(
@@ -229,18 +232,18 @@ module.exports = {
 
             return res.status(200).json({
                 status: 'success',
-                data: user[0],
+                data: user[0]
             });
         } catch (error) {
             console.log(error);
             if (error.name === 'Error')
                 return res.status(200).json({
                     status: 'error',
-                    message: error.message,
+                    message: error.message
                 });
             return res.status(500).json({
                 status: 'error',
-                message: 'Error at server',
+                message: 'Error at server'
             });
         }
     },
@@ -252,6 +255,10 @@ module.exports = {
     async checkRoom(req, res) {
         try {
             let { userId } = req.query;
+
+            if (!userId)
+                return res.status(400).json({ message: 'Missing parameters' });
+
             let user = await User.findById(req.auth.userId)
                 .select('rooms')
                 .populate('rooms')
@@ -272,7 +279,7 @@ module.exports = {
                 res.status(200).json({
                     status: 'success',
                     data: null,
-                    roomId,
+                    roomId
                 });
             } else {
                 req.params.roomId = roomId;
@@ -283,7 +290,7 @@ module.exports = {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: error.message,
+                message: error.message
             });
         }
     },
@@ -294,13 +301,15 @@ module.exports = {
             async executeCallback(session) {
                 const { roomId, messageId } = req.query;
 
+                if (!(roomId && messageId)) throw new Error('400');
+
                 let room = await Room.findOne({
-                    _id: roomId,
+                    _id: roomId
                 })
                     .select('chatMate messages')
                     .populate({
                         path: 'chatMate',
-                        select: 'username',
+                        select: 'username'
                     });
 
                 if (
@@ -325,28 +334,28 @@ module.exports = {
                     updatedRoom = await Room.updateOne(
                         {
                             _id: roomId,
-                            'messages._id': messageId,
+                            'messages._id': messageId
                         },
                         {
                             $set: {
-                                'messages.$.showWith': showWith,
-                            },
+                                'messages.$.showWith': showWith
+                            }
                         },
                         {
-                            session,
+                            session
                         }
                     );
                 else
                     updatedRoom = await Room.updateOne(
                         {
-                            _id: roomId,
+                            _id: roomId
                         },
                         {
                             $pull: {
                                 messages: {
-                                    _id: new ObjectId(messageId),
-                                },
-                            },
+                                    _id: new ObjectId(messageId)
+                                }
+                            }
                         },
                         { session }
                     );
@@ -360,18 +369,22 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 let message = 'Error at server';
                 if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
                     status: 'error',
-                    message,
+                    message
                 });
-            },
+            }
         });
     },
 
@@ -381,6 +394,8 @@ module.exports = {
             async executeCallback(session) {
                 const { roomId, messageId } = req.query;
 
+                if (!(roomId && messageId)) throw new Error('400');
+
                 let room = await Room.findById(roomId)
                     .select('chatMate')
                     .lean();
@@ -389,14 +404,14 @@ module.exports = {
 
                 let updatedRoom = await Room.updateOne(
                     {
-                        _id: roomId,
+                        _id: roomId
                     },
                     {
                         $pull: {
                             messages: {
-                                _id: new ObjectId(messageId),
-                            },
-                        },
+                                _id: new ObjectId(messageId)
+                            }
+                        }
                     },
                     { session }
                 );
@@ -410,18 +425,22 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 let message = 'Error at server';
                 if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
                     status: 'error',
-                    message,
+                    message
                 });
-            },
+            }
         });
     },
 
@@ -446,44 +465,44 @@ module.exports = {
 
                 let updatedRoom = await Room.updateOne(
                     {
-                        _id: roomId,
+                        _id: roomId
                     },
                     {
                         $set: {
-                            'messages.$[i].showWith': other.toString(),
-                        },
+                            'messages.$[i].showWith': other.toString()
+                        }
                     },
                     {
                         arrayFilters: [
                             {
-                                'i.showWith': 'all',
-                            },
+                                'i.showWith': 'all'
+                            }
                         ],
-                        session,
+                        session
                     }
                 );
                 console.log(updatedRoom);
 
                 updatedRoom = await Room.updateOne(
                     {
-                        _id: roomId,
+                        _id: roomId
                     },
                     {
                         $pull: {
                             messages: {
-                                showWith: req.auth.userId,
-                            },
-                        },
+                                showWith: req.auth.userId
+                            }
+                        }
                     },
                     {
-                        session,
+                        session
                     }
                 );
                 console.log(updatedRoom);
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
@@ -491,14 +510,14 @@ module.exports = {
                 if (error.name === 'Error')
                     return res.status(403).json({
                         status: 'error',
-                        message: error.message,
+                        message: error.message
                     });
                 else
                     return res.status(500).json({
                         status: 'error',
-                        message: 'Error at server',
+                        message: 'Error at server'
                     });
-            },
+            }
         });
-    },
+    }
 };

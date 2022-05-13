@@ -20,27 +20,27 @@ module.exports = {
                     path: 'comments',
                     options: {
                         limit: 2,
-                        sort: { numberOfLikes: -1, updatedAt: -1 },
+                        sort: { numberOfLikes: -1, updatedAt: -1 }
                     },
                     populate: {
                         path: 'commentBy',
-                        select: 'username',
+                        select: 'username'
                     },
-                    select: '-replies',
-                },
+                    select: '-replies'
+                }
             };
             let user = await User.findById(req.auth.userId)
                 .select('username friends posts notifications')
                 .populate([
                     {
                         path: 'friends',
-                        populate: populatePostPipeline,
+                        populate: populatePostPipeline
                     },
                     populatePostPipeline,
                     {
                         path: 'notifications',
-                        match: { isChecked: false },
-                    },
+                        match: { isChecked: false }
+                    }
                 ])
                 .lean();
 
@@ -48,7 +48,7 @@ module.exports = {
                 myPosts: user.posts.map(post => ({
                     username: user.username,
                     ...post,
-                    imgs: resourceHelper.getListPostImages(post._id.toString()),
+                    imgs: resourceHelper.getListPostImages(post._id.toString())
                 })),
                 friendPosts: (function () {
                     let allFriendPosts = user.friends.map(friend =>
@@ -57,27 +57,27 @@ module.exports = {
                             ...post,
                             imgs: resourceHelper.getListPostImages(
                                 post._id.toString()
-                            ),
+                            )
                         }))
                     );
                     return allFriendPosts.reduce(
                         (pre, cur) => pre.concat(cur),
                         []
                     );
-                })(),
+                })()
             };
             let newFeed = [...posts.myPosts, ...posts.friendPosts];
             newFeed.sort((a, b) => Math.random() - 0.5);
             res.status(200).json({
                 status: 'success',
                 uncheckedNotifications: user.notifications.length,
-                posts: newFeed,
+                posts: newFeed
             });
         } catch (err) {
             console.log(err);
             res.status(500).json({
                 status: 'error',
-                message: err.message,
+                message: err.message
             });
         }
     },
@@ -85,6 +85,8 @@ module.exports = {
     // [POST] /v1/post/new
     async newPost(req, res) {
         let { caption, postId } = req.body;
+        if (!(caption && postId))
+            return res.status(400).json({ message: 'Missing parameters' });
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let [savedPost, updatedUser] = await Promise.all([
@@ -93,18 +95,18 @@ module.exports = {
                             {
                                 _id: postId,
                                 user: req.auth.userId,
-                                caption,
-                            },
+                                caption
+                            }
                         ],
                         { session }
                     ),
                     User.updateOne(
                         { _id: req.auth.userId },
                         {
-                            $push: { posts: postId },
+                            $push: { posts: postId }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 if (updatedUser.modifiedCount < 1)
@@ -112,13 +114,13 @@ module.exports = {
             },
             successCallback() {
                 return res.status(201).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 try {
                     fs.rmdirSync(resourceHelper.createPostPath(postId), {
-                        recursive: true,
+                        recursive: true
                     });
                 } catch (error2) {
                     error = error2;
@@ -126,9 +128,9 @@ module.exports = {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
-                    message: error.message,
+                    message: error.message
                 });
-            },
+            }
         });
     },
 
@@ -136,24 +138,25 @@ module.exports = {
     async detailPost(req, res) {
         try {
             let { postId } = req.params;
+
             let post = await Post.findById(postId)
                 .populate([
                     {
                         path: 'user',
-                        select: 'username friends',
+                        select: 'username friends'
                     },
                     {
                         path: 'likes',
-                        select: 'username',
+                        select: 'username'
                     },
                     {
                         path: 'comments',
                         populate: {
                             path: 'commentBy',
-                            select: 'username',
+                            select: 'username'
                         },
-                        select: 'commentBy content',
-                    },
+                        select: 'commentBy content'
+                    }
                 ])
                 .select('-reports')
                 .lean();
@@ -165,13 +168,13 @@ module.exports = {
             post.imgs = resourceHelper.getListPostImages(postId);
             res.status(200).json({
                 status: 'success',
-                data: post,
+                data: post
             });
         } catch (err) {
             console.log(err);
             res.status(500).json({
                 status: 'error',
-                message: err.message,
+                message: err.message
             });
         }
     },
@@ -181,10 +184,11 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let { postId, content } = req.body;
+                if (!(postId && content)) throw new Error('400');
 
                 let report = await Report.findOne({
                     userId: req.auth.userId,
-                    tag: postId,
+                    tag: postId
                 });
                 if (report)
                     throw new Error('Only one report per post is allowed');
@@ -197,18 +201,18 @@ module.exports = {
                                 _id,
                                 userId: req.auth.userId,
                                 tag: postId,
-                                content,
-                            },
+                                content
+                            }
                         ],
                         { session }
                     ),
                     Post.updateOne(
                         { _id: postId },
                         {
-                            $push: { reports: _id },
+                            $push: { reports: _id }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 console.log(updatedPost.modifiedCount);
@@ -217,28 +221,34 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 if (error.name === 'Error')
                     return res.status(401).json({
                         status: 'error',
-                        message: error.message,
+                        message: error.message
                     });
                 else
                     return res.status(500).json({
                         status: 'error',
-                        message: error.message,
+                        message: error.message
                     });
-            },
+            }
         });
     },
 
     // [PUT] /v1/post
     async updatePost(req, res) {
         let { postId, caption } = req.body;
+        if (!(postId && caption))
+            return res.status(400).json({ message: 'Missing parameters' });
         let imageDir;
         mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
@@ -253,7 +263,7 @@ module.exports = {
                     fse.copySync(imageDir + '-new', imageDir);
                     fs.rmSync(imageDir + '-new', {
                         recursive: true,
-                        force: true,
+                        force: true
                     });
                     console.log('Update image successful');
                 }
@@ -279,9 +289,9 @@ module.exports = {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server',
+                    message: 'Error at server'
                 });
-            },
+            }
         });
     },
 
@@ -298,10 +308,10 @@ module.exports = {
                     User.updateOne(
                         { _id: req.auth.userId },
                         {
-                            $pull: { posts: postId },
+                            $pull: { posts: postId }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 if (!post) throw new Error('Not found');
@@ -319,16 +329,16 @@ module.exports = {
                 let [reports, comments] = await Promise.all([
                     Report.deleteMany(
                         {
-                            _id: { $in: post.reports },
+                            _id: { $in: post.reports }
                         },
                         { session }
                     ),
                     Comment.deleteMany(
                         {
-                            _id: { $in: post.comments },
+                            _id: { $in: post.comments }
                         },
                         { session }
-                    ),
+                    )
                 ]);
                 console.log(
                     `Deleted ${reports.deletedCount} report${
@@ -344,22 +354,22 @@ module.exports = {
 
                 fs.rmSync(resourceHelper.createPostPath(postId.toString()), {
                     force: true,
-                    recursive: true,
+                    recursive: true
                 });
                 console.log('Deleted image resource');
             },
             successCallback() {
                 res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
-                    message: error.message,
+                    message: error.message
                 });
-            },
+            }
         });
     },
 
@@ -382,13 +392,13 @@ module.exports = {
             await post.save();
             res.status(200).json({
                 status: 'success',
-                message: index === -1 ? 'liked post' : 'unliked post',
+                message: index === -1 ? 'liked post' : 'unliked post'
             });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: error.message,
+                message: error.message
             });
         }
     },
@@ -412,13 +422,13 @@ module.exports = {
             await comment.save();
             res.status(200).json({
                 status: 'success',
-                message: index === -1 ? 'liked comment' : 'unliked comment',
+                message: index === -1 ? 'liked comment' : 'unliked comment'
             });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: error.message,
+                message: error.message
             });
         }
     },
@@ -428,6 +438,7 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let { postId, commentId } = req.query;
+                if (!(postId && commentId)) throw new Error('400');
 
                 let comment = await Comment.findOne({ _id: commentId });
                 if (!comment) throw new Error('Not found');
@@ -438,11 +449,11 @@ module.exports = {
                     Post.updateOne(
                         { _id: postId },
                         {
-                            $pull: { comments: commentId },
+                            $pull: { comments: commentId }
                         },
                         { session }
                     ),
-                    Comment.deleteOne({ _id: commentId }, { session }),
+                    Comment.deleteOne({ _id: commentId }, { session })
                 ]);
 
                 console.log(
@@ -461,16 +472,20 @@ module.exports = {
             },
             successCallback() {
                 res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: error.message,
+                    message: error.message
                 });
-            },
+            }
         });
     },
 
@@ -479,10 +494,11 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let { commentId, replyId } = req.query;
+                if (!(commentId && replyId)) throw new Error('400');
 
                 let comment = await Comment.findOne({
                     _id: commentId,
-                    'replies._id': replyId,
+                    'replies._id': replyId
                 });
                 if (!comment) throw new Error('Not found');
                 let reply = comment.replies.id(replyId);
@@ -493,8 +509,8 @@ module.exports = {
                     { _id: commentId },
                     {
                         $pull: {
-                            replies: { _id: new ObjectId(replyId) },
-                        },
+                            replies: { _id: new ObjectId(replyId) }
+                        }
                     },
                     { session }
                 );
@@ -508,16 +524,20 @@ module.exports = {
             },
             successCallback() {
                 res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: error.message,
+                    message: error.message
                 });
-            },
+            }
         });
-    },
+    }
 };

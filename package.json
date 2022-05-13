@@ -7,6 +7,8 @@
         "web": "cd client && npm start",
         "api-user": "cd server && npm run start-user",
         "api-admin": "cd server && npm run start-admin",
+        "test-api-user": "cd server && npm run test-user",
+        "test-api-admin": "cd server && npm run test-admin",
         "setup": "cd server && npm install --force && cd ../client && npm install --force",
         "postinstall": "cd server && npm install --force && cd ../client && npm install --force",
         "prepare": "husky install",
