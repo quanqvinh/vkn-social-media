@@ -1,4 +1,4 @@
-import './nav1.scss';
+import './nav.scss';
 import NewPost from '../../NewPost/NewPost';
 import ProfileIcon from '../../Profile/ProfilePreview/ProfileIcon';
 
