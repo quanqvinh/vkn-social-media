@@ -15,16 +15,22 @@ module.exports = (io, socket) => {
 
     function joinPostRoom(payload) {
         const { postId } = payload;
-        socket.join(postId);
+        if (postId) socket.join(postId);
+        else console.log('post:join_post_room => Missing parameters');
     }
 
     function leavePostRoom(payload) {
         const { postId } = payload;
-        socket.leave(postId);
+        if (postId) socket.leave(postId);
+        else console.log('post:leave_post_room => Missing parameters');
     }
 
     async function likePost(payload) {
         let { postId, postOwnerId } = payload;
+        if (!(postId && postOwnerId)) {
+            console.log('post:like_post => Missing parameters');
+            return;
+        }
         let notification;
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
@@ -32,9 +38,9 @@ module.exports = (io, socket) => {
                     user: socket.handshake.auth.userId,
                     type: 'react_post',
                     relatedUsers: {
-                        from: socket.handshake.auth.username,
+                        from: socket.handshake.auth.username
                     },
-                    tag: [postId],
+                    tag: [postId]
                 });
 
                 let [savedNotification, updatedUser] = await Promise.all([
@@ -42,10 +48,10 @@ module.exports = (io, socket) => {
                     User.updateOne(
                         { _id: postOwnerId },
                         {
-                            $push: { notifications: notification._id },
+                            $push: { notifications: notification._id }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 console.log(savedNotification !== notification);
@@ -59,13 +65,13 @@ module.exports = (io, socket) => {
             successCallback() {
                 if (postOwnerId !== socket.handshake.auth.userId)
                     io.to(postOwnerId).emit('user:print_notification', {
-                        notification: notification.toObject(),
+                        notification: notification.toObject()
                     });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     }
 
@@ -76,8 +82,9 @@ module.exports = (io, socket) => {
             postOwnerId,
             postOwnerUsername,
             commentOwnerId,
-            commentOwnerUsername,
+            commentOwnerUsername
         } = payload;
+        c;
         let notification;
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
@@ -86,9 +93,9 @@ module.exports = (io, socket) => {
                     type: 'react_comment',
                     relatedUsers: {
                         from: socket.handshake.auth.username,
-                        of: postOwnerUsername,
+                        of: postOwnerUsername
                     },
-                    tag: [postId, commentId],
+                    tag: [postId, commentId]
                 });
 
                 let [savedNotification, updatedUser] = await Promise.all([
@@ -96,10 +103,10 @@ module.exports = (io, socket) => {
                     User.updateOne(
                         { _id: commentOwnerId },
                         {
-                            $push: { notifications: notification._id },
+                            $push: { notifications: notification._id }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 console.log(savedNotification !== notification);
@@ -113,46 +120,50 @@ module.exports = (io, socket) => {
             successCallback() {
                 if (commentOwnerId !== socket.handshake.auth.userId)
                     io.to(commentOwnerId).emit('user:print_notification', {
-                        notification: notification.toObject(),
+                        notification: notification.toObject()
                     });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     }
 
     async function commentPost(payload) {
         const { postId, postOwnerId, postOwnerUsername, content } = payload;
         let comment, notification;
+        if (!(postId && postOwnerId && postOwnerUsername && content)) {
+            console.log('post:like_comment => Missing parameters');
+            return;
+        }
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 comment = new Comment({
                     post: postId,
                     commentBy: socket.handshake.auth.userId,
-                    content,
+                    content
                 });
                 notification = new Notification({
                     user: postOwnerId,
                     type: 'comment',
                     relatedUsers: {
-                        from: socket.handshake.auth.username,
+                        from: socket.handshake.auth.username
                     },
-                    tag: [postId, comment._id],
+                    tag: [postId, comment._id]
                 });
 
                 let [
                     savedComment,
                     updatedPost,
                     savedNotification,
-                    updatedUser,
+                    updatedUser
                 ] = await Promise.all([
                     comment.save({ session }),
                     Post.updateOne(
                         { _id: postId },
                         {
-                            $push: { comments: comment._id },
+                            $push: { comments: comment._id }
                         },
                         { session }
                     ),
@@ -160,10 +171,10 @@ module.exports = (io, socket) => {
                     User.updateOne(
                         { _id: postOwnerId },
                         {
-                            $push: { notifications: notification._id },
+                            $push: { notifications: notification._id }
                         },
                         { session }
-                    ),
+                    )
                 ]);
 
                 console.log(savedComment !== comment);
@@ -182,17 +193,17 @@ module.exports = (io, socket) => {
                 socket.broadcast.to(postId).emit('post:print_comment', {
                     commentedUserId: socket.handshake.auth.userId,
                     commentedUsername: socket.handshake.auth.username,
-                    comment: comment.toObject(),
+                    comment: comment.toObject()
                 });
                 if (postOwnerId !== socket.handshake.auth.userId)
                     io.to(postOwnerId).emit('user:print_notification', {
-                        notification: notification.toObject(),
+                        notification: notification.toObject()
                     });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     }
 
@@ -204,34 +215,48 @@ module.exports = (io, socket) => {
             commentId,
             commentOwnerId,
             commentOwnerUsername,
-            content,
+            content
         } = payload;
+        if (
+            !(
+                postId &&
+                postOwnerId &&
+                postOwnerUsername &&
+                commentId &&
+                commentOwnerId &&
+                content
+            )
+        ) {
+            console.log('post:reply_comment => Missing parameters');
+            return;
+        }
+
         let reply, notificationOfCommentOwner;
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 reply = new Reply({
                     replyBy: socket.handshake.auth.userId,
-                    content,
+                    content
                 });
                 notificationOfCommentOwner = new Notification({
                     user: commentOwnerId,
                     type: 'reply',
                     relatedUsers: {
                         from: socket.handshake.auth.username,
-                        of: postOwnerUsername,
+                        of: postOwnerUsername
                     },
-                    tag: [postId, commentId, reply._id],
+                    tag: [postId, commentId, reply._id]
                 });
 
                 let [
                     updatedComment,
                     savedNotificationOfCommentOwner,
-                    updatedCommentOwner,
+                    updatedCommentOwner
                 ] = await Promise.all([
                     Comment.updateOne(
                         { _id: commentId },
                         {
-                            $push: { replies: reply },
+                            $push: { replies: reply }
                         },
                         { session }
                     ),
@@ -244,12 +269,12 @@ module.exports = (io, socket) => {
                                   {
                                       $push: {
                                           notifications:
-                                              notificationOfCommentOwner._id,
-                                      },
+                                              notificationOfCommentOwner._id
+                                      }
                                   },
                                   { session }
-                              ),
-                          ]),
+                              )
+                          ])
                 ]);
 
                 console.log('updatedComment:', updatedComment.modifiedCount);
@@ -280,17 +305,17 @@ module.exports = (io, socket) => {
                     repliedUserId: socket.handshake.auth.userId,
                     repliedUsername: socket.handshake.auth.username,
                     commentId,
-                    reply: reply.toObject(),
+                    reply: reply.toObject()
                 });
                 if (socket.handshake.auth.userId !== commentOwnerId)
                     io.to(commentOwnerId).emit('user:print_notification', {
-                        notification: notificationOfCommentOwner.toObject(),
+                        notification: notificationOfCommentOwner.toObject()
                     });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     }
 };
