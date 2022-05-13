@@ -47,6 +47,10 @@ a.navLink--active {
     top: 100%;
     right: -25px;
 
+    &--active {
+      display: block;
+    }
+
     .icon--active {
       display: none;
     }
@@ -114,6 +118,20 @@ a.navLink--active {
   .notification {
     position: relative;
 
+    &-quantity {
+      position: absolute;
+      top: -5px;
+      right: 15px;
+      z-index: 1;
+      font-size: 0.78rem;
+      display: block;
+      background-color: rgb(243, 4, 4);
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 100rem;
+      text-align: center;
+    }
     .icon--active {
       display: none;
     }
@@ -128,6 +146,7 @@ a.navLink--active {
 
         .profile {
           width: 100%;
+          pointer-events: none;
         }
       }
 

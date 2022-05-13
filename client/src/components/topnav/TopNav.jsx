@@ -1,5 +1,5 @@
 import React from 'react';
-import './topnav.css';
+import './topnav.scss';
 import avatarDefault from '../../assets/images/avatar_default.png';
 import { Link } from 'react-router-dom';
 import Dropdown from '../dropdown/Dropdown';

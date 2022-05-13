@@ -86,10 +86,28 @@ const userApi = {
         });
     },
 
-    search: params => {
-        const url = `/user/search`;
-        return axiosClient.get(url, { params });
-    },
+   search: (params) => {
+      let accessToken = getCookie("accessToken");
+      const url = `/user/search`;
+      return axiosClient.get(url, {
+         params,
+         headers: {
+            "access-token": accessToken,
+         },
+      });
+   },
+
+   getAllNotifications: () => {
+      let accessToken = getCookie("accessToken");
+
+      const url = `/user/notifications`;
+      return axiosClient.get(url, {
+         headers: {
+            "access-token": accessToken,
+         },
+      });
+   },
+
 };
 
 export default userApi;

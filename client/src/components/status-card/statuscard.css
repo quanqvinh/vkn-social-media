@@ -13,6 +13,7 @@
 }
 
 .status-card__icon {
+  user-select: none;
   width: 30%;
   height: 100%;
   font-size: 3rem;
@@ -32,6 +33,11 @@
 .status-card__info > h4 {
   font-size: 2.5rem;
   margin-bottom: 10px;
+  user-select: none;
+}
+
+.status-card__info > span {
+  user-select: none;
 }
 
 .status-card::before {
