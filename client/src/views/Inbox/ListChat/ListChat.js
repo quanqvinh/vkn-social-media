@@ -13,6 +13,7 @@ const ListChat = (props) => {
       const fetchRooms = async () => {
          try {
             let res = await userApi.getRooms();
+            console.log(res);
             res?.data?.rooms && setListRooms([...listRooms, ...res.data.rooms]);
          } catch (error) {
             console.log(error.message);

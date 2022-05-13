@@ -6,8 +6,10 @@ import { ReactComponent as NewInbox } from "../../assets/images/newInbox.svg";
 import { ReactComponent as InboxIcon } from "../../assets/images/inbox_outline.svg";
 import ChatRoom from "./ChatRoom/ChatRoom";
 import { SOCKET } from "../../App";
+import { useSelector } from "react-redux";
 const Inbox = () => {
    const socket = useContext(SOCKET);
+   const user = useSelector((state) => state.user);
    const [latestMessage, setLatestMessage] = useState({
       roomId: "",
       content: "",
@@ -54,7 +56,9 @@ const Inbox = () => {
             <div className="inbox-container__content">
                <div className="nav-left">
                   <div className="nav-left__header">
-                     <h2 className="nav-left__header-username">kien108</h2>
+                     <h2 className="nav-left__header-username">
+                        {user.username}
+                     </h2>
                      <NewInbox />
                   </div>
                   <ListChat

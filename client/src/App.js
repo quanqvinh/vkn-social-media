@@ -7,7 +7,7 @@ import VerifyEmail from "./views/VerifyEmail/VerifyEmail";
 import Inbox from "./views/Inbox/Inbox";
 
 import { createContext, useEffect } from "react";
-import { useSelector, useStore } from "react-redux";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import ProfilePage from "./views/ProfilePage/ProfilePage";
 import EditProfile from "./views/EditProfile/EditProfile";
 import EditPassword from "./views/EditProfile/EditPassword/EditPassword";
@@ -16,10 +16,15 @@ import { getCookie } from "./views/Global/cookie";
 import { useState } from "react";
 import EditEmail from "./views/EditProfile/EditEmail/EditEmail";
 import Layout from "./components/layout/Layout";
+import { addNotifications } from "./actions/notification";
 
 export const SOCKET = createContext();
+const notificationQuantityElement = document.querySelector(
+   ".notification-quantity"
+);
 function App() {
    const user = useSelector((state) => state.user);
+   const dispatch = useDispatch();
    const [socket, setSocket] = useState(null);
 
    useEffect(() => {
@@ -32,10 +37,16 @@ function App() {
          },
       });
       setSocket(socket);
-      socket.on("user:print_notification", (payload) => {
-         console.log(payload);
-      });
    }, [user]);
+
+   useEffect(() => {
+      socket &&
+         socket.on("user:print_notification", (payload) => {
+            console.log("add");
+            let action = addNotifications(payload.notification);
+            dispatch(action);
+         });
+   }, [socket, dispatch]);
 
    return (
       <Router>

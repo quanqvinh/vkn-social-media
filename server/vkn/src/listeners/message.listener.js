@@ -57,7 +57,8 @@ module.exports = (io, socket) => {
 
                if (!savedRoom) throw new Error("Create room failed");
                return;
-            } else if (validate === false) throw new Error("Unauthorized");
+            }
+            // else if (validate === false) throw new Error("Unauthorized");
 
             let updatedRoom = await Room.updateOne(
                {

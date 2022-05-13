@@ -1,22 +1,36 @@
 import "./posts.scss";
 import Post from "./Post/Post";
-import { useContext, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import postApi from "../../apis/postApi";
 import { UserContext } from "../../App";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchNotificationsRequest } from "../../actions/notification";
 
 function Posts(props) {
    const user = useSelector((state) => state.user);
    const [posts, setPosts] = useState([]);
    const [listImg, setListImg] = useState([]);
    const [isLike, setIsLike] = useState(false);
+   const dispatch = useDispatch();
+   const uncheckedRef = useRef(null);
 
    useEffect(() => {
       const fetchPost = async () => {
          try {
             const res = await postApi.newFeeds();
-            console.log(res);
+
             res?.status === "success" && setPosts([...res.posts]);
+
+            sessionStorage.setItem(
+               "NOTIFICATIONS",
+               JSON.stringify({
+                  uncheck: res.uncheckedNotifications,
+                  listNotifications: [],
+               })
+            );
+
+            console.log("posts");
+            dispatch(fetchNotificationsRequest());
          } catch (error) {
             console.log(error.message);
          }
@@ -24,7 +38,7 @@ function Posts(props) {
       if (sessionStorage.getItem("USER_INFO")) {
          fetchPost();
       }
-   }, [isLike]);
+   }, []);
 
    function isEmpty(obj) {
       for (var key in obj) {

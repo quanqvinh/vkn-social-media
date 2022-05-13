@@ -2,8 +2,8 @@ import "./nav.scss";
 import NewPost from "../../NewPost/NewPost";
 import ProfileIcon from "../../Profile/ProfilePreview/ProfileIcon";
 
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getCookie, setCookie } from "../../Global/cookie";
 import { NavLink } from "react-router-dom";
@@ -18,11 +18,16 @@ import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutline
 import ChatIcon from "@mui/icons-material/Chat";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import HomeIcon from "@mui/icons-material/Home";
+
 const $ = document.querySelector.bind(document);
 const clickOutsideRef = (content_ref, toggle_ref) => {
    document.addEventListener("mousedown", (e) => {
       // user click toggle
-      if (toggle_ref.current && toggle_ref.current.contains(e.target)) {
+      if (
+         toggle_ref.current &&
+         toggle_ref.current.contains(e.target) &&
+         !e.target.closest(".dropdown__notification-item")
+      ) {
          toggle_ref.current.classList.toggle("notification--open");
       } else {
          // user click outside toggle and content
@@ -43,6 +48,7 @@ function Nav() {
    const statePage = useRef(sessionStorage.getItem("STATE_PAGE"));
    const notificationRef = useRef(null);
    const notificationContentRef = useRef(null);
+   const notifications = useSelector((user) => user.notifications);
 
    const socket = useContext(SOCKET);
 
@@ -50,6 +56,8 @@ function Nav() {
       getCookie("accessToken") && setCookie("accessToken", "", 0);
       getCookie("refreshToken") && setCookie("refreshToken", "", 0);
       sessionStorage.removeItem("USER_INFO");
+      sessionStorage.removeItem("NOTIFICATIONS");
+      sessionStorage.removeItem("STATE_PAGE");
       socket.disconnect();
    };
 
@@ -77,11 +85,21 @@ function Nav() {
       sessionStorage.setItem("STATE_PAGE", "home");
    };
 
+   const handelClickNotify = (e) => {
+      e.stopPropagation();
+   };
+
+   const clickAccept = (e) => {
+      e.stopPropagation();
+   };
+
+   const clickDecline = (e) => {
+      e.stopPropagation();
+   };
+
+   // open drop-down notifications
    clickOutsideRef(notificationContentRef, notificationRef);
 
-   console.log(
-      notificationRef?.current?.classList.contains("notification--open")
-   );
    return (
       <>
          <div className="menu">
@@ -132,6 +150,12 @@ function Nav() {
                   className={"icon icon--dont-active"}
                   onClick={() => handelClickNotification()}
                />
+               {notifications?.uncheck > 0 && (
+                  <span className="notification-quantity">
+                     {notifications.uncheck}
+                  </span>
+               )}
+
                <div className="arrow"></div>
                <ul
                   className="dropdown dropdown__notification"
@@ -140,7 +164,11 @@ function Nav() {
                   {Array(7)
                      .fill(0)
                      .map((item, index) => (
-                        <li className="dropdown__notification-item">
+                        <li
+                           className="dropdown__notification-item"
+                           key={index}
+                           onClick={(e) => handelClickNotify(e)}
+                        >
                            <ProfilePreview
                               username={user.username}
                               name={"liked your comment"}
@@ -151,8 +179,16 @@ function Nav() {
                               }
                            />
                            <div className="dropdown__notification-item-action">
-                              <button className="btn btn-accept">Accept</button>
-                              <button className="btn btn-decline">
+                              <button
+                                 className="btn btn-accept"
+                                 onClick={(e) => clickAccept(e)}
+                              >
+                                 Accept
+                              </button>
+                              <button
+                                 className="btn btn-decline"
+                                 onClick={(e) => clickDecline(e)}
+                              >
                                  Decline
                               </button>
                            </div>

@@ -9,6 +9,7 @@ const userReducer = (state = initState, action) => {
             ...action.payload,
          });
       case "FETCH_PROFILE":
+         console.log(initState);
          state = action.payload;
          return { ...state };
       case "EDIT":
