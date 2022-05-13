@@ -5,27 +5,27 @@ const authSchema = new mongoose.Schema(
     {
         password: {
             type: String,
-            required: true,
+            required: true
         },
         isAdmin: {
             type: Boolean,
             default: false,
-            required: true,
+            required: true
         },
-        verified: {
+        isVerified: {
             type: Boolean,
             default: false,
-            required: true,
+            required: true
         },
         remainingTime: {
             type: Date,
             default: new Date(Date.now()),
-            index: { expireAfterSeconds: 60 * 60 * 24 * 7 },
-        },
+            index: { expireAfterSeconds: 60 * 60 * 24 * 7 }
+        }
     },
     {
         _id: false,
-        autoCreate: false,
+        autoCreate: false
     }
 );
 

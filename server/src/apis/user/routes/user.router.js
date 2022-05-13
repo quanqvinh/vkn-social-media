@@ -6,7 +6,7 @@ router.get('/me/profile', controller.getMyProfile);
 router.get('/search', controller.searchUser);
 router.get('/notifications', controller.getAllNotification);
 router.get('/notification/check', controller.checkNotification);
-router.get('/:id', controller.getUserProfile);
+router.get('/:userId', controller.getUserProfile);
 
 router.post('/edit/email/request', controller.requestEditUserEmail);
 router.post(

@@ -10,6 +10,10 @@ module.exports = (() => {
 
         async function addFriendRequest(payload) {
             const { receivedUserId, receivedUsername } = payload;
+            if (!receivedUserId) {
+                console.log('user:add_friend_request => Missing parameters');
+                return;
+            }
             let notification;
             await mongodbHelper.executeTransactionWithRetry({
                 async executeCallback(session) {
@@ -17,7 +21,7 @@ module.exports = (() => {
                         await Request.findOne({
                             type: 'add_friend',
                             from: socket.handshake.auth.userId,
-                            to: receivedUserId,
+                            to: receivedUserId
                         })
                     )
                         throw new Error('Add friend request have sent before');
@@ -26,14 +30,14 @@ module.exports = (() => {
                         user: receivedUserId,
                         type: 'add_friend_request',
                         relatedUsers: {
-                            from: socket.handshake.auth.username,
+                            from: socket.handshake.auth.username
                         },
-                        tag: [socket.handshake.auth.userId],
+                        tag: [socket.handshake.auth.userId]
                     });
 
                     let request = new Request({
                         from: socket.handshake.auth.userId,
-                        to: receivedUserId,
+                        to: receivedUserId
                     });
 
                     let [savedNotification, savedRequest, receivedUser] =
@@ -42,15 +46,15 @@ module.exports = (() => {
                             request.save({ session }),
                             User.updateOne(
                                 {
-                                    _id: receivedUserId,
+                                    _id: receivedUserId
                                 },
                                 {
                                     $push: {
-                                        notifications: notification._id,
-                                    },
+                                        notifications: notification._id
+                                    }
                                 },
                                 { session }
-                            ),
+                            )
                         ]);
 
                     console.log('Accept add friend result');
@@ -83,13 +87,13 @@ module.exports = (() => {
                 },
                 successCallback() {
                     io.to(receivedUserId).emit('user:print_notification', {
-                        notification,
+                        notification
                     });
                 },
                 errorCallback(error) {
                     console.log(error);
                     socket.emit('error');
-                },
+                }
             });
         }
     };

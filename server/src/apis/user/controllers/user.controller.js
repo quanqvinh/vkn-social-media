@@ -7,6 +7,7 @@ const Comment = require('../../../models/comment.model');
 const Auth = require('./auth.controller');
 const Crypto = require('../../../utils/crypto');
 const { unlink } = require('fs/promises');
+const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const resourceHelper = require('../../../utils/resourceHelper');
 const objectIdHelper = require('../../../utils/objectIdHelper');
@@ -19,15 +20,15 @@ module.exports = {
         let id = req.auth.userId;
         User.findById(id, {
             rooms: 0,
-            auth: 0,
+            auth: 0
         })
+            .select('-notifications -deleted -updatedAt')
             .populate([
                 'posts',
                 {
                     path: 'friends',
-                    select: 'username name',
-                },
-                'notifications',
+                    select: 'username name'
+                }
             ])
             .lean()
             .then(data => {
@@ -42,59 +43,62 @@ module.exports = {
                 console.log(err);
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server',
+                    message: 'Error at server'
                 });
             });
     },
 
-    // [GET] /v1/user/:id
+    // [GET] /v1/user/:userId
     getUserProfile(req, res) {
-        let id = req.params.id;
-        console.log(req.auth.userId);
-        if (id) {
-            Promise.all([
-                User.findById(id)
-                    .select('-rooms -auth')
-                    .populate([
-                        'posts',
-                        {
-                            path: 'friends',
-                            select: 'username name',
-                        },
-                    ])
-                    .lean(),
-                User.findById(req.auth.userId).select('friends').lean(),
-            ])
-                .then(([data, mine]) => {
-                    if (!data)
-                        return res.status(400).json({
-                            status: 'error',
-                            message: 'Data not found',
-                        });
-                    data.posts.forEach(post => {
-                        post.imgs = resourceHelper.getListPostImages(
-                            post._id.toString()
-                        );
-                    });
-                    data.isFriend = objectIdHelper.include(
-                        mine.friends,
-                        data._id
-                    );
-                    res.status(200).json(data);
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).json({
+        let userId = req.params.userId;
+
+        if (!userId)
+            return res.status(400).json({ message: 'Missing parameters' });
+
+        Promise.all([
+            User.findById(userId)
+                .select('-rooms -auth -notifications -deleted -updatedAt')
+                .populate([
+                    'posts',
+                    {
+                        path: 'friends',
+                        select: 'username name'
+                    }
+                ])
+                .lean(),
+            User.findById(req.auth.userId).select('friends').lean(),
+            Request.findOne({
+                type: 'add_friend',
+                from: req.auth.userId,
+                to: userId
+            }).lean()
+        ])
+            .then(([data, mine, request]) => {
+                if (!data)
+                    return res.status(200).json({
                         status: 'error',
-                        message: 'Error at server',
+                        message: 'Data not found'
                     });
+                data.posts.forEach(post => {
+                    post.imgs = resourceHelper.getListPostImages(
+                        post._id.toString()
+                    );
                 });
-        } else {
-            res.status(400).json({
-                status: 'error',
-                message: 'Bad request. User id is needed.',
+                data.isFriend = objectIdHelper.include(mine.friends, data._id);
+                if (!data.isFriend)
+                    data.addFriendRequest = request ? true : false;
+                res.status(200).json({
+                    status: 'success',
+                    data
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server'
+                });
             });
-        }
     },
 
     // [PATCH] /v1/user/edit/info
@@ -103,12 +107,27 @@ module.exports = {
             async executeCallback(session) {
                 let { username, name, bio, dob, gender } = req.body;
 
+                if (
+                    [username, name, bio, dob, gender].some(
+                        a => a === undefined
+                    )
+                )
+                    throw new Error('400');
+
                 let updatedUser = await User.updateOne(
                     {
-                        _id: req.auth.userId,
+                        _id: req.auth.userId
                     },
-                    { username, name, bio, dob, gender },
-                    { session }
+                    {
+                        username,
+                        name,
+                        bio,
+                        dob,
+                        gender
+                    },
+                    {
+                        session
+                    }
                 );
                 console.log(
                     'updatedUser.modifiedCount:',
@@ -120,98 +139,94 @@ module.exports = {
             successCallback() {
                 res.status(200).json({
                     status: 'success',
-                    message: 'User has been edited.',
+                    message: 'User has been edited'
                 });
             },
             errorCallback(error) {
                 console.log(error);
-                res.status(500).json({
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
+                if (error.name === 'Error')
+                    return res.status(200).json({
+                        status: 'error',
+                        message: error.message
+                    });
+                return res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
     // [POST] /v1/user/edit/email/request
-    requestEditUserEmail(req, res) {
-        return Auth.requestVerifyEmail(req, res);
+    async requestEditUserEmail(req, res) {
+        let newEmail = req.body.newEmail;
+        if (!newEmail)
+            return res.status(400).json({ message: 'Missing parameters' });
+
+        let [user, checkUser] = await Promise.all([
+            User.findById(req.auth.userId).select('username').lean(),
+            User.findOne({ email: newEmail }).lean()
+        ]);
+
+        if (checkUser)
+            return res.status(200).json({
+                status: 'warning',
+                message: 'This email has already been used by another user'
+            });
+        req.body.username = user.username;
+
+        return await Auth.requestVerifyEmail(req, res);
     },
 
     // [PATCH] /v1/user/edit/email
     async editUserEmail(req, res) {
-        try {
-            let id = req.auth.userId;
+        let { token } = req.body;
 
-            let user = await User.findOne({
-                _id: id,
-            });
-            user.auth.verified = false;
-            await user.save();
-
-            let responseData = await Auth.verifyEmail(req, res);
-            if (responseData.statusCode === 200) {
-                if (responseData.req.body.email) {
-                    user.email = responseData.req.body.email;
-                    await user.save();
-                    res.status(200).json({
-                        status: 'success',
-                        message: 'Email has been updated.',
-                    });
-                } else {
-                    res.status(500).json({
-                        status: 'error',
-                        message: 'Error at server.',
-                    });
-                }
-            }
-        } catch (error) {
-            res.status(500).json({
-                status: 'error',
-                message: error.message,
-            });
-        }
+        if (!token)
+            return res.status(400).json({ message: 'Missing parameters' });
+        await Auth.verifyEmail(req, res);
     },
 
     // [PATCH] /v1/user/edit/password
     async changePassword(req, res) {
         try {
             let { password, newPassword } = req.body;
-            let user = await User.findOne({
-                _id: req.auth.userId,
-                'auth.password': Crypto.hash(password),
-            }).lean();
-            if (!user)
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Old password is incorrect',
-                });
+
+            if (!(password && newPassword))
+                return res.status(400).json({ message: 'Missing parameters' });
 
             let updatedUser = await User.updateOne(
                 {
                     _id: req.auth.userId,
+                    'auth.password': Crypto.hash(password)
                 },
                 {
                     $set: {
-                        'auth.password': Crypto.hash(newPassword),
-                    },
+                        'auth.password': Crypto.hash(newPassword)
+                    }
                 }
             );
 
-            console.log(
-                'updatedUser.modifiedCount:',
-                updatedUser.modifiedCount
-            );
-            if (updatedUser.modifiedCount < 1)
+            console.log(updatedUser);
+            if (updatedUser.matchedCount === 0)
+                return res.status(200).json({
+                    status: 'error',
+                    message: 'Password is incorrect'
+                });
+            if (updatedUser.modifiedCount === 0)
                 throw new Error('Update data failed');
-            return res.status(200).json({
-                status: 'success',
-            });
+
+            return res.status(200).json({ status: 'success' });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: 'Error at server',
+                message:
+                    error.name === 'Error' ? error.message : 'Error at server'
             });
         }
     },
@@ -219,7 +234,7 @@ module.exports = {
     // [DELETE] /v1/user/delete
     softDeleteUser(req, res) {
         let id = req.auth.userId;
-        console.log(id);
+
         if (id) {
             User.deleteById(id)
                 .then(data => {
@@ -227,19 +242,18 @@ module.exports = {
                         res.status(200).json({
                             status: 'success',
                             message:
-                                'User account has been moved to recycle bin.',
+                                'User account has been moved to recycle bin.'
                         });
                 })
                 .catch(err => {
                     res.status(500).json({
                         status: 'error',
-                        message: 'Error at server.',
+                        message: 'Error at server.'
                     });
                 });
         } else {
-            res.status(400).json({
-                status: 'error',
-                message: 'Bad request. User id is needed.',
+            return res.status(400).json({
+                message: 'Missing parameters'
             });
         }
     },
@@ -262,7 +276,7 @@ module.exports = {
         };
         if (err)
             return res.status(500).json({
-                status: 'failed',
+                status: 'failed'
             });
         // check whether file exists
         fs.access(file, fs.constants.F_OK, error => {
@@ -285,10 +299,10 @@ module.exports = {
 
         if (err)
             return res.status(500).json({
-                status: 'failed',
+                status: 'failed'
             });
         return res.status(201).json({
-            status: 'success',
+            status: 'success'
         });
     },
 
@@ -298,29 +312,19 @@ module.exports = {
             let keyword = req.query.keyword;
             let regex = new RegExp('' + keyword, 'i');
             let result = await User.find({
-                $or: [
-                    {
-                        name: regex,
-                    },
-                    {
-                        username: regex,
-                    },
-                    {
-                        email: regex,
-                    },
-                ],
+                $or: [{ username: regex }, { email: regex }]
             })
                 .select('username name email')
                 .lean();
             return res.status(200).json({
                 status: 'success',
-                result,
+                result
             });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message: 'Error at server.',
+                message: 'Error at server.'
             });
         }
     },
@@ -331,10 +335,12 @@ module.exports = {
             async executeCallback(session) {
                 const { requestedUserId, requestedUsername } = req.body;
 
+                if (!requestedUserId) throw new Error('400');
+
                 let notification = await Notification.findOne({
                     user: req.auth.userId,
                     type: 'add_friend_request',
-                    tag: requestedUserId,
+                    tag: requestedUserId
                 }).lean();
 
                 if (!notification)
@@ -344,55 +350,55 @@ module.exports = {
                     requestedUser,
                     receivedUser,
                     deletedNotification,
-                    deletedRequest,
+                    deletedRequest
                 ] = await Promise.all([
                     User.updateOne(
                         {
-                            _id: requestedUserId,
+                            _id: requestedUserId
                         },
                         {
                             $push: {
-                                friends: req.auth.userId,
-                            },
+                                friends: req.auth.userId
+                            }
                         },
                         {
-                            session,
+                            session
                         }
                     ),
                     User.updateOne(
                         {
-                            _id: req.auth.userId,
+                            _id: req.auth.userId
                         },
                         {
                             $push: {
-                                friends: requestedUserId,
+                                friends: requestedUserId
                             },
                             $pull: {
-                                notifications: notification._id,
-                            },
+                                notifications: notification._id
+                            }
                         },
                         {
-                            session,
+                            session
                         }
                     ),
                     Notification.deleteOne(
                         {
-                            _id: notification._id,
+                            _id: notification._id
                         },
                         {
-                            session,
+                            session
                         }
                     ),
                     Request.deleteOne(
                         {
                             type: 'add_friend',
                             from: requestedUserId,
-                            to: req.auth.userId,
+                            to: req.auth.userId
                         },
                         {
-                            session,
+                            session
                         }
-                    ),
+                    )
                 ]);
 
                 console.log('Accept add friend result');
@@ -419,16 +425,20 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback: error => {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
@@ -438,10 +448,12 @@ module.exports = {
             async executeCallback(session) {
                 const { requestedUserId, requestedUsername } = req.body;
 
+                if (!requestedUserId) throw new Error('400');
+
                 let notification = await Notification.findOne({
                     user: req.auth.userId,
                     type: 'add_friend_request',
-                    tag: [requestedUserId],
+                    tag: [requestedUserId]
                 }).lean();
 
                 if (!notification)
@@ -451,35 +463,35 @@ module.exports = {
                     await Promise.all([
                         User.updateOne(
                             {
-                                _id: req.auth.userId,
+                                _id: req.auth.userId
                             },
                             {
                                 $pull: {
-                                    notifications: notification._id,
-                                },
+                                    notifications: notification._id
+                                }
                             },
                             {
-                                session,
+                                session
                             }
                         ),
                         Notification.deleteOne(
                             {
-                                _id: notification._id,
+                                _id: notification._id
                             },
                             {
-                                session,
+                                session
                             }
                         ),
                         Request.deleteOne(
                             {
                                 type: 'add_friend',
                                 from: requestedUserId,
-                                to: req.auth.userId,
+                                to: req.auth.userId
                             },
                             {
-                                session,
+                                session
                             }
-                        ),
+                        )
                     ]);
 
                 console.log('Decline add friend result');
@@ -502,16 +514,20 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback: error => {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
@@ -520,10 +536,13 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 const { receivedUserId, receivedUsername } = req.body;
+
+                if (!receivedUserId) throw new Error('400');
+
                 let notification = await Notification.findOne({
                     user: receivedUserId,
                     type: 'add_friend_request',
-                    tag: [req.auth.userId],
+                    tag: [req.auth.userId]
                 }).lean();
 
                 if (!notification)
@@ -533,35 +552,35 @@ module.exports = {
                     await Promise.all([
                         User.updateOne(
                             {
-                                _id: receivedUserId,
+                                _id: receivedUserId
                             },
                             {
                                 $pull: {
-                                    notifications: notification._id,
-                                },
+                                    notifications: notification._id
+                                }
                             },
                             {
-                                session,
+                                session
                             }
                         ),
                         Notification.deleteOne(
                             {
-                                _id: notification._id,
+                                _id: notification._id
                             },
                             {
-                                session,
+                                session
                             }
                         ),
                         Request.deleteOne(
                             {
                                 type: 'add_friend',
                                 from: req.auth.userId,
-                                to: receivedUserId,
+                                to: receivedUserId
                             },
                             {
-                                session,
+                                session
                             }
-                        ),
+                        )
                     ]);
 
                 console.log('Undo add friend result');
@@ -585,16 +604,20 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
@@ -603,33 +626,36 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 const { friendId, friendUsername } = req.body;
+
+                if (!friendId) throw new Error('400');
+
                 let [updatedFriendStatus, updatedMyStatus] = await Promise.all([
                     User.updateOne(
                         {
-                            _id: friendId,
+                            _id: friendId
                         },
                         {
                             $pull: {
-                                friends: req.auth.userId,
-                            },
+                                friends: req.auth.userId
+                            }
                         },
                         {
-                            session,
+                            session
                         }
                     ),
                     User.updateOne(
                         {
-                            _id: req.auth.userId,
+                            _id: req.auth.userId
                         },
                         {
                             $pull: {
-                                friends: friendId,
-                            },
+                                friends: friendId
+                            }
                         },
                         {
-                            session,
+                            session
                         }
-                    ),
+                    )
                 ]);
 
                 console.log('Unfriend result');
@@ -648,16 +674,20 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
@@ -670,19 +700,21 @@ module.exports = {
                     path: 'notifications',
                     select: '-user',
                     options: {
-                        sort: { createdAt: -1 },
-                    },
+                        sort: {
+                            createdAt: -1
+                        }
+                    }
                 });
 
             return res.status(200).json({
                 status: 'success',
-                data: user.notifications,
+                data: user.notifications
             });
         } catch (error) {
             console.log(error);
             return res.status(500).json({
                 status: 'error',
-                message: 'Error at server',
+                message: 'Error at server'
             });
         }
     },
@@ -703,25 +735,25 @@ module.exports = {
                 let [updatedUser, deletedNotification] = await Promise.all([
                     User.updateOne(
                         {
-                            _id: req.auth.userId,
+                            _id: req.auth.userId
                         },
                         {
                             $pull: {
-                                notifications: id,
-                            },
+                                notifications: id
+                            }
                         },
                         {
-                            session,
+                            session
                         }
                     ),
                     Notification.deleteOne(
                         {
-                            _id: id,
+                            _id: id
                         },
                         {
-                            session,
+                            session
                         }
-                    ),
+                    )
                 ]);
 
                 console.log(
@@ -740,22 +772,26 @@ module.exports = {
             },
             successCallback() {
                 return res.status(200).json({
-                    status: 'success',
+                    status: 'success'
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 res.status(500).json({
                     status: 'error',
-                    message: 'Error at server.',
+                    message: 'Error at server.'
                 });
-            },
+            }
         });
     },
 
     // [GET] /v1/user/notification/check
     async checkNotification(req, res) {
         let { notificationId } = req.query;
+
+        if (!notificationId)
+            return res.status(400).json({ message: 'Missing parameters' });
+
         let user = undefined,
             post = undefined,
             comment = undefined,
@@ -766,8 +802,10 @@ module.exports = {
                     .select('notifications')
                     .populate({
                         path: 'notifications',
-                        match: { _id: ObjectId(notificationId) },
-                        select: '-user',
+                        match: {
+                            _id: ObjectId(notificationId)
+                        },
+                        select: '-user'
                     })
                     .lean();
 
@@ -779,20 +817,20 @@ module.exports = {
                 let postPipeline = [
                     {
                         path: 'user',
-                        select: 'username friends',
+                        select: 'username friends'
                     },
                     {
                         path: 'likes',
-                        select: 'username',
+                        select: 'username'
                     },
                     {
                         path: 'comments',
                         populate: {
                             path: 'commentBy',
-                            select: 'username',
+                            select: 'username'
                         },
-                        select: 'commentBy content',
-                    },
+                        select: 'commentBy content'
+                    }
                 ];
 
                 switch (notification.type) {
@@ -854,9 +892,15 @@ module.exports = {
                 }
 
                 let updatedNotification = await Notification.updateOne(
-                    { _id: notification._id },
-                    { isChecked: true },
-                    { session }
+                    {
+                        _id: notification._id
+                    },
+                    {
+                        isChecked: true
+                    },
+                    {
+                        session
+                    }
                 );
                 console.log(updatedNotification);
             },
@@ -866,21 +910,25 @@ module.exports = {
                     user,
                     post,
                     comment,
-                    reply,
+                    reply
                 });
             },
             errorCallback(error) {
                 console.log(error);
+                if (error?.message == 400)
+                    return res
+                        .status(400)
+                        .json({ message: 'Missing parameters' });
                 if (error.name === 'Error')
-                    return res.status(400).json({
+                    return res.status(200).json({
                         status: 'error',
-                        message: error.message,
+                        message: error.message
                     });
                 return res.status(500).json({
                     status: 'error',
-                    message: 'Error at server',
+                    message: 'Error at server'
                 });
-            },
+            }
         });
-    },
+    }
 };

@@ -10,14 +10,14 @@ async function validateRoom(roomId, user1, user2) {
     let room = await Room.aggregate([
         {
             $match: {
-                _id: ObjectId(roomId),
-            },
+                _id: ObjectId(roomId)
+            }
         },
         {
             $project: {
-                chatMate: 1,
-            },
-        },
+                chatMate: 1
+            }
+        }
     ]);
     console.log(room);
     if (room.length === 0) return null;
@@ -30,12 +30,16 @@ async function validateRoom(roomId, user1, user2) {
 module.exports = (io, socket) => {
     socket.on('chat:send_message', async payload => {
         let { username, userId, roomId, content } = payload;
+        if (!(username && userId && roomId && content)) {
+            console.log('chat:send_message => Missing parameters');
+            return;
+        }
         let message;
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 message = new Message({
                     sendBy: socket.handshake.auth.username,
-                    content,
+                    content
                 });
 
                 let validate = await validateRoom(
@@ -50,10 +54,10 @@ module.exports = (io, socket) => {
                                 _id: roomId,
                                 chatMate: [
                                     userId,
-                                    socket.handshake.auth.userId,
+                                    socket.handshake.auth.userId
                                 ],
-                                messages: [message],
-                            },
+                                messages: [message]
+                            }
                         ],
                         { session }
                     );
@@ -64,12 +68,12 @@ module.exports = (io, socket) => {
 
                 let updatedRoom = await Room.updateOne(
                     {
-                        _id: roomId,
+                        _id: roomId
                     },
                     {
                         $push: {
-                            messages: message,
-                        },
+                            messages: message
+                        }
                     },
                     { session }
                 );
@@ -82,25 +86,29 @@ module.exports = (io, socket) => {
                     roomId,
                     userId,
                     username: socket.handshake.auth.username,
-                    message: message._doc,
+                    message: message._doc
                 });
             },
             errorCallback(error) {
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     });
 
     socket.on('chat:send_image', async payload => {
         let { username, userId, roomId, image } = payload;
+        if (!(username && userId && roomId && image)) {
+            console.log('chat:send_image => Missing parameters');
+            return;
+        }
         let message,
             roomResource = resourceHelper.createRoomImageFile(roomId);
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 message = new Message({
                     sendBy: username,
-                    isImage: true,
+                    isImage: true
                 });
                 let imageBase64 = image.split(';base64,')[1];
 
@@ -116,10 +124,10 @@ module.exports = (io, socket) => {
                                 _id: roomId,
                                 chatMate: [
                                     userId,
-                                    socket.handshake.auth.userId,
+                                    socket.handshake.auth.userId
                                 ],
-                                messages: [message],
-                            },
+                                messages: [message]
+                            }
                         ],
                         { session }
                     );
@@ -130,12 +138,12 @@ module.exports = (io, socket) => {
 
                 let updatedRoom = await Room.updateOne(
                     {
-                        _id: roomId,
+                        _id: roomId
                     },
                     {
                         $push: {
-                            messages: message,
-                        },
+                            messages: message
+                        }
                     },
                     { session }
                 );
@@ -155,7 +163,7 @@ module.exports = (io, socket) => {
                     roomId,
                     userId,
                     username: socket.handshake.auth.username,
-                    message: message._doc,
+                    message: message._doc
                 });
             },
             errorCallback(error) {
@@ -164,7 +172,7 @@ module.exports = (io, socket) => {
                     fs.rmSync(filePath, {
                         force: true,
                         recursive: true,
-                        maxRetries: 5,
+                        maxRetries: 5
                     });
                 if (
                     fs.existsSync(roomResource) &&
@@ -172,11 +180,11 @@ module.exports = (io, socket) => {
                 )
                     fs.rmdirSync(roomResource, {
                         recursive: true,
-                        maxRetries: 5,
+                        maxRetries: 5
                     });
                 console.log(error);
                 socket.emit('error');
-            },
+            }
         });
     });
 };
