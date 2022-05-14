@@ -13,6 +13,7 @@ function Sidebar({ listOnline }) {
         <Sticky topOffset={-80}>
             <div className="sidebar__user">
                 <ProfilePreview
+                    userId={user._id}
                     username={user.username}
                     name={user.name || 'null'}
                     urlText="Switch"

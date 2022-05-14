@@ -21,7 +21,7 @@ function Post(props) {
         likedByNumber,
         hours,
         accountName,
-        content,
+        content
     } = props;
 
     const [like, setLike] = useState(likedByNumber);
@@ -63,7 +63,7 @@ function Post(props) {
         slidesToShow: 1,
         slidesToScroll: 1,
         nextArrow: <SlickArrowRight />,
-        prevArrow: <SlickArrowLeft />,
+        prevArrow: <SlickArrowLeft />
     };
 
     const handelViewPostDetail = () => {
@@ -78,6 +78,7 @@ function Post(props) {
         <div className="card">
             <header>
                 <ProfilePreview
+                    userId={post.user}
                     image={avatar}
                     iconSize="medium"
                     storyBorder={storyBorder}

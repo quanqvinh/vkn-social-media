@@ -1,38 +1,48 @@
-import userApi from "../apis/userApi";
+import userApi from '../apis/userApi';
 
-export const fetchNotifications = (notifications) => {
-   return {
-      type: "FETCH",
-      payload: notifications,
-   };
+export const fetchNotifications = notifications => {
+    return {
+        type: 'FETCH',
+        payload: notifications
+    };
 };
 
-export const fetchNotificationsRequest = () => {
-   return async (dispatch) => {
-      try {
-         let res = await userApi.getAllNotifications();
-         let notifications = await JSON.parse(
-            sessionStorage.getItem("NOTIFICATIONS")
-         );
-         sessionStorage.setItem(
-            "NOTIFICATIONS",
-            JSON.stringify({
-               ...notifications,
-               listNotifications: [...res.data],
-            })
-         );
+export const fetchNotificationsRequest = uncheck => {
+    return async dispatch => {
+        try {
+            let res = await userApi.getAllNotifications();
 
-         dispatch(fetchNotifications(res.data));
-      } catch (error) {
-         console.log(error.message);
-      }
-   };
+            sessionStorage.setItem(
+                'NOTIFICATIONS',
+                JSON.stringify({
+                    uncheck,
+                    listNotifications: [...res.data]
+                })
+            );
+
+            console.log('fetch request');
+            dispatch(
+                fetchNotifications({
+                    uncheck,
+                    listNotifications: [...res.data]
+                })
+            );
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
 };
 
-export const addNotifications = (notification) => {
-   console.log("add");
-   return {
-      type: "ADD",
-      payload: notification,
-   };
+export const addNotifications = notification => {
+    return {
+        type: 'ADD',
+        payload: notification
+    };
+};
+
+export const checkNotifications = nId => {
+    return {
+        type: 'CHECK',
+        payload: nId
+    };
 };

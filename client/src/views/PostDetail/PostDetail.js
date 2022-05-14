@@ -15,6 +15,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const PostDetail = props => {
     const { closePost, post, owner } = props;
+    console.log(post);
     const [postOwner, setPostOwner] = useState({});
 
     const handelClosePost = e => {
@@ -27,7 +28,7 @@ const PostDetail = props => {
         const fetchUser = async () => {
             try {
                 let res = await userApi.getById(post.user);
-                res && setPostOwner(res);
+                res && setPostOwner(res.data);
             } catch (error) {
                 console.log(error.message);
             }
@@ -69,7 +70,7 @@ const PostDetail = props => {
         slidesToShow: 1,
         slidesToScroll: 1,
         nextArrow: <SlickArrowRight />,
-        prevArrow: <SlickArrowLeft />,
+        prevArrow: <SlickArrowLeft />
     };
 
     return (
@@ -99,15 +100,19 @@ const PostDetail = props => {
                </div> */}
                     <div className="post__right">
                         <div className="right__header">
-                            <ProfilePreview
-                                username={postOwner.username}
-                                iconSize="medium"
-                                image={
-                                    process.env.REACT_APP_STATIC_URL +
-                                    `/avatars/${postOwner._id}.png`
-                                }
-                            />
-                            <MoreHorizIcon className="right__header-options" />
+                            {postOwner._id && (
+                                <>
+                                    <ProfilePreview
+                                        username={postOwner.username}
+                                        iconSize="medium"
+                                        image={
+                                            process.env.REACT_APP_STATIC_URL +
+                                            `/avatars/${postOwner._id}.png`
+                                        }
+                                    />
+                                    <MoreHorizIcon className="right__header-options" />
+                                </>
+                            )}
                         </div>
                         <div className="right__body">
                             <div className="right__body-list-messages">
