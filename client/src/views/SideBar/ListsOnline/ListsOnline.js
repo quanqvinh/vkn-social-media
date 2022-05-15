@@ -11,11 +11,12 @@ function ListsOnline({ listOnline }) {
             {listOnline?.length > 0 &&
                 listOnline.map(user => (
                     <ProfilePreview
+                        userId={user._id}
+                        key={user._id || user.useId}
                         image={
                             process.env.REACT_APP_STATIC_URL +
-                            `/avatars/${user._id}.png`
+                            `/avatars/${user._id || user.useId}.png`
                         }
-                        key={user._id}
                         username={user.username}
                         name={user.name}
                         iconSize="medium"

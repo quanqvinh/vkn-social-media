@@ -78,11 +78,11 @@ a.navLink--active {
       top: 5px;
       right: 0;
       width: 200px;
-
       box-shadow: 0px 1px 4px #888;
       border-radius: 4px;
       background-color: #fff;
       list-style: none;
+      transition: 0.2s all linear;
 
       li {
         font-weight: 400;

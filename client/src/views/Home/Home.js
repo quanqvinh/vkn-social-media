@@ -2,22 +2,21 @@ import './home.scss';
 import Posts from '../Posts/Posts';
 import Sidebar from '../SideBar/SideBar';
 import Header from '../Header/Header';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch, useStore } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { fetchProfileRequest } from '../../actions/user';
 import { getCookie } from '../Global/cookie';
 import { useHistory } from 'react-router-dom';
 import { SOCKET } from '../../App';
 import { useContext } from 'react';
 
-const Home = () => {
+const Home = ({ listOnlineInit }) => {
     const history = useHistory();
     const accessToken = getCookie('accessToken');
-    const SESSION_USER = sessionStorage.getItem('USER_INFO');
     const socket = useContext(SOCKET);
     const [listOnline, setListOnline] = useState([]);
 
-    if (!SESSION_USER) {
+    if (!accessToken) {
         history.push('/login');
     }
 
@@ -36,11 +35,8 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        socket &&
-            socket.on('home:list_friend_online', payload => {
-                setListOnline([...payload]);
-            });
-    }, [socket]);
+        setListOnline([...listOnlineInit]);
+    }, [listOnlineInit]);
 
     useEffect(() => {
         socket &&
