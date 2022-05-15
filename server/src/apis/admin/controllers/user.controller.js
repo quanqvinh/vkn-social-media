@@ -1,4 +1,7 @@
 const User = require('../../../models/user.model');
+const Post = require('../../../models/post.model');
+const ObjectId = require('mongoose').Types.ObjectId;
+const resourceHelper = require('../../../utils/resourceHelper');
 const COUNT_ITEM_OF_A_PAGE = 10;
 
 module.exports = {
@@ -47,8 +50,6 @@ module.exports = {
                 .project({
                     username: 1,
                     email: 1,
-                    name: 1,
-                    dob: 1,
                     numberOfFriends: { $size: '$friends' },
                     numberOfPosts: { $size: '$posts' },
                     isDisabled: '$deleted',
@@ -70,35 +71,96 @@ module.exports = {
         }
     },
 
-    // [GET] admin/v1/user/:id
-    getUser(req, res, next) {
-        let id = req.params.id;
-        if (!id) {
-            // not a number or undefined
-            res.status(400).json({
-                status: 'error',
-                message: 'User ID required.'
+    // [GET] /v1/user/:id
+    async getUserDetail(req, res) {
+        let userId = req.params.id;
+        try {
+            let [userInfo, userPosts] = await Promise.all([
+                User.aggregate()
+                    .match({ _id: ObjectId(userId) })
+                    .project({
+                        username: 1,
+                        email: 1,
+                        disabled: '$deleted',
+                        joinedAt: '$createdAt',
+                        numberOfPosts: { $size: '$posts' },
+                        numberOfFriends: { $size: '$friends' },
+                        rooms: 1
+                    })
+                    .lookup({
+                        from: 'rooms',
+                        localField: 'rooms',
+                        foreignField: '_id',
+                        as: 'rooms'
+                    })
+                    .unwind({
+                        path: '$rooms',
+                        preserveNullAndEmptyArrays: true
+                    })
+                    .addFields({
+                        numberOfMessages: {
+                            $cond: [{ $not: ['$rooms'] }, 0, { $size: '$rooms.messages' }]
+                        }
+                    })
+                    .group({
+                        _id: '$_id',
+                        username: { $first: '$username' },
+                        email: { $first: '$email' },
+                        disabled: { $first: '$disabled' },
+                        joinedAt: { $first: '$joinedAt' },
+                        numberOfPosts: { $first: '$numberOfPosts' },
+                        numberOfFriends: { $first: '$numberOfFriends' },
+                        numberOfMessages: { $sum: '$numberOfMessages' }
+                    }),
+                Post.aggregate()
+                    .match({ user: ObjectId(userId) })
+                    .lookup({
+                        from: 'comments',
+                        localField: 'comments',
+                        foreignField: '_id',
+                        as: 'comments'
+                    })
+                    .unwind({
+                        path: '$comments',
+                        preserveNullAndEmptyArrays: true
+                    })
+                    .addFields({
+                        numberOfReports: { $size: '$reports' },
+                        numberOfComments: {
+                            $cond: [
+                                { $not: ['$comments'] },
+                                0,
+                                { $add: [1, { $size: '$comments.replies' }] }
+                            ]
+                        }
+                    })
+                    .group({
+                        _id: '$_id',
+                        caption: { $first: '$caption' },
+                        numberOfLikes: { $first: '$numberOfLikes' },
+                        numberOfReports: { $first: '$numberOfReports' },
+                        numberOfComments: { $first: '$numberOfComments' },
+                        numberOfComments: { $first: '$numberOfComments' },
+                        createdAt: { $first: '$createdAt' }
+                    })
+            ]);
+            userInfo = userInfo.length > 0 ? userInfo[0] : userInfo;
+            userPosts.forEach((value, index) => {
+                userPosts[index].imgs = resourceHelper.getListPostImages(value._id);
             });
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    ...userInfo,
+                    posts: userPosts
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            res.json(error);
         }
-        User.findOneWithDeleted(
-            {
-                _id: id
-            },
-            {
-                auth: 0
-            }
-        )
-            .lean()
-            .then(data => {
-                res.status(200).json(data);
-            })
-            .catch(() => {
-                res.status(400).json({
-                    status: 'error',
-                    message: 'User not found.'
-                });
-            });
     },
+
     // [PATCH] admin/v1/user/enable/:id
     async enableUser(req, res, next) {
         try {

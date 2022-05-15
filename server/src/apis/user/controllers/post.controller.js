@@ -16,21 +16,18 @@ module.exports = {
         try {
             let populatePostPipeline = {
                 path: 'posts',
-                select: '-reports -updatedAt',
-                populate: [
-                    {
-                        path: 'likes',
+                populate: {
+                    path: 'comments',
+                    options: {
+                        limit: 2,
+                        sort: { numberOfLikes: -1, createdAt: -1 }
+                    },
+                    populate: {
+                        path: 'commentBy',
                         select: 'username'
                     },
-                    {
-                        path: 'comments',
-                        populate: {
-                            path: 'commentBy',
-                            select: 'username'
-                        },
-                        select: '-updatedAt'
-                    }
-                ]
+                    select: '-replies'
+                }
             };
             let user = await User.findById(req.auth.userId)
                 .select('username friends posts notifications')
@@ -147,21 +144,29 @@ module.exports = {
                     },
                     {
                         path: 'comments',
-                        populate: {
-                            path: 'commentBy',
-                            select: 'username'
-                        },
-                        select: 'commentBy content replies'
+                        populate: [
+                            {
+                                path: 'commentBy',
+                                select: 'username'
+                            },
+                            {
+                                path: 'replies.replyBy',
+                                select: 'username'
+                            }
+                        ],
+                        select: '-updatedAt -replies.updatedAt'
                     }
                 ])
                 .select('-reports')
                 .lean();
 
-            post.user.isFriend =
-                objectIdHelper.include(post.user.friends, req.auth.userId) ||
-                objectIdHelper.compare(req.auth.userId, post.user._id);
-            post.user.friends = undefined;
-            post.imgs = resourceHelper.getListPostImages(postId);
+            if (post) {
+                post.user.isFriend =
+                    objectIdHelper.include(post.user.friends, req.auth.userId) ||
+                    objectIdHelper.compare(req.auth.userId, post.user._id);
+                post.user.friends = undefined;
+                post.imgs = resourceHelper.getListPostImages(postId);
+            }
             res.status(200).json({
                 status: 'success',
                 data: post

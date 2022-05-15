@@ -3,27 +3,19 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const objectIdHelper = require('../../../utils/objectIdHelper');
 
 module.exports = async (io, socket) => {
-    let listFriendsOnline = await getListFriendsOnline(
-        socket.handshake.auth.userId
-    );
+    let listFriendsOnline = await getListFriendsOnline(socket.handshake.auth.userId);
     let userInfo = {
         username: socket.handshake.auth.username,
-        useId: socket.handshake.auth.userId,
+        useId: socket.handshake.auth.userId
     };
 
     if (listFriendsOnline.length > 0) {
         socket.emit('home:list_friend_online', listFriendsOnline);
-        io.to(listFriendsOnline.map(friend => friend._id)).emit(
-            'home:friend_connect',
-            userInfo
-        );
+        io.to(listFriendsOnline.map(friend => friend._id)).emit('home:friend_connect', userInfo);
     }
 
     socket.on('disconnect', () => {
-        io.to(listFriendsOnline.map(friend => friend._id)).emit(
-            'home:friend_disconnect',
-            userInfo
-        );
+        io.to(listFriendsOnline.map(friend => friend._id)).emit('home:friend_disconnect', userInfo);
         console.log(`Socket ID ${socket.id} disconnect!`);
     });
 
@@ -32,15 +24,16 @@ module.exports = async (io, socket) => {
             {
                 $match: {
                     _id: ObjectId(_id),
-                },
+                    deleted: false
+                }
             },
             {
                 $lookup: {
                     from: 'users',
                     localField: 'friends',
                     foreignField: '_id',
-                    as: 'friends',
-                },
+                    as: 'friends'
+                }
             },
             {
                 $project: {
@@ -50,18 +43,16 @@ module.exports = async (io, socket) => {
                             input: '$friends',
                             in: {
                                 _id: {
-                                    $toString: '$$this._id',
+                                    $toString: '$$this._id'
                                 },
                                 username: '$$this.username',
-                                name: '$$this.name',
-                            },
-                        },
-                    },
-                },
-            },
+                                name: '$$this.name'
+                            }
+                        }
+                    }
+                }
+            }
         ]);
-        return user[0].friends.filter(friend =>
-            io.sockets.adapter.rooms.has(friend.username)
-        );
+        return user[0].friends.filter(friend => io.sockets.adapter.rooms.has(friend.username));
     }
 };

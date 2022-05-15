@@ -1,9 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const userController = require('../controllers/user.controller');
+const router = require('express').Router();
+const controller = require('../controllers/user.controller');
 
 // router.get('/search', userController.searchUser);
-// router.get('/:id', userController.getUser);
+router.get('/:id', controller.getUserDetail);
 
 // router.patch('/enable/:id', userController.enableUser);
 // router.patch('/disable/:id', userController.disableUser);

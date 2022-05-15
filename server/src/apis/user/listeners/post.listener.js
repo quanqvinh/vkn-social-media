@@ -41,7 +41,9 @@ module.exports = (io, socket) => {
                     relatedUsers: {
                         from: socket.handshake.auth.username
                     },
-                    tag: [postId]
+                    tag: [postId],
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
 
                 let [savedNotification, updatedUser] = await Promise.all([
@@ -82,7 +84,10 @@ module.exports = (io, socket) => {
             commentOwnerId,
             commentOwnerUsername
         } = payload;
-        c;
+        if (!(postId, commentId, postOwnerUsername, commentOwnerId)) {
+            console.log('post:like_comment => Missing parameters');
+            return;
+        }
         let notification;
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
@@ -94,7 +99,9 @@ module.exports = (io, socket) => {
                         from: socket.handshake.auth.username,
                         of: postOwnerUsername
                     },
-                    tag: [postId, commentId]
+                    tag: [postId, commentId],
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
 
                 let [savedNotification, updatedUser] = await Promise.all([
@@ -130,7 +137,7 @@ module.exports = (io, socket) => {
         const { postId, postOwnerId, postOwnerUsername, content } = payload;
         let comment, notification;
         if (!(postId && postOwnerId && postOwnerUsername && content)) {
-            console.log('post:like_comment => Missing parameters');
+            console.log('post:comment_post => Missing parameters');
             return;
         }
         await mongodbHelper.executeTransactionWithRetry({
@@ -138,7 +145,9 @@ module.exports = (io, socket) => {
                 comment = new Comment({
                     post: postId,
                     commentBy: socket.handshake.auth.userId,
-                    content
+                    content,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
                 notification = new Notification({
                     user: postOwnerId,
@@ -147,7 +156,9 @@ module.exports = (io, socket) => {
                     relatedUsers: {
                         from: socket.handshake.auth.username
                     },
-                    tag: [postId, comment._id]
+                    tag: [postId, comment._id],
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
 
                 let [savedComment, updatedPost, savedNotification, updatedUser] = await Promise.all(
@@ -223,7 +234,9 @@ module.exports = (io, socket) => {
             async executeCallback(session) {
                 reply = new Reply({
                     replyBy: socket.handshake.auth.userId,
-                    content
+                    content,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
                 notificationOfCommentOwner = new Notification({
                     user: commentOwnerId,
@@ -233,7 +246,9 @@ module.exports = (io, socket) => {
                         from: socket.handshake.auth.username,
                         of: postOwnerUsername
                     },
-                    tag: [postId, commentId, reply._id]
+                    tag: [postId, commentId, reply._id],
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 });
 
                 let [updatedComment, savedNotificationOfCommentOwner, updatedCommentOwner] =

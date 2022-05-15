@@ -47,16 +47,10 @@ async function loadMessage(req, res) {
                                         cond: {
                                             $or: [
                                                 {
-                                                    $eq: [
-                                                        '$$this.showWith',
-                                                        'all'
-                                                    ]
+                                                    $eq: ['$$this.showWith', 'all']
                                                 },
                                                 {
-                                                    $eq: [
-                                                        '$$this.showWith',
-                                                        req.auth.userId
-                                                    ]
+                                                    $eq: ['$$this.showWith', req.auth.userId]
                                                 }
                                             ]
                                         }
@@ -87,9 +81,7 @@ async function loadMessage(req, res) {
             return res.status(200).json({
                 status: 'success',
                 data: [],
-                roomId: req.originalUrl.includes('room/check')
-                    ? roomId
-                    : undefined
+                roomId: req.originalUrl.includes('room/check') ? roomId : undefined
             });
         } else if (numberOfMessage + numberOfLoadMessage > countMessage.count)
             data.messages.splice(
@@ -114,9 +106,7 @@ module.exports = {
     // [GET] /v1/room
     async getRooms(req, res) {
         try {
-            let user = await User.findById(req.auth.userId)
-                .select('username name rooms')
-                .lean();
+            let user = await User.findById(req.auth.userId).select('username name rooms').lean();
 
             if (!user) throw new Error('Not found user');
 
@@ -129,7 +119,8 @@ module.exports = {
             user = await User.aggregate([
                 {
                     $match: {
-                        _id: ObjectId(req.auth.userId)
+                        _id: ObjectId(req.auth.userId),
+                        deleted: false
                     }
                 },
                 {
@@ -183,16 +174,10 @@ module.exports = {
                                             cond: {
                                                 $or: [
                                                     {
-                                                        $eq: [
-                                                            '$$this.showWith',
-                                                            'all'
-                                                        ]
+                                                        $eq: ['$$this.showWith', 'all']
                                                     },
                                                     {
-                                                        $eq: [
-                                                            '$$this.showWith',
-                                                            req.auth.userId
-                                                        ]
+                                                        $eq: ['$$this.showWith', req.auth.userId]
                                                     }
                                                 ]
                                             }
@@ -226,9 +211,7 @@ module.exports = {
                 }
             ]);
 
-            user[0].rooms = user[0].rooms.filter(
-                room => room.messages.length > 0
-            );
+            user[0].rooms = user[0].rooms.filter(room => room.messages.length > 0);
 
             return res.status(200).json({
                 status: 'success',
@@ -256,8 +239,7 @@ module.exports = {
         try {
             let { userId } = req.query;
 
-            if (!userId)
-                return res.status(400).json({ message: 'Missing parameters' });
+            if (!userId) return res.status(400).json({ message: 'Missing parameters' });
 
             let user = await User.findById(req.auth.userId)
                 .select('rooms')
@@ -360,12 +342,8 @@ module.exports = {
                         { session }
                     );
 
-                console.log(
-                    'updatedRoom.modifiedCount:',
-                    updatedRoom.modifiedCount
-                );
-                if (updatedRoom.modifiedCount < 1)
-                    throw new Error('Delete data failed');
+                console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+                if (updatedRoom.modifiedCount < 1) throw new Error('Delete data failed');
             },
             successCallback() {
                 return res.status(200).json({
@@ -375,9 +353,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 let message = 'Error at server';
                 if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
@@ -396,9 +372,7 @@ module.exports = {
 
                 if (!(roomId && messageId)) throw new Error('400');
 
-                let room = await Room.findById(roomId)
-                    .select('chatMate')
-                    .lean();
+                let room = await Room.findById(roomId).select('chatMate').lean();
                 if (!objectIdHelper.include(room.chatMate, req.auth.userId))
                     return new Error('Unauthorized');
 
@@ -416,12 +390,8 @@ module.exports = {
                     { session }
                 );
 
-                console.log(
-                    'updatedRoom.modifiedCount:',
-                    updatedRoom.modifiedCount
-                );
-                if (updatedRoom.modifiedCount < 1)
-                    throw new Error('Delete data failed');
+                console.log('updatedRoom.modifiedCount:', updatedRoom.modifiedCount);
+                if (updatedRoom.modifiedCount < 1) throw new Error('Delete data failed');
             },
             successCallback() {
                 return res.status(200).json({
@@ -431,9 +401,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 let message = 'Error at server';
                 if (error.name === 'Error') message = error.message;
                 return res.status(500).json({
@@ -455,12 +423,7 @@ module.exports = {
                     throw new Error('Unauthorized');
                 let other =
                     room.chatMate[
-                        objectIdHelper.compare(
-                            req.auth.userId,
-                            room.chatMate[0]._id
-                        )
-                            ? 1
-                            : 0
+                        objectIdHelper.compare(req.auth.userId, room.chatMate[0]._id) ? 1 : 0
                     ]._id;
 
                 let updatedRoom = await Room.updateOne(

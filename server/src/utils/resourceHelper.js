@@ -18,9 +18,13 @@ module.exports = {
     },
     getListPostImages(postId) {
         postId = postId.toString();
-        console.log(postId);
+        console.log(this.postResource);
         let dirPath = path.join(this.postResource, postId);
-        if (!fs.existsSync(dirPath)) return [];
+        console.log(dirPath);
+        if (!fs.existsSync(dirPath)) {
+            console.log('not exist');
+            return [];
+        }
         return fs.readdirSync(dirPath);
     }
 };

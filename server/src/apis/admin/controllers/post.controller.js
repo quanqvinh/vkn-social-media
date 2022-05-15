@@ -2,7 +2,8 @@ const User = require('../../../models/user.model');
 const Comment = require('../../../models/comment.model');
 const Post = require('../../../models/post.model');
 const Report = require('../../../models/report.model');
-const { getListPostImages } = require('../../../utils/resourceHelper');
+const ObjectId = require('mongoose').Types.ObjectId;
+const resourceHelper = require('../../../utils/resourceHelper');
 
 const COUNT_ITEM_OF_A_PAGE = 10;
 module.exports = {
@@ -91,11 +92,9 @@ module.exports = {
                     numberOfComments: { $sum: '$numberOfComments' },
                     createdAt: { $first: '$createdAt' }
                 });
-            // posts.forEach((post, index) => {
-            //     console.log(posts[index]);
-            //     console.log(getListPostImages(post._id));
-            //     posts[index].imgs = getListPostImages(post._id);
-            // });
+            posts.forEach((post, index) => {
+                posts[index].imgs = resourceHelper.getListPostImages(post._id);
+            });
             return res.status(200).json({
                 status: 'success',
                 data: posts
@@ -109,30 +108,49 @@ module.exports = {
         }
     },
 
-    // [GET] /admin/v1/post/:id
-    async getPostById(req, res, next) {
+    // [GET] /v1/post/:id
+    async getPostDetail(req, res) {
         let id = req.params.id;
         try {
-            await Post.findOne({
-                _id: id
-            })
-                .lean()
-                .then(data => {
-                    res.status(200).json(data);
-                })
-                .catch(err => {
-                    res.status(400).json({
-                        status: 'error',
-                        message: 'Post not found.'
-                    });
-                });
-        } catch (err) {
+            let post = await Post.findById(id)
+                .populate([
+                    {
+                        path: 'user',
+                        select: 'username'
+                    },
+                    {
+                        path: 'likes',
+                        select: 'username'
+                    },
+                    {
+                        path: 'comments',
+                        populate: [
+                            {
+                                path: 'commentBy',
+                                select: 'username'
+                            },
+                            {
+                                path: 'replies.replyBy',
+                                select: 'username'
+                            }
+                        ],
+                        select: '-replies.updatedAt -updatedAt'
+                    }
+                ])
+                .lean();
+            res.status(200).json({
+                status: 'success',
+                data: post
+            });
+        } catch (error) {
+            console.log(error);
             res.status(500).json({
                 status: 'error',
                 message: 'Error at server'
             });
         }
     },
+
     async getPostByUserId(req, res, next) {
         let userId = req.params.userId;
         try {

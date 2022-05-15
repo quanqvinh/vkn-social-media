@@ -17,20 +17,3 @@ module.exports = io => {
         postHandlerRegister(io, socket);
     });
 };
-
-/* All event emit to sockets <<<<<<<<<<<<<<<<
-home:list_friend_online
-home:friend_connect
-home:friend_disconnect
-chat:print_message
-user:send_add_friend_request
-error
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
-
-/* All event listeners <<<<<<<<<<<<<<
-connection (auto)
-disconnect (auto)
-chat:send_message
-chat:send_image
-user:add_friend_request
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
