@@ -24,7 +24,24 @@ module.exports = {
         })
             .select('-notifications -deleted -updatedAt')
             .populate([
-                'posts',
+                {
+                    path: 'posts',
+                    select: '-user -reports -updatedAt',
+                    populate: [
+                        {
+                            path: 'likes',
+                            select: 'username'
+                        },
+                        {
+                            path: 'comments',
+                            populate: {
+                                path: 'commentBy',
+                                select: 'username'
+                            },
+                            select: '-updatedAt'
+                        }
+                    ]
+                },
                 {
                     path: 'friends',
                     select: 'username name'
@@ -33,9 +50,7 @@ module.exports = {
             .lean()
             .then(data => {
                 data.posts.forEach(post => {
-                    post.imgs = resourceHelper.getListPostImages(
-                        post._id.toString()
-                    );
+                    post.imgs = resourceHelper.getListPostImages(post._id.toString());
                 });
                 res.status(200).json(data);
             })
@@ -52,8 +67,7 @@ module.exports = {
     getUserProfile(req, res) {
         let userId = req.params.userId;
 
-        if (!userId)
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!userId) return res.status(400).json({ message: 'Missing parameters' });
 
         Promise.all([
             User.findById(userId)
@@ -80,13 +94,10 @@ module.exports = {
                         message: 'Data not found'
                     });
                 data.posts.forEach(post => {
-                    post.imgs = resourceHelper.getListPostImages(
-                        post._id.toString()
-                    );
+                    post.imgs = resourceHelper.getListPostImages(post._id.toString());
                 });
                 data.isFriend = objectIdHelper.include(mine.friends, data._id);
-                if (!data.isFriend)
-                    data.addFriendRequest = request ? true : false;
+                if (!data.isFriend) data.addFriendRequest = request ? true : false;
                 res.status(200).json({
                     status: 'success',
                     data
@@ -107,11 +118,7 @@ module.exports = {
             async executeCallback(session) {
                 let { username, name, bio, dob, gender } = req.body;
 
-                if (
-                    [username, name, bio, dob, gender].some(
-                        a => a === undefined
-                    )
-                )
+                if ([username, name, bio, dob, gender].some(a => a === undefined))
                     throw new Error('400');
 
                 let updatedUser = await User.updateOne(
@@ -129,12 +136,8 @@ module.exports = {
                         session
                     }
                 );
-                console.log(
-                    'updatedUser.modifiedCount:',
-                    updatedUser.modifiedCount
-                );
-                if (updatedUser.modifiedCount < 1)
-                    throw new Error('Update data failed');
+                console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
+                if (updatedUser.modifiedCount < 1) throw new Error('Update data failed');
             },
             successCallback() {
                 res.status(200).json({
@@ -145,9 +148,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 if (error.name === 'Error')
                     return res.status(200).json({
                         status: 'error',
@@ -164,8 +165,7 @@ module.exports = {
     // [POST] /v1/user/edit/email/request
     async requestEditUserEmail(req, res) {
         let newEmail = req.body.newEmail;
-        if (!newEmail)
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!newEmail) return res.status(400).json({ message: 'Missing parameters' });
 
         let [user, checkUser] = await Promise.all([
             User.findById(req.auth.userId).select('username').lean(),
@@ -186,8 +186,7 @@ module.exports = {
     async editUserEmail(req, res) {
         let { token } = req.body;
 
-        if (!token)
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!token) return res.status(400).json({ message: 'Missing parameters' });
         await Auth.verifyEmail(req, res);
     },
 
@@ -217,16 +216,14 @@ module.exports = {
                     status: 'error',
                     message: 'Password is incorrect'
                 });
-            if (updatedUser.modifiedCount === 0)
-                throw new Error('Update data failed');
+            if (updatedUser.modifiedCount === 0) throw new Error('Update data failed');
 
             return res.status(200).json({ status: 'success' });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: 'error',
-                message:
-                    error.name === 'Error' ? error.message : 'Error at server'
+                message: error.name === 'Error' ? error.message : 'Error at server'
             });
         }
     },
@@ -241,8 +238,7 @@ module.exports = {
                     if (data.deletedCount === 1)
                         res.status(200).json({
                             status: 'success',
-                            message:
-                                'User account has been moved to recycle bin.'
+                            message: 'User account has been moved to recycle bin.'
                         });
                 })
                 .catch(err => {
@@ -267,10 +263,7 @@ module.exports = {
                 await unlink(filepath);
                 console.log('deleted');
             } catch (error) {
-                console.error(
-                    'there was an error when deleting file:',
-                    error.message
-                );
+                console.error('there was an error when deleting file:', error.message);
                 err = error;
             }
         };
@@ -285,9 +278,7 @@ module.exports = {
                 err = error;
             } else if (file.includes('new-')) {
                 // check whether there is a new avatar, then delete the old one
-                deleteFileFunction(
-                    resourceHelper.createAvatarFile(req.auth.userId)
-                );
+                deleteFileFunction(resourceHelper.createAvatarFile(req.auth.userId));
                 fs.rename(file, file.replace('new-', ''), err => {
                     if (err) {
                         console.log('error when changing name:', err.message);
@@ -343,129 +334,31 @@ module.exports = {
                     tag: requestedUserId
                 }).lean();
 
-                if (!notification)
-                    throw new Error('Notification is not found!');
+                if (!notification) throw new Error('Notification is not found!');
 
-                let [
-                    requestedUser,
-                    receivedUser,
-                    deletedNotification,
-                    deletedRequest
-                ] = await Promise.all([
-                    User.updateOne(
-                        {
-                            _id: requestedUserId
-                        },
-                        {
-                            $push: {
-                                friends: req.auth.userId
-                            }
-                        },
-                        {
-                            session
-                        }
-                    ),
-                    User.updateOne(
-                        {
-                            _id: req.auth.userId
-                        },
-                        {
-                            $push: {
-                                friends: requestedUserId
-                            },
-                            $pull: {
-                                notifications: notification._id
-                            }
-                        },
-                        {
-                            session
-                        }
-                    ),
-                    Notification.deleteOne(
-                        {
-                            _id: notification._id
-                        },
-                        {
-                            session
-                        }
-                    ),
-                    Request.deleteOne(
-                        {
-                            type: 'add_friend',
-                            from: requestedUserId,
-                            to: req.auth.userId
-                        },
-                        {
-                            session
-                        }
-                    )
-                ]);
-
-                console.log('Accept add friend result');
-                console.log(
-                    `requestedUser.modifiedCount: ${requestedUser.modifiedCount}`
-                );
-                console.log(
-                    `receivedUser.modifiedCount: ${receivedUser.modifiedCount}`
-                );
-                console.log(
-                    `deletedNotification.deletedCount: ${deletedNotification.deletedCount}`
-                );
-                console.log(
-                    `deletedRequest.deletedCount: ${deletedRequest.deletedCount}`
-                );
-                console.log('OK');
-                if (
-                    requestedUser.modifiedCount < 1 ||
-                    receivedUser.modifiedCount < 1 ||
-                    deletedNotification.deletedCount < 1 ||
-                    deletedRequest.deletedCount < 1
-                )
-                    throw new Error('Contain not updated data');
-            },
-            successCallback() {
-                return res.status(200).json({
-                    status: 'success'
-                });
-            },
-            errorCallback: error => {
-                console.log(error);
-                if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
-                res.status(500).json({
-                    status: 'error',
-                    message: 'Error at server.'
-                });
-            }
-        });
-    },
-
-    // [POST] /v1/user/friends/decline-request
-    async declineAddFriendRequest(req, res) {
-        await mongodbHelper.executeTransactionWithRetry({
-            async executeCallback(session) {
-                const { requestedUserId, requestedUsername } = req.body;
-
-                if (!requestedUserId) throw new Error('400');
-
-                let notification = await Notification.findOne({
-                    user: req.auth.userId,
-                    type: 'add_friend_request',
-                    tag: [requestedUserId]
-                }).lean();
-
-                if (!notification)
-                    throw new Error('Notification is not found!');
-
-                let [receivedUser, deletedNotification, deletedRequest] =
+                let [requestedUser, receivedUser, deletedNotification, deletedRequest] =
                     await Promise.all([
+                        User.updateOne(
+                            {
+                                _id: requestedUserId
+                            },
+                            {
+                                $push: {
+                                    friends: req.auth.userId
+                                }
+                            },
+                            {
+                                session
+                            }
+                        ),
                         User.updateOne(
                             {
                                 _id: req.auth.userId
                             },
                             {
+                                $push: {
+                                    friends: requestedUserId
+                                },
                                 $pull: {
                                     notifications: notification._id
                                 }
@@ -494,16 +387,95 @@ module.exports = {
                         )
                     ]);
 
-                console.log('Decline add friend result');
-                console.log(
-                    `receivedUser.modifiedCount: ${receivedUser.modifiedCount}`
-                );
+                console.log('Accept add friend result');
+                console.log(`requestedUser.modifiedCount: ${requestedUser.modifiedCount}`);
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
                 console.log(
                     `deletedNotification.deletedCount: ${deletedNotification.deletedCount}`
                 );
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
+                console.log('OK');
+                if (
+                    requestedUser.modifiedCount < 1 ||
+                    receivedUser.modifiedCount < 1 ||
+                    deletedNotification.deletedCount < 1 ||
+                    deletedRequest.deletedCount < 1
+                )
+                    throw new Error('Contain not updated data');
+            },
+            successCallback() {
+                return res.status(200).json({
+                    status: 'success'
+                });
+            },
+            errorCallback: error => {
+                console.log(error);
+                if (error?.message == 400)
+                    return res.status(400).json({ message: 'Missing parameters' });
+                res.status(500).json({
+                    status: 'error',
+                    message: 'Error at server.'
+                });
+            }
+        });
+    },
+
+    // [POST] /v1/user/friends/decline-request
+    async declineAddFriendRequest(req, res) {
+        await mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                const { requestedUserId, requestedUsername } = req.body;
+
+                if (!requestedUserId) throw new Error('400');
+
+                let notification = await Notification.findOne({
+                    user: req.auth.userId,
+                    type: 'add_friend_request',
+                    tag: [requestedUserId]
+                }).lean();
+
+                if (!notification) throw new Error('Notification is not found!');
+
+                let [receivedUser, deletedNotification, deletedRequest] = await Promise.all([
+                    User.updateOne(
+                        {
+                            _id: req.auth.userId
+                        },
+                        {
+                            $pull: {
+                                notifications: notification._id
+                            }
+                        },
+                        {
+                            session
+                        }
+                    ),
+                    Notification.deleteOne(
+                        {
+                            _id: notification._id
+                        },
+                        {
+                            session
+                        }
+                    ),
+                    Request.deleteOne(
+                        {
+                            type: 'add_friend',
+                            from: requestedUserId,
+                            to: req.auth.userId
+                        },
+                        {
+                            session
+                        }
+                    )
+                ]);
+
+                console.log('Decline add friend result');
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
                 console.log(
-                    `deletedRequest.deletedCount: ${deletedRequest.deletedCount}`
+                    `deletedNotification.deletedCount: ${deletedNotification.deletedCount}`
                 );
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
 
                 if (
                     receivedUser.modifiedCount < 1 ||
@@ -520,9 +492,7 @@ module.exports = {
             errorCallback: error => {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
                     message: 'Error at server.'
@@ -545,54 +515,48 @@ module.exports = {
                     tag: [req.auth.userId]
                 }).lean();
 
-                if (!notification)
-                    throw new Error('Notification is not found!');
+                if (!notification) throw new Error('Notification is not found!');
 
-                let [receivedUser, deletedNotification, deletedRequest] =
-                    await Promise.all([
-                        User.updateOne(
-                            {
-                                _id: receivedUserId
-                            },
-                            {
-                                $pull: {
-                                    notifications: notification._id
-                                }
-                            },
-                            {
-                                session
+                let [receivedUser, deletedNotification, deletedRequest] = await Promise.all([
+                    User.updateOne(
+                        {
+                            _id: receivedUserId
+                        },
+                        {
+                            $pull: {
+                                notifications: notification._id
                             }
-                        ),
-                        Notification.deleteOne(
-                            {
-                                _id: notification._id
-                            },
-                            {
-                                session
-                            }
-                        ),
-                        Request.deleteOne(
-                            {
-                                type: 'add_friend',
-                                from: req.auth.userId,
-                                to: receivedUserId
-                            },
-                            {
-                                session
-                            }
-                        )
-                    ]);
+                        },
+                        {
+                            session
+                        }
+                    ),
+                    Notification.deleteOne(
+                        {
+                            _id: notification._id
+                        },
+                        {
+                            session
+                        }
+                    ),
+                    Request.deleteOne(
+                        {
+                            type: 'add_friend',
+                            from: req.auth.userId,
+                            to: receivedUserId
+                        },
+                        {
+                            session
+                        }
+                    )
+                ]);
 
                 console.log('Undo add friend result');
-                console.log(
-                    `receivedUser.modifiedCount: ${receivedUser.modifiedCount}`
-                );
+                console.log(`receivedUser.modifiedCount: ${receivedUser.modifiedCount}`);
                 console.log(
                     `deletedNotification.deletedCount: ${deletedNotification.deletedCount}`
                 );
-                console.log(
-                    `deletedRequest.deletedCount: ${deletedRequest.deletedCount}`
-                );
+                console.log(`deletedRequest.deletedCount: ${deletedRequest.deletedCount}`);
                 console.log('OK');
 
                 if (
@@ -610,9 +574,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
                     message: 'Error at server.'
@@ -662,14 +624,9 @@ module.exports = {
                 console.log(
                     `updatedFriendStatus.modifiedCount: ${updatedFriendStatus.modifiedCount}`
                 );
-                console.log(
-                    `updatedMyStatus.modifiedCount: ${updatedMyStatus.modifiedCount}`
-                );
+                console.log(`updatedMyStatus.modifiedCount: ${updatedMyStatus.modifiedCount}`);
                 console.log('OK');
-                if (
-                    updatedFriendStatus.modifiedCount < 1 ||
-                    updatedMyStatus.modifiedCount < 1
-                )
+                if (updatedFriendStatus.modifiedCount < 1 || updatedMyStatus.modifiedCount < 1)
                     throw new Error('Data is not updated');
             },
             successCallback() {
@@ -680,9 +637,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
                     message: 'Error at server.'
@@ -725,9 +680,7 @@ module.exports = {
             async executeCallback(session) {
                 const id = req.params.id;
 
-                let notification = await Notification.findById(id)
-                    .select('user')
-                    .lean();
+                let notification = await Notification.findById(id).select('user').lean();
                 if (!notification) throw new Error('Not found');
                 if (!objectIdHelper.compare(notification.user, req.auth.userId))
                     throw new Error('Authorized');
@@ -756,18 +709,9 @@ module.exports = {
                     )
                 ]);
 
-                console.log(
-                    'updatedUser.modifiedCount:',
-                    updatedUser.modifiedCount
-                );
-                console.log(
-                    'deletedNotification.deletedCount:',
-                    deletedNotification.deletedCount
-                );
-                if (
-                    updatedUser.modifiedCount < 1 ||
-                    deletedNotification.deletedCount < 1
-                )
+                console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
+                console.log('deletedNotification.deletedCount:', deletedNotification.deletedCount);
+                if (updatedUser.modifiedCount < 1 || deletedNotification.deletedCount < 1)
                     throw new Error('Update data failed');
             },
             successCallback() {
@@ -789,8 +733,7 @@ module.exports = {
     async checkNotification(req, res) {
         let { notificationId } = req.query;
 
-        if (!notificationId)
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!notificationId) return res.status(400).json({ message: 'Missing parameters' });
 
         let user = undefined,
             post = undefined,
@@ -809,8 +752,7 @@ module.exports = {
                     })
                     .lean();
 
-                if (me.notifications.length === 0)
-                    throw new Error('Notification not found');
+                if (me.notifications.length === 0) throw new Error('Notification not found');
 
                 let notification = me.notifications[0];
                 let tag = notification.tag;
@@ -836,8 +778,7 @@ module.exports = {
                 switch (notification.type) {
                     case 'add_friend_request':
                         user = await User.findById(tag[0]);
-                        if (!user)
-                            throw new Error('Requested user is not found');
+                        if (!user) throw new Error('Requested user is not found');
                         break;
                     case 'react_post':
                         post = await Post.findById(tag[0])
@@ -916,9 +857,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 if (error.name === 'Error')
                     return res.status(200).json({
                         status: 'error',

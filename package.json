@@ -4,7 +4,7 @@
     "description": "Build social-media using MERN stack",
     "main": "index.js",
     "scripts": {
-        "test": "concurrently \"npm run web\" \"npm run test-api-user\" \"npm run test-api-admin\" -n web,api-user,api-admin",
+        "test": "concurrently -n WEB,API-USER,API-ADMIN -c \"bgRed.bold,bgBlue.bold,yellow.bgGray.bold\" \"npm run web\" \"npm run test-api-user\" \"npm run test-api-admin\"",
         "web": "cd client && npm start",
         "api-user": "cd server && npm run start-user",
         "api-admin": "cd server && npm run start-admin",

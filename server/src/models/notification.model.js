@@ -7,41 +7,40 @@ const NotificationSchema = new mongoose.Schema(
         user: {
             type: ObjectId,
             ref: 'User',
-            required: true,
+            required: true
+        },
+        requestedUserId: {
+            type: ObjectId,
+            ref: 'User',
+            required: true
         },
         type: {
             type: String,
-            enum: [
-                'add_friend_request',
-                'react_post',
-                'react_comment',
-                'comment',
-                'reply',
-            ],
+            enum: ['add_friend_request', 'react_post', 'react_comment', 'comment', 'reply']
         },
         relatedUsers: {
             from: {
                 type: String,
-                required: true,
+                required: true
             },
             of: {
-                type: String,
-            },
+                type: String
+            }
         },
         isChecked: {
             type: Boolean,
-            default: false,
+            default: false
         },
         tag: [
             {
                 type: ObjectId,
-                require: true,
-            },
-        ],
+                require: true
+            }
+        ]
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

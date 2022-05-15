@@ -17,8 +17,10 @@ module.exports = {
         return path.join(this.messageResource, messageId + ext);
     },
     getListPostImages(postId) {
+        postId = postId.toString();
+        console.log(postId);
         let dirPath = path.join(this.postResource, postId);
         if (!fs.existsSync(dirPath)) return [];
         return fs.readdirSync(dirPath);
-    },
+    }
 };

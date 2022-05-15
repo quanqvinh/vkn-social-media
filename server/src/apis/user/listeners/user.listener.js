@@ -28,6 +28,7 @@ module.exports = (() => {
 
                     notification = new Notification({
                         user: receivedUserId,
+                        requestedUserId: socket.handshake.auth.userId,
                         type: 'add_friend_request',
                         relatedUsers: {
                             from: socket.handshake.auth.username
@@ -40,41 +41,34 @@ module.exports = (() => {
                         to: receivedUserId
                     });
 
-                    let [savedNotification, savedRequest, receivedUser] =
-                        await Promise.all([
-                            notification.save({ session }),
-                            request.save({ session }),
-                            User.updateOne(
-                                {
-                                    _id: receivedUserId
-                                },
-                                {
-                                    $push: {
-                                        notifications: notification._id
-                                    }
-                                },
-                                { session }
-                            )
-                        ]);
+                    let [savedNotification, savedRequest, receivedUser] = await Promise.all([
+                        notification.save({ session }),
+                        request.save({ session }),
+                        User.updateOne(
+                            {
+                                _id: receivedUserId
+                            },
+                            {
+                                $push: {
+                                    notifications: notification._id
+                                }
+                            },
+                            { session }
+                        )
+                    ]);
 
                     console.log('Accept add friend result');
                     console.log(
                         `Notification create ${
-                            savedNotification === notification
-                                ? 'successful'
-                                : 'failed'
+                            savedNotification === notification ? 'successful' : 'failed'
                         }!`
                     );
                     console.log(
-                        `Request create ${
-                            savedRequest === request ? 'successful' : 'failed'
-                        }!`
+                        `Request create ${savedRequest === request ? 'successful' : 'failed'}!`
                     );
                     console.log(
                         `Notification in received user ${
-                            receivedUser.modifiedCount === 1
-                                ? 'saved'
-                                : 'unsaved'
+                            receivedUser.modifiedCount === 1 ? 'saved' : 'unsaved'
                         }`
                     );
                     console.log('OK');
