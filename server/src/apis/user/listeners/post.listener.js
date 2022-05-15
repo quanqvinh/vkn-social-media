@@ -35,7 +35,8 @@ module.exports = (io, socket) => {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 notification = new Notification({
-                    user: socket.handshake.auth.userId,
+                    user: postOwnerId,
+                    requestedUserId: socket.handshake.auth.userId,
                     type: 'react_post',
                     relatedUsers: {
                         from: socket.handshake.auth.username
@@ -56,10 +57,7 @@ module.exports = (io, socket) => {
 
                 console.log(savedNotification !== notification);
                 console.log(updatedUser.modifiedCount);
-                if (
-                    savedNotification !== notification ||
-                    updatedUser.modifiedCount < 1
-                )
+                if (savedNotification !== notification || updatedUser.modifiedCount < 1)
                     throw new Error('Store data failed');
             },
             successCallback() {
@@ -89,7 +87,8 @@ module.exports = (io, socket) => {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 notification = new Notification({
-                    user: socket.handshake.auth.userId,
+                    user: commentOwnerId,
+                    requestedUserId: socket.handshake.auth.userId,
                     type: 'react_comment',
                     relatedUsers: {
                         from: socket.handshake.auth.username,
@@ -111,10 +110,7 @@ module.exports = (io, socket) => {
 
                 console.log(savedNotification !== notification);
                 console.log(updatedUser.modifiedCount);
-                if (
-                    savedNotification !== notification ||
-                    updatedUser.modifiedCount < 1
-                )
+                if (savedNotification !== notification || updatedUser.modifiedCount < 1)
                     throw new Error('Store data failed');
             },
             successCallback() {
@@ -146,6 +142,7 @@ module.exports = (io, socket) => {
                 });
                 notification = new Notification({
                     user: postOwnerId,
+                    requestedUserId: socket.handshake.auth.userId,
                     type: 'comment',
                     relatedUsers: {
                         from: socket.handshake.auth.username
@@ -153,29 +150,26 @@ module.exports = (io, socket) => {
                     tag: [postId, comment._id]
                 });
 
-                let [
-                    savedComment,
-                    updatedPost,
-                    savedNotification,
-                    updatedUser
-                ] = await Promise.all([
-                    comment.save({ session }),
-                    Post.updateOne(
-                        { _id: postId },
-                        {
-                            $push: { comments: comment._id }
-                        },
-                        { session }
-                    ),
-                    notification.save({ session }),
-                    User.updateOne(
-                        { _id: postOwnerId },
-                        {
-                            $push: { notifications: notification._id }
-                        },
-                        { session }
-                    )
-                ]);
+                let [savedComment, updatedPost, savedNotification, updatedUser] = await Promise.all(
+                    [
+                        comment.save({ session }),
+                        Post.updateOne(
+                            { _id: postId },
+                            {
+                                $push: { comments: comment._id }
+                            },
+                            { session }
+                        ),
+                        notification.save({ session }),
+                        User.updateOne(
+                            { _id: postOwnerId },
+                            {
+                                $push: { notifications: notification._id }
+                            },
+                            { session }
+                        )
+                    ]
+                );
 
                 console.log(savedComment !== comment);
                 console.log(updatedPost.modifiedCount);
@@ -218,14 +212,7 @@ module.exports = (io, socket) => {
             content
         } = payload;
         if (
-            !(
-                postId &&
-                postOwnerId &&
-                postOwnerUsername &&
-                commentId &&
-                commentOwnerId &&
-                content
-            )
+            !(postId && postOwnerId && postOwnerUsername && commentId && commentOwnerId && content)
         ) {
             console.log('post:reply_comment => Missing parameters');
             return;
@@ -240,6 +227,7 @@ module.exports = (io, socket) => {
                 });
                 notificationOfCommentOwner = new Notification({
                     user: commentOwnerId,
+                    requestedUserId: socket.handshake.auth.userId,
                     type: 'reply',
                     relatedUsers: {
                         from: socket.handshake.auth.username,
@@ -248,54 +236,44 @@ module.exports = (io, socket) => {
                     tag: [postId, commentId, reply._id]
                 });
 
-                let [
-                    updatedComment,
-                    savedNotificationOfCommentOwner,
-                    updatedCommentOwner
-                ] = await Promise.all([
-                    Comment.updateOne(
-                        { _id: commentId },
-                        {
-                            $push: { replies: reply }
-                        },
-                        { session }
-                    ),
-                    ...(socket.handshake.auth.userId === commentOwnerId
-                        ? [null, null]
-                        : [
-                              notificationOfCommentOwner.save({ session }),
-                              User.updateOne(
-                                  { _id: commentOwnerId },
-                                  {
-                                      $push: {
-                                          notifications:
-                                              notificationOfCommentOwner._id
-                                      }
-                                  },
-                                  { session }
-                              )
-                          ])
-                ]);
+                let [updatedComment, savedNotificationOfCommentOwner, updatedCommentOwner] =
+                    await Promise.all([
+                        Comment.updateOne(
+                            { _id: commentId },
+                            {
+                                $push: { replies: reply }
+                            },
+                            { session }
+                        ),
+                        ...(socket.handshake.auth.userId === commentOwnerId
+                            ? [null, null]
+                            : [
+                                  notificationOfCommentOwner.save({ session }),
+                                  User.updateOne(
+                                      { _id: commentOwnerId },
+                                      {
+                                          $push: {
+                                              notifications: notificationOfCommentOwner._id
+                                          }
+                                      },
+                                      { session }
+                                  )
+                              ])
+                    ]);
 
                 console.log('updatedComment:', updatedComment.modifiedCount);
                 if (savedNotificationOfCommentOwner) {
                     console.log(
                         'savedNotificationOfCommentOwner:',
-                        savedNotificationOfCommentOwner ===
-                            notificationOfCommentOwner
+                        savedNotificationOfCommentOwner === notificationOfCommentOwner
                     );
-                    console.log(
-                        'updatedCommentOwner:',
-                        updatedCommentOwner.modifiedCount
-                    );
+                    console.log('updatedCommentOwner:', updatedCommentOwner.modifiedCount);
                 }
 
-                if (updatedComment.modifiedCount < 1)
-                    throw new Error('Update data failed');
+                if (updatedComment.modifiedCount < 1) throw new Error('Update data failed');
                 if (
                     savedNotificationOfCommentOwner &&
-                    (savedNotificationOfCommentOwner !==
-                        notificationOfCommentOwner ||
+                    (savedNotificationOfCommentOwner !== notificationOfCommentOwner ||
                         updatedCommentOwner.modifiedCount < 1)
                 )
                     throw new Error('Update data failed');

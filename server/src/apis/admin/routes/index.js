@@ -1,11 +1,14 @@
-const userRouter = require('./user.router');
-const allUserRouter = require('./allUser.router');
-const postRouter = require('./post.router');
-const allPostRouter = require('./allPost.router');
+const analyticsRoute = require('./analytics.router');
+const usersRouter = require('./users.router');
+const postsRouter = require('./posts.router');
+// const userRouter = require('./user.router');
+// const postRouter = require('./post.router');
+const authenJwtMiddleware = require('../middlewares/authenJwt.middleware');
 
 module.exports = app => {
-    app.use('/admin/v1/user', userRouter);
-    app.use('/admin/v1/users', allUserRouter);
-    app.use('/admin/v1/post', postRouter);
-    app.use('/admin/v1/posts', allPostRouter);
+    app.use('/v1/analytics', analyticsRoute);
+    app.use('/v1/users', usersRouter);
+    app.use('/v1/posts', postsRouter);
+    // app.use('/v1/user', userRouter);
+    // app.use('/v1/post', postRouter);
 };

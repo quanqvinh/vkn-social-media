@@ -16,18 +16,21 @@ module.exports = {
         try {
             let populatePostPipeline = {
                 path: 'posts',
-                populate: {
-                    path: 'comments',
-                    options: {
-                        limit: 2,
-                        sort: { numberOfLikes: -1, updatedAt: -1 }
-                    },
-                    populate: {
-                        path: 'commentBy',
+                select: '-reports -updatedAt',
+                populate: [
+                    {
+                        path: 'likes',
                         select: 'username'
                     },
-                    select: '-replies'
-                }
+                    {
+                        path: 'comments',
+                        populate: {
+                            path: 'commentBy',
+                            select: 'username'
+                        },
+                        select: '-updatedAt'
+                    }
+                ]
             };
             let user = await User.findById(req.auth.userId)
                 .select('username friends posts notifications')
@@ -55,15 +58,10 @@ module.exports = {
                         friend.posts.map(post => ({
                             username: friend.username,
                             ...post,
-                            imgs: resourceHelper.getListPostImages(
-                                post._id.toString()
-                            )
+                            imgs: resourceHelper.getListPostImages(post._id.toString())
                         }))
                     );
-                    return allFriendPosts.reduce(
-                        (pre, cur) => pre.concat(cur),
-                        []
-                    );
+                    return allFriendPosts.reduce((pre, cur) => pre.concat(cur), []);
                 })()
             };
             let newFeed = [...posts.myPosts, ...posts.friendPosts];
@@ -85,8 +83,7 @@ module.exports = {
     // [POST] /v1/post/new
     async newPost(req, res) {
         let { caption, postId } = req.body;
-        if (!(caption && postId))
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!(caption && postId)) return res.status(400).json({ message: 'Missing parameters' });
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let [savedPost, updatedUser] = await Promise.all([
@@ -109,8 +106,7 @@ module.exports = {
                     )
                 ]);
 
-                if (updatedUser.modifiedCount < 1)
-                    throw new Error('Store data failed');
+                if (updatedUser.modifiedCount < 1) throw new Error('Store data failed');
             },
             successCallback() {
                 return res.status(201).json({
@@ -155,7 +151,7 @@ module.exports = {
                             path: 'commentBy',
                             select: 'username'
                         },
-                        select: 'commentBy content'
+                        select: 'commentBy content replies'
                     }
                 ])
                 .select('-reports')
@@ -190,8 +186,7 @@ module.exports = {
                     userId: req.auth.userId,
                     tag: postId
                 });
-                if (report)
-                    throw new Error('Only one report per post is allowed');
+                if (report) throw new Error('Only one report per post is allowed');
 
                 let _id = new ObjectId();
                 let [savedReport, updatedPost] = await Promise.all([
@@ -216,8 +211,7 @@ module.exports = {
                 ]);
 
                 console.log(updatedPost.modifiedCount);
-                if (updatedPost.modifiedCount < 1)
-                    throw new Error('Update data failed');
+                if (updatedPost.modifiedCount < 1) throw new Error('Update data failed');
             },
             successCallback() {
                 return res.status(200).json({
@@ -227,9 +221,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 if (error.name === 'Error')
                     return res.status(401).json({
                         status: 'error',
@@ -247,8 +239,7 @@ module.exports = {
     // [PUT] /v1/post
     async updatePost(req, res) {
         let { postId, caption } = req.body;
-        if (!(postId && caption))
-            return res.status(400).json({ message: 'Missing parameters' });
+        if (!(postId && caption)) return res.status(400).json({ message: 'Missing parameters' });
         let imageDir;
         mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
@@ -267,13 +258,8 @@ module.exports = {
                     });
                     console.log('Update image successful');
                 }
-                let updatedPost = await Post.updateOne(
-                    { _id: postId },
-                    { caption },
-                    { session }
-                );
-                if (updatedPost.modifiedCount > 0)
-                    console.log('Update caption successful');
+                let updatedPost = await Post.updateOne({ _id: postId }, { caption }, { session });
+                if (updatedPost.modifiedCount > 0) console.log('Update caption successful');
                 else throw new Error('Update caption failed');
             },
             successCallback() {
@@ -319,12 +305,8 @@ module.exports = {
                 if (!objectIdHelper.compare(post.user, req.auth.userId))
                     throw new Error('Unauthorized');
 
-                console.log(
-                    'updatedUser.modifiedCount:',
-                    updatedUser.modifiedCount
-                );
-                if (updatedUser.modifiedCount < 1)
-                    throw new Error('Update data failed');
+                console.log('updatedUser.modifiedCount:', updatedUser.modifiedCount);
+                if (updatedUser.modifiedCount < 1) throw new Error('Update data failed');
 
                 let [reports, comments] = await Promise.all([
                     Report.deleteMany(
@@ -341,9 +323,7 @@ module.exports = {
                     )
                 ]);
                 console.log(
-                    `Deleted ${reports.deletedCount} report${
-                        reports.deletedCount > 1 ? 's' : ''
-                    }`
+                    `Deleted ${reports.deletedCount} report${reports.deletedCount > 1 ? 's' : ''}`
                 );
                 console.log(
                     `Deleted ${comments.deletedCount} comment${
@@ -379,9 +359,7 @@ module.exports = {
             const { postId } = req.params,
                 userId = req.auth.userId;
             let post = await Post.findById(postId);
-            let index = post.likes.findIndex(id =>
-                objectIdHelper.compare(id, userId)
-            );
+            let index = post.likes.findIndex(id => objectIdHelper.compare(id, userId));
             if (index === -1) {
                 post.likes.push(userId);
                 post.numberOfLikes++;
@@ -409,9 +387,7 @@ module.exports = {
             const { commentId } = req.params,
                 userId = req.auth.userId;
             let comment = await Comment.findById(commentId);
-            let index = comment.likes.findIndex(id =>
-                objectIdHelper.compare(id, userId)
-            );
+            let index = comment.likes.findIndex(id => objectIdHelper.compare(id, userId));
             if (index === -1) {
                 comment.likes.push(userId);
                 comment.numberOfLikes++;
@@ -456,18 +432,9 @@ module.exports = {
                     Comment.deleteOne({ _id: commentId }, { session })
                 ]);
 
-                console.log(
-                    'updatedPost.modifiedCount:',
-                    updatedPost.modifiedCount
-                );
-                console.log(
-                    'deletedComment.deletedCount:',
-                    deletedComment.deletedCount
-                );
-                if (
-                    updatedPost.modifiedCount < 1 ||
-                    deletedComment.deletedCount < 1
-                )
+                console.log('updatedPost.modifiedCount:', updatedPost.modifiedCount);
+                console.log('deletedComment.deletedCount:', deletedComment.deletedCount);
+                if (updatedPost.modifiedCount < 1 || deletedComment.deletedCount < 1)
                     throw new Error('Update data failed!');
             },
             successCallback() {
@@ -478,9 +445,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
                     message: error.message
@@ -515,12 +480,8 @@ module.exports = {
                     { session }
                 );
 
-                console.log(
-                    'updatedComment.modifiedCount:',
-                    updatedComment.modifiedCount
-                );
-                if (updatedComment.modifiedCount < 1)
-                    throw new Error('Update data failed');
+                console.log('updatedComment.modifiedCount:', updatedComment.modifiedCount);
+                if (updatedComment.modifiedCount < 1) throw new Error('Update data failed');
             },
             successCallback() {
                 res.status(200).json({
@@ -530,9 +491,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 res.status(500).json({
                     status: 'error',
                     message: error.message

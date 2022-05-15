@@ -1,17 +1,75 @@
-const mongoose = require('mongoose');
 const User = require('../../../models/user.model');
-// const Auth = require("./auth.controller");
-// const Crypto = require("../../utils/crypto");
-// const {
-//     unlink
-// } = require('fs/promises');
-// const fs = require("fs");
-// const path = require('path');
-
-// const avatarFolder = __dirname + '/../../../resources/images/avatars/';
-
 const COUNT_ITEM_OF_A_PAGE = 10;
+
 module.exports = {
+    // [GET] /v1/users/number-of-pages
+    async getNumberOfPages(req, res) {
+        try {
+            let { numberRowPerPage } = req.query;
+            if (!numberRowPerPage)
+                return res.status(400).json({
+                    message: 'Missing parameters'
+                });
+            numberRowPerPage *= 1;
+            if (isNaN(numberRowPerPage))
+                return res.status(400).json({
+                    message: 'Parameters must numbers'
+                });
+            let numberRow = await User.countDocuments();
+            return res.status(200).json({
+                status: 'success',
+                numberOfPage: Math.ceil(numberRow / numberRowPerPage)
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Error at server'
+            });
+        }
+    },
+
+    // [GET] /v1/users
+    async getUsersOfPage(req, res) {
+        try {
+            let { numberRowPerPage, pageNumber } = req.query;
+            if (!(numberRowPerPage && pageNumber))
+                return res.status(400).json({
+                    message: 'Missing parameters'
+                });
+            numberRowPerPage *= 1;
+            pageNumber *= 1;
+            if (isNaN(numberRowPerPage) || isNaN(pageNumber))
+                return res.status(400).json({
+                    message: 'Parameters must numbers'
+                });
+            let users = await User.aggregate()
+                .project({
+                    username: 1,
+                    email: 1,
+                    name: 1,
+                    dob: 1,
+                    numberOfFriends: { $size: '$friends' },
+                    numberOfPosts: { $size: '$posts' },
+                    isDisabled: '$deleted',
+                    createdAt: 1
+                })
+                .sort('createdAt')
+                .skip(numberRowPerPage * (pageNumber > 0 ? pageNumber - 1 : 0))
+                .limit(numberRowPerPage);
+            return res.status(200).json({
+                status: 'success',
+                data: users
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Error at server'
+            });
+        }
+    },
+
     // [GET] admin/v1/user/:id
     getUser(req, res, next) {
         let id = req.params.id;
@@ -19,15 +77,15 @@ module.exports = {
             // not a number or undefined
             res.status(400).json({
                 status: 'error',
-                message: 'User ID required.',
+                message: 'User ID required.'
             });
         }
         User.findOneWithDeleted(
             {
-                _id: id,
+                _id: id
             },
             {
-                auth: 0,
+                auth: 0
             }
         )
             .lean()
@@ -37,39 +95,7 @@ module.exports = {
             .catch(() => {
                 res.status(400).json({
                     status: 'error',
-                    message: 'User not found.',
-                });
-            });
-    },
-    // [GET] admin/v1/users
-    getAllUser(req, res, next) {
-        User.findWithDeleted(
-            {},
-            {
-                auth: 0,
-            }
-        )
-            .lean()
-            .then(data => {
-                let lengthData = data.length;
-                let totalPageCount =
-                    parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) ===
-                    parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE
-                        ? parseInt(
-                              parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE
-                          )
-                        : parseInt(
-                              parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE
-                          ) + 1;
-                res.status(200).json({
-                    users: data,
-                    totalPageCount: totalPageCount,
-                });
-            })
-            .catch(err => {
-                res.status(500).json({
-                    status: 'error',
-                    message: 'Error at server',
+                    message: 'User not found.'
                 });
             });
     },
@@ -90,17 +116,17 @@ module.exports = {
             //     ])
             let user = await User.findOneAndUpdateWithDeleted(
                 {
-                    _id: id,
+                    _id: id
                 },
                 {
                     deleted: false,
-                    deletedAt: new Date(Date.now()),
+                    deletedAt: new Date(Date.now())
                 }
             );
             console.log(user);
             res.status(200).json({
                 status: 'success',
-                message: 'User has been enabled.',
+                message: 'User has been enabled.'
             });
             // .then((data) => {
             //     res.status(200).json({
@@ -117,7 +143,7 @@ module.exports = {
         } catch (error) {
             res.status(500).json({
                 status: 'error',
-                message: 'Error at server.',
+                message: 'Error at server.'
             });
         }
     },
@@ -126,24 +152,24 @@ module.exports = {
             let id = req.params.id;
 
             await User.delete({
-                _id: id,
+                _id: id
             })
                 .then(() => {
                     res.status(200).json({
                         status: 'success',
-                        message: 'User has been disabled.',
+                        message: 'User has been disabled.'
                     });
                 })
                 .catch(() => {
                     res.status(400).json({
                         status: 'error',
-                        message: 'User not found.',
+                        message: 'User not found.'
                     });
                 });
         } catch (error) {
             res.status(500).json({
                 status: 'error',
-                message: 'Error at server.',
+                message: 'Error at server.'
             });
         }
     },
@@ -155,12 +181,12 @@ module.exports = {
             await User.findWithDeleted({
                 $or: [
                     {
-                        name: regex,
+                        name: regex
                     },
                     {
-                        username: regex,
-                    },
-                ],
+                        username: regex
+                    }
+                ]
             })
                 .lean()
                 .then(data => {
@@ -170,8 +196,8 @@ module.exports = {
             console.log(err);
             res.status(500).json({
                 status: 'error',
-                message: 'Error at server.',
+                message: 'Error at server.'
             });
         }
-    },
+    }
 };
