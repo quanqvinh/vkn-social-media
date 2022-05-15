@@ -21,7 +21,10 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import HomeIcon from '@mui/icons-material/Home';
 
 import friendApi from '../../../apis/friendApi';
-import { checkNotifications } from '../../../actions/notification';
+import {
+    checkNotifications,
+    formatNotifications
+} from '../../../actions/notification';
 
 const clickOutsideRef = (content_ref, toggle_ref) => {
     document.addEventListener('mousedown', e => {
@@ -55,7 +58,7 @@ function Nav() {
     const notificationRef = useRef(null);
     const notificationContentRef = useRef(null);
     const notificationInit = useSelector(user => user.notifications);
-    const [notifications, setNotifications] = useState({ ...notificationInit });
+    const [notifications, setNotifications] = useState({});
     const socket = useContext(SOCKET);
     const history = useHistory();
     const dispatch = useDispatch();
@@ -115,7 +118,6 @@ function Nav() {
 
     const clickAccept = (e, notiId, reqUId, reqUname) => {
         e.stopPropagation();
-        console.log(reqUname, reqUId);
         const acceptAddFriendRequest = async () => {
             try {
                 let res = await friendApi.accept({
@@ -152,53 +154,7 @@ function Nav() {
     clickOutsideRef(notificationContentRef, notificationRef);
 
     useEffect(() => {
-        if (notificationInit.listNotifications?.length > 0) {
-            const listNotificationsFormat =
-                notificationInit.listNotifications.map(noti => {
-                    let notiFormat = {};
-                    switch (noti.type) {
-                        case 'add_friend_request':
-                            notiFormat = {
-                                ...noti,
-                                content: 'send a add friend request'
-                            };
-                            break;
-                        case 'react_post':
-                            notiFormat = {
-                                ...noti,
-                                content: 'reacted your post'
-                            };
-                            break;
-                        case 'react_comment':
-                            notiFormat = {
-                                ...noti,
-                                content: 'reacted your comment'
-                            };
-                            break;
-                        case 'comment':
-                            notiFormat = {
-                                ...noti,
-                                content: 'send a comment in your post'
-                            };
-                            break;
-                        case 'reply':
-                            notiFormat = {
-                                ...noti,
-                                content: 'send a reply your comment'
-                            };
-                            break;
-                        default:
-                            break;
-                    }
-                    return notiFormat;
-                });
-            setNotifications({
-                ...notificationInit,
-                listNotifications: listNotificationsFormat
-            });
-        } else {
-            setNotifications({ ...notificationInit });
-        }
+        setNotifications({ ...notificationInit });
     }, [notificationInit]);
 
     return (
@@ -280,7 +236,7 @@ function Nav() {
                                         iconSize="medium"
                                         image={
                                             process.env.REACT_APP_STATIC_URL +
-                                            `/avatars/${noti.tag}.png`
+                                            `/avatars/${noti.user}.png`
                                         }
                                     />
                                     {noti.type.includes('add_friend') && (

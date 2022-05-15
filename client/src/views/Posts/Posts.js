@@ -19,6 +19,7 @@ function Posts(props) {
             try {
                 const res = await postApi.newFeeds();
 
+                console.log(res);
                 res?.status === 'success' && setPosts([...res.posts]);
 
                 dispatch(fetchNotificationsRequest(res.uncheckedNotifications));

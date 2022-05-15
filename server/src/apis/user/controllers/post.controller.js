@@ -16,19 +16,23 @@ module.exports = {
         try {
             let populatePostPipeline = {
                 path: 'posts',
-                populate: {
-                    path: 'comments',
-                    options: {
-                        limit: 2,
-                        sort: { numberOfLikes: -1, updatedAt: -1 }
-                    },
-                    populate: {
-                        path: 'commentBy',
+                select: '-reports -updatedAt',
+                populate: [
+                    {
+                        path: 'likes',
                         select: 'username'
                     },
-                    select: '-replies'
-                }
+                    {
+                        path: 'comments',
+                        populate: {
+                            path: 'commentBy',
+                            select: 'username'
+                        },
+                        select: '-updatedAt'
+                    }
+                ]
             };
+
             let user = await User.findById(req.auth.userId)
                 .select('username friends posts notifications')
                 .populate([
@@ -155,7 +159,7 @@ module.exports = {
                             path: 'commentBy',
                             select: 'username'
                         },
-                        select: 'commentBy content'
+                        select: 'commentBy content replies'
                     }
                 ])
                 .select('-reports')

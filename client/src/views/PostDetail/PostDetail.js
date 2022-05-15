@@ -1,5 +1,5 @@
 import './postDetail.scss';
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import avatar from '../../assets/images/profile.jpg';
 import ProfilePreview from '../Profile/ProfilePreview/ProfilePreview';
 import { useSelector } from 'react-redux';
@@ -12,18 +12,20 @@ import userApi from '../../apis/userApi';
 import Slider from 'react-slick';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { SOCKET } from '../../App';
 
 const PostDetail = props => {
     const { closePost, post, owner } = props;
     console.log(post);
     const [postOwner, setPostOwner] = useState({});
+    const [cmtContent, setCmtContent] = useState('');
+    const socket = useContext(SOCKET);
+    const user = useSelector(state => state.user);
 
     const handelClosePost = e => {
         if (!e.target.classList.contains('post__overlay')) return;
         closePost();
     };
-    const user = useSelector(state => state.user);
-
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -73,6 +75,16 @@ const PostDetail = props => {
         prevArrow: <SlickArrowLeft />
     };
 
+    const handelSendCmt = () => {
+        if (cmtContent && socket) return;
+
+        socket.emit('post:comment_post', {
+            postId: post._id,
+            postOwnerId: post.user,
+            postOwnerUsername: post.username,
+            content: cmtContent
+        });
+    };
     return (
         <>
             <div className="post__overlay" onClick={handelClosePost}>
@@ -124,32 +136,18 @@ const PostDetail = props => {
                                         />
                                     </div>
                                 </>
-                                {Array(3)
-                                    .fill(0)
-                                    .map((v, i) => (
-                                        <div className="message" key={i}>
-                                            <Comment user={postOwner} />
-
+                                {post?.comments?.length > 0 &&
+                                    post.comments.map(cmt => (
+                                        <div className="message" key={cmt._id}>
+                                            <Comment cmt={cmt} />
                                             <div className="message-list-reply">
-                                                <Comment
-                                                    user={postOwner}
-                                                    hideSubComments={true}
-                                                />
+                                                {cmt?.replies?.length > 0 &&
+                                                    cmt.replies.map(reply => (
+                                                        <Comment cmt={reply} />
+                                                    ))}
                                             </div>
                                         </div>
                                     ))}
-                                {/* {post?.comments?.length > 0 &&
-                           post.comments.map((comment) => (
-                              <div className="message" key={comment._id}>
-                                 <Comment user={user} />
-                                 <div className="message-list-reply">
-                                    <Comment
-                                       user={user}
-                                       hideSubComments={true}
-                                    />
-                                 </div>
-                              </div>
-                           ))} */}
                             </div>
                         </div>
                         <div className="right__footer">
@@ -167,10 +165,18 @@ const PostDetail = props => {
                             </div>
                             <div className="footer__input">
                                 <input
+                                    value={cmtContent}
                                     type="text"
                                     placeholder="Add a comment..."
+                                    onChange={e =>
+                                        setCmtContent(e.target.value)
+                                    }
                                 />
-                                <span className="footer__input-post">Post</span>
+                                <span
+                                    className="footer__input-post"
+                                    onClick={handelSendCmt}>
+                                    Post
+                                </span>
                             </div>
                         </div>
                     </div>

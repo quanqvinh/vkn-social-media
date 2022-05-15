@@ -24,7 +24,24 @@ module.exports = {
         })
             .select('-notifications -deleted -updatedAt')
             .populate([
-                'posts',
+                {
+                    path: 'posts',
+                    select: '-user -reports -updatedAt',
+                    populate: [
+                        {
+                            path: 'likes',
+                            select: 'username'
+                        },
+                        {
+                            path: 'comments',
+                            populate: {
+                                path: 'commentBy',
+                                select: 'username'
+                            },
+                            select: '-updatedAt'
+                        }
+                    ]
+                },
                 {
                     path: 'friends',
                     select: 'username name'

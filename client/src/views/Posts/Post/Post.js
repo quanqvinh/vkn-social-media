@@ -6,8 +6,9 @@ import Comment from './Comment';
 import Slider from 'react-slick';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import PostDetail from '../../PostDetail/PostDetail';
+import { SOCKET } from '../../../App';
 
 function Post(props) {
     const {
@@ -24,6 +25,7 @@ function Post(props) {
         content
     } = props;
 
+    const socket = useContext(SOCKET);
     const [like, setLike] = useState(likedByNumber);
     const [isShowPost, setIsShowPost] = useState(false);
     const [isCmt, setIsCmt] = useState(false);
@@ -67,12 +69,32 @@ function Post(props) {
     };
 
     const handelViewPostDetail = () => {
+        if (!isShowPost) {
+            console.log('join', socket);
+            socket.emit('post:join_post_room', { postId: post._id });
+        } else {
+            console.log('leave', socket);
+
+            socket.emit('post:leave_post_room', { postId: post._id });
+        }
         setIsShowPost(!isShowPost);
     };
 
-    const handelLikePost = useCallback(like => {
-        setLike(like);
-    }, []);
+    const handelLikePost = useCallback(
+        newLike => {
+            if (like < newLike) {
+                console.log('like_post', socket);
+                console.log(post.user);
+                socket &&
+                    socket.emit('post:like_post', {
+                        postId: post._id,
+                        postOwnerId: post.user
+                    });
+            }
+            setLike(newLike);
+        },
+        [socket, like, post._id, post.user]
+    );
 
     return (
         <div className="card">

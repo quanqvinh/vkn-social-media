@@ -6,8 +6,10 @@ let newState = {};
 const notificationReducer = (state = initState, action) => {
     switch (action.type) {
         case 'FETCH':
+            console.log('fetch init noti', action.payload);
             return { ...state, ...action.payload };
         case 'ADD':
+            console.log(action.payload);
             newState = {
                 ...state,
                 uncheck: state.uncheck + 1,
