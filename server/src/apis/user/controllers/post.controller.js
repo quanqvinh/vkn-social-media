@@ -29,6 +29,7 @@ module.exports = {
                     select: '-replies'
                 }
             };
+
             let user = await User.findById(req.auth.userId)
                 .select('username friends posts notifications')
                 .populate([

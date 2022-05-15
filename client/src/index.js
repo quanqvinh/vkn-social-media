@@ -15,7 +15,7 @@ document.title = 'VKN Social Media';
 ReactDOM.render(
     <Provider store={store}>
         <React.StrictMode>
-            <App />
+            <App waitBeforeShow={500} />
         </React.StrictMode>
     </Provider>,
     document.getElementById('root')

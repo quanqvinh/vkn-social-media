@@ -7,7 +7,7 @@ const userApi = {
         let accessToken = getCookie('accessToken');
         return axiosClient.get(url, {
             params,
-            headers: { 'access-token': accessToken },
+            headers: { 'access-token': accessToken }
         });
     },
 
@@ -16,8 +16,8 @@ const userApi = {
         let accessToken = getCookie('accessToken');
         return axiosClient.get(url, {
             headers: {
-                'access-token': accessToken,
-            },
+                'access-token': accessToken
+            }
         });
     },
 
@@ -26,9 +26,9 @@ const userApi = {
         const url = `/room/${roomId}`;
         return axiosClient.get(url, {
             headers: {
-                'access-token': accessToken,
+                'access-token': accessToken
             },
-            params,
+            params
         });
     },
 
@@ -37,8 +37,8 @@ const userApi = {
         const url = `user/${userId}`;
         return axiosClient.get(url, {
             headers: {
-                'access-token': accessToken,
-            },
+                'access-token': accessToken
+            }
         });
     },
 
@@ -49,8 +49,8 @@ const userApi = {
         return axiosClient.post(url, data, {
             headers: {
                 'content-type': 'multipart/form-data',
-                'access-token': accessToken,
-            },
+                'access-token': accessToken
+            }
         });
     },
 
@@ -59,9 +59,9 @@ const userApi = {
         let accessToken = getCookie('accessToken');
         return axiosClient.patch(url, {
             headers: {
-                'access-token': accessToken,
+                'access-token': accessToken
             },
-            ...data,
+            ...data
         });
     },
 
@@ -80,34 +80,33 @@ const userApi = {
         const url = `/user/edit/email`;
         return axiosClient.patch(url, {
             headers: {
-                'access-token': accessToken,
+                'access-token': accessToken
             },
-            token,
+            token
         });
     },
 
-   search: (params) => {
-      let accessToken = getCookie("accessToken");
-      const url = `/user/search`;
-      return axiosClient.get(url, {
-         params,
-         headers: {
-            "access-token": accessToken,
-         },
-      });
-   },
+    search: params => {
+        let accessToken = getCookie('accessToken');
+        const url = `/user/search`;
+        return axiosClient.get(url, {
+            params,
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
 
-   getAllNotifications: () => {
-      let accessToken = getCookie("accessToken");
+    getAllNotifications: () => {
+        let accessToken = getCookie('accessToken');
 
-      const url = `/user/notifications`;
-      return axiosClient.get(url, {
-         headers: {
-            "access-token": accessToken,
-         },
-      });
-   },
-
+        const url = `/user/notifications`;
+        return axiosClient.get(url, {
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    }
 };
 
 export default userApi;

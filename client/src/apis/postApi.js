@@ -7,7 +7,7 @@ const postApi = {
         let accessToken = getCookie('accessToken');
         return axiosClient.get(url, {
             params,
-            headers: { 'access-token': accessToken },
+            headers: { 'access-token': accessToken }
         });
     },
 
@@ -15,7 +15,7 @@ const postApi = {
         const url = '/post/new-feed';
         let accessToken = getCookie('accessToken');
         return axiosClient.get(url, {
-            headers: { 'access-token': accessToken },
+            headers: { 'access-token': accessToken }
         });
     },
 
@@ -23,7 +23,7 @@ const postApi = {
         const url = `/post/${id}`;
         let accessToken = getCookie('accessToken');
         return axiosClient.get(url, {
-            headers: { 'access-token': accessToken },
+            headers: { 'access-token': accessToken }
         });
     },
 
@@ -31,7 +31,7 @@ const postApi = {
         const url = `/post/${postId}/like`;
         let accessToken = getCookie('accessToken');
         return axiosClient.patch(url, {
-            headers: { 'access-token': accessToken },
+            headers: { 'access-token': accessToken }
         });
     },
 
@@ -39,8 +39,8 @@ const postApi = {
         const url = '/post/new';
         return axiosClient.post(url, data, {
             header: {
-                'content-type': 'multipart/form-data',
-            },
+                'content-type': 'multipart/form-data'
+            }
         });
     },
 
@@ -52,7 +52,7 @@ const postApi = {
     update: (id, data) => {
         const url = `/posts/${id}`;
         return axiosClient.delete(url, data);
-    },
+    }
 };
 
 export default postApi;

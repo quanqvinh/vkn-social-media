@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import userApi from '../../apis/userApi';
 import avatarDefault from '../../assets/images/avatar_default.png';
 import { SOCKET } from '../../App';
+import friendApi from '../../apis/friendApi';
 const $ = document.querySelector.bind(document);
 
 const ProfilePage = () => {
@@ -19,7 +20,7 @@ const ProfilePage = () => {
     const owner = useSelector(state => state.user);
     const [postSelected, setPostSelected] = useState({
         isSelected: false,
-        post: null,
+        post: null
     });
     const [posts, setPosts] = useState([]);
 
@@ -31,8 +32,9 @@ const ProfilePage = () => {
         const fetchUser = async () => {
             try {
                 let res = await userApi.getById(id);
-                res && setUser(res);
-                setPosts([...res.posts]);
+                console.log('res fetch user', user);
+                res?.data && setUser(res.data);
+                setPosts([...res.data.posts]);
             } catch (error) {
                 console.log(error);
             }
@@ -62,7 +64,7 @@ const ProfilePage = () => {
 
         const changeImg = async () => {
             try {
-                let res = await userApi.changeAvatar(formData);
+                await userApi.changeAvatar(formData);
                 window.location.reload();
             } catch (error) {
                 console.log(error.message);
@@ -76,25 +78,35 @@ const ProfilePage = () => {
         overlay.classList.remove('overlay--open');
     };
 
-    const defaltAvatar = e => {
-        console.log(avatarDefault);
+    const defaultAvatar = e => {
         e.target.src = avatarDefault;
     };
 
     const checkFriend = fId => {
-        for (let i = 0; i < user.friends.length; i++) {
-            if (i === fId) return true;
-        }
-        return false;
+        return user.friends.some(friend => friend._id === fId);
     };
 
     const handleAddFriend = () => {
         socket.emit('user:add_friend_request', {
             receivedUserId: user._id,
-            receivedUsername: user.username,
+            receivedUsername: user.username
         });
     };
 
+    const handelUnFriend = () => {
+        const unFriend = async () => {
+            try {
+                let res = await friendApi.unfriend({
+                    friendId: user._id,
+                    friendUsername: user.username
+                });
+                console.log(res);
+            } catch (error) {
+                console.log(error.message);
+            }
+        };
+        unFriend();
+    };
     return (
         <>
             <Header />
@@ -120,7 +132,7 @@ const ProfilePage = () => {
                     <div className="profile__header">
                         <div className="header__left">
                             <img
-                                onError={e => defaltAvatar(e)}
+                                onError={e => defaultAvatar(e)}
                                 src={
                                     process.env.REACT_APP_STATIC_URL +
                                     `/avatars/${user._id}.png`
@@ -140,8 +152,10 @@ const ProfilePage = () => {
                                         className="right__header-btn-edit">
                                         Edit Profile
                                     </Link>
-                                ) : checkFriend(id) ? (
-                                    <p className="right__header-btn-edit">
+                                ) : checkFriend(owner._id) ? (
+                                    <p
+                                        className="right__header-btn-edit"
+                                        onClick={handelUnFriend}>
                                         Unfriend
                                     </p>
                                 ) : (
@@ -182,7 +196,7 @@ const ProfilePage = () => {
                                         onClick={() =>
                                             setPostSelected({
                                                 isSelected: true,
-                                                post,
+                                                post
                                             })
                                         }>
                                         <div className="post__img">
