@@ -34,10 +34,7 @@ function Post(props) {
     const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
         <button
             {...props}
-            className={
-                'slick-prev slick-arrow' +
-                (currentSlide === 0 ? ' slick-disabled' : '')
-            }
+            className={'slick-prev slick-arrow' + (currentSlide === 0 ? ' slick-disabled' : '')}
             aria-hidden="true"
             aria-disabled={currentSlide === 0 ? true : false}
             type="button">
@@ -115,19 +112,12 @@ function Post(props) {
                             style={{ height: 600 }}
                             onClick={handelViewPostDetail}
                             key={img}
-                            src={
-                                process.env.REACT_APP_STATIC_URL +
-                                `/posts/${id}/${img}`
-                            }
+                            src={process.env.REACT_APP_STATIC_URL + `/posts/${id}/${img}`}
                             alt="postImg"
                         />
                     ))}
             </Slider>
-            <PostMenu
-                postId={post._id}
-                handelLikePost={handelLikePost}
-                like={like}
-            />
+            <PostMenu postId={post._id} handelLikePost={handelLikePost} like={like} />
             <div className="likedBy">
                 <span>
                     {like} {like > 1 ? 'likes' : 'like'}
@@ -138,9 +128,7 @@ function Post(props) {
                 <span className="post__author-content">{content}</span>
             </div>
             <div className="timePosted">{hours} hours ago</div>
-            {isShowPost && (
-                <PostDetail post={post} closePost={handelViewPostDetail} />
-            )}
+            {isShowPost && <PostDetail postId={post._id} closePost={handelViewPostDetail} />}
         </div>
     );
 }

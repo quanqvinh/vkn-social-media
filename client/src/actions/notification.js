@@ -12,19 +12,19 @@ export const fetchNotificationsRequest = uncheck => {
         try {
             let res = await userApi.getAllNotifications();
 
-            console.log('fetch init');
+            const listNotifications = res.data.map(noti => formatNotifications(noti));
             sessionStorage.setItem(
                 'NOTIFICATIONS',
                 JSON.stringify({
                     uncheck,
-                    listNotifications: [...res.data]
+                    listNotifications
                 })
             );
 
             dispatch(
                 fetchNotifications({
                     uncheck,
-                    listNotifications: [...res.data]
+                    listNotifications
                 })
             );
         } catch (error) {
@@ -34,7 +34,6 @@ export const fetchNotificationsRequest = uncheck => {
 };
 
 export const addNotifications = notification => {
-    console.log('add notification action', notification);
     return {
         type: 'ADD',
         payload: formatNotifications(notification)
@@ -85,16 +84,3 @@ export const checkNotifications = nId => {
         payload: nId
     };
 };
-
-// export const formatNotifications = notifications => {
-//     console.log('format');
-//     sessionStorage.setItem(
-//         'NOTIFICATIONS',
-//         JSON.stringify({ ...notifications })
-//     );
-
-//     return {
-//         type: 'FORMAT',
-//         payload: notifications
-//     };
-// };
