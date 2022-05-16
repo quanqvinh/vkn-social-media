@@ -1,25 +1,21 @@
 import './posts.scss';
 import Post from './Post/Post';
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import postApi from '../../apis/postApi';
-import { UserContext } from '../../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotificationsRequest } from '../../actions/notification';
 
 function Posts(props) {
     const user = useSelector(state => state.user);
     const [posts, setPosts] = useState([]);
-    const [listImg, setListImg] = useState([]);
     const [isLike, setIsLike] = useState(false);
     const dispatch = useDispatch();
-    const uncheckedRef = useRef(null);
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 const res = await postApi.newFeeds();
 
-                console.log(res);
                 res?.status === 'success' && setPosts([...res.posts]);
 
                 dispatch(fetchNotificationsRequest(res.uncheckedNotifications));
@@ -50,10 +46,7 @@ function Posts(props) {
                     <Post
                         handelLike={handelLike}
                         post={post}
-                        avatar={
-                            process.env.REACT_APP_STATIC_URL +
-                            `/avatars/${post.user}.png`
-                        }
+                        avatar={process.env.REACT_APP_STATIC_URL + `/avatars/${post.user}.png`}
                         key={post._id}
                         accountName={post.username}
                         content={post.caption}
