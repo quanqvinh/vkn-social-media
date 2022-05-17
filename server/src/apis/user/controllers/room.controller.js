@@ -119,8 +119,7 @@ module.exports = {
             user = await User.aggregate([
                 {
                     $match: {
-                        _id: ObjectId(req.auth.userId),
-                        deleted: false
+                        _id: ObjectId(req.auth.userId)
                     }
                 },
                 {

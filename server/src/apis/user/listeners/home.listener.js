@@ -23,8 +23,7 @@ module.exports = async (io, socket) => {
         let user = await User.aggregate([
             {
                 $match: {
-                    _id: ObjectId(_id),
-                    deleted: false
+                    _id: ObjectId(_id)
                 }
             },
             {

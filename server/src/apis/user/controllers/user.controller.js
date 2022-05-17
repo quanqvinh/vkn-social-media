@@ -114,7 +114,7 @@ module.exports = {
 
     // [PATCH] /v1/user/edit/info
     async editUserProfile(req, res) {
-        mongodbHelper.executeTransactionWithRetry({
+        await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let { username, name, bio, dob, gender } = req.body;
 
@@ -224,32 +224,6 @@ module.exports = {
             res.status(500).json({
                 status: 'error',
                 message: error.name === 'Error' ? error.message : 'Error at server'
-            });
-        }
-    },
-
-    // [DELETE] /v1/user/delete
-    softDeleteUser(req, res) {
-        let id = req.auth.userId;
-
-        if (id) {
-            User.deleteById(id)
-                .then(data => {
-                    if (data.deletedCount === 1)
-                        res.status(200).json({
-                            status: 'success',
-                            message: 'User account has been moved to recycle bin.'
-                        });
-                })
-                .catch(err => {
-                    res.status(500).json({
-                        status: 'error',
-                        message: 'Error at server.'
-                    });
-                });
-        } else {
-            return res.status(400).json({
-                message: 'Missing parameters'
             });
         }
     },

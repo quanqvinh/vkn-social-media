@@ -172,7 +172,8 @@ module.exports = {
                     })
                     .sort('year month')
             ]);
-            res.json({
+            res.status(200).json({
+                status: 'success',
                 famousUser,
                 popularPost,
                 numberOfUsers,
