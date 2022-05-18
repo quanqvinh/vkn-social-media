@@ -45,6 +45,7 @@ function App() {
     useEffect(() => {
         socket &&
             socket.on('user:print_notification', payload => {
+                console.log(payload);
                 let action = addNotifications(payload.notification);
                 dispatch(action);
             });

@@ -110,6 +110,17 @@ input:focus {
 
 .card-admin > div ~ div {
   margin-top: 30px;
+  max-height: 380px;
+  overflow: auto;
+}
+
+.card-admin > div ~ div::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card-admin > div ~ div::-webkit-scrollbar-thumb {
+  background-color: var(--second-color);
+  border-radius: 10px;
 }
 
 .card-admin__footer {

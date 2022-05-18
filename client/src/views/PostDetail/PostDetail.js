@@ -17,7 +17,7 @@ import postApi from '../../apis/postApi';
 
 let checkLoopCmts = false;
 const PostDetail = props => {
-    const { closePost, postId, owner } = props;
+    const { closePost, postId } = props;
     const [postOwner, setPostOwner] = useState({});
     const [post, setPost] = useState(null);
     const [cmtContent, setCmtContent] = useState('');
@@ -35,7 +35,6 @@ const PostDetail = props => {
         const fetchPost = async () => {
             try {
                 let res = await postApi.get(postId);
-                console.log('fetch list cmt');
                 res.status === 'success' && setPost(res.data);
                 setListCmts([...res.data.comments]);
             } catch (error) {
@@ -48,7 +47,6 @@ const PostDetail = props => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                console.log('call');
                 let res = await userApi.getById(post.user._id);
                 res && setPostOwner(res.data);
             } catch (error) {
@@ -106,7 +104,7 @@ const PostDetail = props => {
         if (cmtContent && !socket) return;
 
         if (JSON.stringify(receiverReply) !== '{}') {
-            console.log('send reply', socket);
+            console.log(receiverReply);
             socket.emit('post:reply_comment', {
                 ...receiverReply,
                 content: cmtContent.split(' ')[1]
@@ -134,8 +132,6 @@ const PostDetail = props => {
             setReceiverReply({});
             setCmtContent('');
         } else {
-            console.log('send cmt', socket);
-
             socket.emit('post:comment_post', {
                 postId: post._id,
                 postOwnerId: post.user._id,
@@ -178,14 +174,12 @@ const PostDetail = props => {
     useEffect(() => {
         socket &&
             socket.on('post:print_reply', payload => {
-                console.log('print reply', payload);
                 if (!(listCmts.length > 0)) {
                     console.log('lengt < 0');
                     return;
                 }
 
                 const newListCmts = [];
-                console.log('listcmt', listCmts);
                 for (let i = 0; i < listCmts.length; i++) {
                     if (listCmts[i]._id !== payload.commentId) {
                         newListCmts.push(listCmts[i]);
@@ -200,8 +194,10 @@ const PostDetail = props => {
                     listCmts[i].replies = [
                         ...listCmts[i].replies,
                         {
-                            replyBy: payload.repliedUserId,
-                            username: payload.repliedUsername,
+                            replyBy: {
+                                _id: payload.repliedUserId,
+                                username: payload.repliedUsername
+                            },
                             content: payload.reply.content,
                             createdAt: new Date().toLocaleString(),
                             _id: payload.reply._id
@@ -213,8 +209,6 @@ const PostDetail = props => {
                 setListCmts([...newListCmts]);
             });
     }, [socket, listCmts]);
-
-    console.log('list cmt', listCmts);
     return (
         <>
             <div className="post__overlay" onClick={handelClosePost}>
@@ -223,10 +217,10 @@ const PostDetail = props => {
                         <div className="post__left">
                             <Slider {...settings} className="post__body-img">
                                 {post.imgs?.length > 0 &&
-                                    post.imgs.map(img => (
+                                    post.imgs.map((img, index) => (
                                         <img
                                             style={{ width: 690, height: 690 }}
-                                            key={img}
+                                            key={index}
                                             src={
                                                 process.env.REACT_APP_STATIC_URL +
                                                 `/posts/${post._id}/${img}`

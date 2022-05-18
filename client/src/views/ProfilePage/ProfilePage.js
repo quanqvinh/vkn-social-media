@@ -133,19 +133,14 @@ const ProfilePage = () => {
                         <div className="header__left">
                             <img
                                 onError={e => defaultAvatar(e)}
-                                src={
-                                    process.env.REACT_APP_STATIC_URL +
-                                    `/avatars/${user._id}.png`
-                                }
+                                src={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                                 alt="avatar"
                                 onClick={openModal}
                             />
                         </div>
                         <div className="header__right">
                             <div className="right__header">
-                                <p className="right__header-username">
-                                    {user.username}
-                                </p>
+                                <p className="right__header-username">{user.username}</p>
                                 {user._id === owner._id ? (
                                     <Link
                                         to={`/profile/${id}/edit`}
@@ -153,15 +148,11 @@ const ProfilePage = () => {
                                         Edit Profile
                                     </Link>
                                 ) : checkFriend(owner._id) ? (
-                                    <p
-                                        className="right__header-btn-edit"
-                                        onClick={handelUnFriend}>
+                                    <p className="right__header-btn-edit" onClick={handelUnFriend}>
                                         Unfriend
                                     </p>
                                 ) : (
-                                    <p
-                                        className="right__header-btn-edit"
-                                        onClick={handleAddFriend}>
+                                    <p className="right__header-btn-edit" onClick={handleAddFriend}>
                                         Add Friend
                                     </p>
                                 )}
@@ -171,21 +162,16 @@ const ProfilePage = () => {
                                     <span>{user.posts.length}</span> posts
                                 </span>
                                 <span className="right__body-friends">
-                                    <span>{user.friends.length || 0}</span>{' '}
-                                    friends
+                                    <span>{user.friends.length || 0}</span> friends
                                 </span>
                             </div>
-                            <span className="header__right-name">
-                                {user.name}
-                            </span>
+                            <span className="header__right-name">{user.name}</span>
                         </div>
                     </div>
 
                     <div
                         className={`profile__body ${
-                            postSelected.isSelected
-                                ? 'profile__body--open-post'
-                                : ''
+                            postSelected.isSelected ? 'profile__body--open-post' : ''
                         }`}>
                         <div className="list-posts">
                             {posts?.length &&
@@ -202,8 +188,7 @@ const ProfilePage = () => {
                                         <div className="post__img">
                                             <img
                                                 src={
-                                                    process.env
-                                                        .REACT_APP_STATIC_URL +
+                                                    process.env.REACT_APP_STATIC_URL +
                                                     `/posts/${post._id}/${post.imgs[0]}`
                                                 }
                                                 alt="postImage"
@@ -216,9 +201,7 @@ const ProfilePage = () => {
                                             </div>
                                             <div className="post__comments">
                                                 <ModeCommentIcon />
-                                                <span>
-                                                    {post.comments.length}
-                                                </span>
+                                                <span>{post.comments.length}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -226,10 +209,7 @@ const ProfilePage = () => {
                         </div>
 
                         {postSelected.isSelected && (
-                            <PostDetail
-                                post={postSelected.post}
-                                closePost={closePost}
-                            />
+                            <PostDetail postId={postSelected.post._id} closePost={closePost} />
                         )}
                     </div>
                     <Footer className="profile__footer" />

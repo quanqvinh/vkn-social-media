@@ -10,8 +10,8 @@
         "icon": "bx bx-user-pin"
     },
     {
-        "display_name": "Posts",
-        "route": "/products",
+        "display_name": "Reports",
+        "route": "/reports",
         "icon": "bx bx-package"
     },
     {

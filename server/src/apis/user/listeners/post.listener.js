@@ -300,6 +300,7 @@ module.exports = (io, socket) => {
                     commentId,
                     reply: reply.toObject()
                 });
+                console.log(socket.handshake.auth.userId, commentOwnerId);
                 if (socket.handshake.auth.userId !== commentOwnerId)
                     io.to(commentOwnerId).emit('user:print_notification', {
                         notification: notificationOfCommentOwner.toObject()

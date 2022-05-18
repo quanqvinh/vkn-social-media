@@ -18,7 +18,7 @@
 }
 
 .sidebar__logo > img {
-  height: 45px;
+  height: 70px;
 }
 
 .sidebar__item {
@@ -48,10 +48,6 @@
 
 .sidebar__item-inner.active {
   border-radius: var(--border-radius);
-  background-image: linear-gradient(
-    to right,
-    var(--main-color),
-    var(--second-color)
-  );
+  background-image: linear-gradient(to right, var(--main-color), var(--second-color));
   color: var(--txt-white);
 }

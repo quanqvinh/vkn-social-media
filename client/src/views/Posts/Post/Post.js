@@ -6,30 +6,30 @@ import Comment from './Comment';
 import Slider from 'react-slick';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useEffect, useState, useContext, useCallback } from 'react';
+import { useRef, useState, useContext, useCallback } from 'react';
 import PostDetail from '../../PostDetail/PostDetail';
 import { SOCKET } from '../../../App';
+import postApi from '../../../apis/postApi';
 
+const $ = document.querySelector.bind(document);
+const dataReport = [
+    'Why are you reporting this post?',
+    "It's spam",
+    'Nudity or sexual activity',
+    'Hate speech or symbols',
+    'Violence or dangerous organization',
+    'Sale of illegal or regulated goods',
+    'Bullying or harassment',
+    'Intellectual property violation'
+];
 function Post(props) {
-    const {
-        handelLike,
-        post,
-        avatar,
-        id,
-        storyBorder,
-        imgs,
-        comments,
-        likedByNumber,
-        hours,
-        accountName,
-        content
-    } = props;
+    const { post, avatar, id, storyBorder, imgs, likedByNumber, hours, accountName, content } =
+        props;
 
     const socket = useContext(SOCKET);
     const [like, setLike] = useState(likedByNumber);
     const [isShowPost, setIsShowPost] = useState(false);
-    const [isCmt, setIsCmt] = useState(false);
-    const [comment, setComment] = useState('');
+    const notifyRef = useRef(null);
 
     const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
         <button
@@ -93,8 +93,50 @@ function Post(props) {
         [socket, like, post._id, post.user]
     );
 
+    const openModal = () => {
+        const overlay = $('.overlay');
+        const modal = $('.modal');
+        modal.classList.add('modal--open');
+        overlay.classList.add('overlay--open');
+    };
+
+    const closeModal = () => {
+        notifyRef.current.innerText = '';
+        const overlay = $('.overlay');
+        const modal = $('.modal');
+        modal.classList.remove('modal--open');
+        overlay.classList.remove('overlay--open');
+    };
+
+    const handelClickReport = data => {
+        const reportPost = async () => {
+            try {
+                let res = await postApi.report({ postId: post._id, content: data });
+                console.log(res);
+                closeModal();
+            } catch (error) {
+                console.log(error.message);
+                notifyRef.current.innerText = 'You had reported this post before';
+            }
+        };
+        reportPost();
+    };
     return (
-        <div className="card">
+        <div className="card-post">
+            <div className="overlay" onClick={closeModal}></div>
+            <div className="modal">
+                <p className="modal__title">Report</p>
+                <p className="modal__notify" ref={notifyRef}></p>
+                {dataReport?.length > 0 &&
+                    dataReport.map(data => (
+                        <label
+                            htmlFor="input-file-avatar"
+                            className="modal__upload"
+                            onClick={() => handelClickReport(data)}>
+                            {data}
+                        </label>
+                    ))}
+            </div>
             <header>
                 <ProfilePreview
                     userId={post.user}
@@ -103,15 +145,15 @@ function Post(props) {
                     storyBorder={storyBorder}
                     username={post.username}
                 />
-                <PostButton className="cardButton" />
+                <PostButton className="cardButton" onClick={() => openModal()} />
             </header>
             <Slider {...settings} className="post__body-img cardImage">
                 {imgs?.length > 0 &&
-                    imgs.map(img => (
+                    imgs.map((img, index) => (
                         <img
                             style={{ height: 600 }}
                             onClick={handelViewPostDetail}
-                            key={img}
+                            key={index}
                             src={process.env.REACT_APP_STATIC_URL + `/posts/${id}/${img}`}
                             alt="postImg"
                         />

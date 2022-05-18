@@ -8,16 +8,13 @@ import { useSelector } from 'react-redux';
 const Comment = props => {
     const { handelReply, caption, cmt, disableReply } = props;
     const user = useSelector(state => state.user);
-    console.log(cmt);
-    const ownUser = caption ? user : cmt.commentBy ? cmt.commentBy : cmt;
-    console.log(ownUser);
+    const ownUser = caption ? user : cmt.commentBy ? cmt.commentBy : cmt.replyBy;
     const cmtContent = caption ? caption : cmt.content;
-    console.log(cmtContent);
     const handelSendReply = () => {
         handelReply({
             commentId: cmt._id,
-            commentOwnerId: user._id,
-            commentOwnerUsername: user.username
+            commentOwnerId: ownUser._id,
+            commentOwnerUsername: ownUser.username
         });
     };
 
@@ -46,7 +43,9 @@ const Comment = props => {
                         {!caption && (
                             <>
                                 <div className="message__content-footer">
-                                    <span className="message-footer-time">{cmt.createdAt}</span>
+                                    <span className="message-footer-time">
+                                        {new Date(cmt.createdAt).toLocaleString()}
+                                    </span>
                                     {!disableReply && (
                                         <>
                                             <span

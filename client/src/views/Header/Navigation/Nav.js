@@ -4,7 +4,7 @@ import NewPost from '../../NewPost/NewPost';
 import ProfileIcon from '../../Profile/ProfilePreview/ProfileIcon';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
 
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { getCookie, setCookie } from '../../Global/cookie';
@@ -22,6 +22,7 @@ import HomeIcon from '@mui/icons-material/Home';
 
 import friendApi from '../../../apis/friendApi';
 import { checkNotifications, formatNotifications } from '../../../actions/notification';
+import PostDetail from '../../PostDetail/PostDetail';
 
 const clickOutsideRef = (content_ref, toggle_ref) => {
     document.addEventListener('mousedown', e => {
@@ -53,6 +54,11 @@ function Nav() {
     const notificationContentRef = useRef(null);
     const notificationInit = useSelector(user => user.notifications);
     const [notifications, setNotifications] = useState({});
+    const [postSelected, setPostSelected] = useState({
+        isSelected: false,
+        postId: null
+    });
+
     const socket = useContext(SOCKET);
     const history = useHistory();
     const dispatch = useDispatch();
@@ -102,6 +108,9 @@ function Nav() {
                         notificationId: notiId
                     });
                     console.log(res);
+                    setPostSelected({ isSelected: true, postId: res.post._id });
+                    notificationRef.current.classList.remove('notification--open');
+                    dispatch(checkNotifications(notiId));
                 } catch (error) {
                     console.log(error.message);
                 }
@@ -147,12 +156,17 @@ function Nav() {
         declineAddFriendRequest();
     };
 
+    console.log(notifications);
     // open drop-down notifications
     clickOutsideRef(notificationContentRef, notificationRef);
 
     useEffect(() => {
         setNotifications({ ...notificationInit });
     }, [notificationInit]);
+
+    const closePost = useCallback(() => {
+        setPostSelected({ isSelected: false, postId: null });
+    }, [postSelected]);
 
     return (
         <>
@@ -207,7 +221,11 @@ function Nav() {
                         {notifications?.listNotifications?.length > 0 &&
                             notifications.listNotifications.map(noti => (
                                 <li
-                                    className="dropdown__notification-item"
+                                    className={`dropdown__notification-item ${
+                                        noti.isChecked ? 'dropdown__notification-item--checked' : ''
+                                    } ${
+                                        !noti.type.includes('add_friend') ? 'max-width-280px' : ''
+                                    }`}
                                     key={noti._id}
                                     onClick={e =>
                                         handelClickNotify(e, noti._id, noti.type, noti.tag)
@@ -320,6 +338,10 @@ function Nav() {
                     iconSize="small"
                     image={user.image}
                 />
+            )}
+
+            {postSelected.isSelected && (
+                <PostDetail postId={postSelected.postId} closePost={closePost} />
             )}
         </>
     );

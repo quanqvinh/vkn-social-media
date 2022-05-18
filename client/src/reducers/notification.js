@@ -11,7 +11,7 @@ const notificationReducer = (state = initState, action) => {
             newState = {
                 ...state,
                 uncheck: state.uncheck + 1,
-                listNotifications: [...state.listNotifications, action.payload]
+                listNotifications: [action.payload, ...state.listNotifications]
             };
             sessionStorage.setItem('NOTIFICATIONS', JSON.stringify(newState));
             return newState;

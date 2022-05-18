@@ -8,8 +8,8 @@ function ProfileIcon(props) {
     let profileImage = image ? image : avatarDefault;
 
     const setDefault = e => {
-        // console.clear();
-        e.target.onerror = null;
+        console.clear();
+        // e.target.onerror = null;
         e.target.src = avatarDefault;
     };
     return (

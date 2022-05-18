@@ -817,7 +817,7 @@ module.exports = {
                         )
                             comment = null;
                         else {
-                            comment = await Comment.findById(tag[1]).lean();
+                            comment = await Comment.findById(tag[1]);
                             if (
                                 !objectIdHelper.include(
                                     comment.replies.map(reply => reply._id),

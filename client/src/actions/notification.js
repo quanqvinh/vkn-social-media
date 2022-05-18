@@ -58,7 +58,7 @@ const formatNotifications = noti => {
         case 'react_comment':
             notiFormat = {
                 ...noti,
-                content: 'liked your comment'
+                content: `liked your comment`
             };
             break;
         case 'comment':
@@ -70,7 +70,7 @@ const formatNotifications = noti => {
         case 'reply':
             notiFormat = {
                 ...noti,
-                content: 'sent a reply your comment'
+                content: `sent a reply your comment in a post of ${noti.relatedUsers.of}`
             };
             break;
         default:

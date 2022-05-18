@@ -52,6 +52,14 @@ const postApi = {
     update: (id, data) => {
         const url = `/posts/${id}`;
         return axiosClient.delete(url, data);
+    },
+
+    report: data => {
+        const url = `/post/report`;
+        let accessToken = getCookie('accessToken');
+        return axiosClient.post(url, data, {
+            headers: { 'access-token': accessToken }
+        });
     }
 };
 
