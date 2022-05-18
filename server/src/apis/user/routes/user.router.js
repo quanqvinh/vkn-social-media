@@ -9,11 +9,7 @@ router.get('/notification/check', controller.checkNotification);
 router.get('/:userId', controller.getUserProfile);
 
 router.post('/edit/email/request', controller.requestEditUserEmail);
-router.post(
-    '/upload/avatar',
-    uploadAvatar.single('avatar'),
-    controller.uploadProfilePicture
-);
+router.post('/upload/avatar', uploadAvatar.single('avatar'), controller.uploadProfilePicture);
 router.post('/friends/accept-request', controller.acceptAddFriendRequest);
 router.post('/friends/decline-request', controller.declineAddFriendRequest);
 router.post('/friends/undo-request', controller.undoAddFriendRequest);
@@ -23,7 +19,7 @@ router.patch('/edit/info', controller.editUserProfile);
 router.patch('/edit/email', controller.editUserEmail);
 router.patch('/edit/password', controller.changePassword);
 
-router.delete('/delete', controller.softDeleteUser);
+// router.delete('/delete', controller.softDeleteUser);
 router.delete('/notification/:id', controller.deleteNotification);
 
 module.exports = router;

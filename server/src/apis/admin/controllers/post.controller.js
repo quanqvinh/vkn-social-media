@@ -7,97 +7,76 @@ const resourceHelper = require('../../../utils/resourceHelper');
 
 const COUNT_ITEM_OF_A_PAGE = 10;
 module.exports = {
-    // [GET] /v1/posts/number-of-pages
-    async getNumberOfPages(req, res) {
-        try {
-            let { numberRowPerPage } = req.query;
-            if (!numberRowPerPage)
-                return res.status(400).json({
-                    message: 'Missing parameters'
-                });
-            numberRowPerPage *= 1;
-            if (isNaN(numberRowPerPage))
-                return res.status(400).json({
-                    message: 'Parameters must numbers'
-                });
-            let numberRow = await Post.countDocuments();
-            return res.status(200).json({
-                status: 'success',
-                numberOfPage: Math.ceil(numberRow / numberRowPerPage)
-            });
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                status: 'error',
-                message: 'Error at server'
-            });
-        }
-    },
-
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {
         try {
             let { numberRowPerPage, pageNumber } = req.query;
             if (!(numberRowPerPage && pageNumber))
                 return res.status(400).json({
+                    status: 'error',
                     message: 'Missing parameters'
                 });
             numberRowPerPage *= 1;
             pageNumber *= 1;
             if (isNaN(numberRowPerPage) || isNaN(pageNumber))
                 return res.status(400).json({
+                    status: 'error',
                     message: 'Parameters must numbers'
                 });
-            let posts = await Post.aggregate()
-                .lookup({
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'user'
-                })
-                .unwind('user')
-                .lookup({
-                    from: 'comments',
-                    localField: 'comments',
-                    foreignField: '_id',
-                    as: 'comments'
-                })
-                .unwind({
-                    path: '$comments',
-                    preserveNullAndEmptyArrays: true
-                })
-                .project({
-                    user: {
-                        username: 1,
-                        email: 1
-                    },
-                    caption: 1,
-                    numberOfLikes: 1,
-                    numberOfReports: { $size: '$reports' },
-                    numberOfComments: {
-                        $cond: [
-                            { $not: ['$comments'] },
-                            0,
-                            { $add: [1, { $size: '$comments.replies' }] }
-                        ]
-                    },
-                    createdAt: 1
-                })
-                .group({
-                    _id: '$_id',
-                    user: { $first: '$user' },
-                    caption: { $first: '$caption' },
-                    numberOfLikes: { $first: '$numberOfLikes' },
-                    numberOfReports: { $first: '$numberOfReports' },
-                    numberOfComments: { $sum: '$numberOfComments' },
-                    createdAt: { $first: '$createdAt' }
-                });
+            let [posts, count] = await Promise.all([
+                Post.aggregate()
+                    .lookup({
+                        from: 'users',
+                        localField: 'user',
+                        foreignField: '_id',
+                        as: 'user'
+                    })
+                    .unwind('user')
+                    .lookup({
+                        from: 'comments',
+                        localField: 'comments',
+                        foreignField: '_id',
+                        as: 'comments'
+                    })
+                    .unwind({
+                        path: '$comments',
+                        preserveNullAndEmptyArrays: true
+                    })
+                    .project({
+                        user: {
+                            username: 1,
+                            email: 1
+                        },
+                        caption: 1,
+                        numberOfLikes: 1,
+                        numberOfReports: { $size: '$reports' },
+                        numberOfComments: {
+                            $cond: [
+                                { $not: ['$comments'] },
+                                0,
+                                { $add: [1, { $size: '$comments.replies' }] }
+                            ]
+                        },
+                        createdAt: 1
+                    })
+                    .group({
+                        _id: '$_id',
+                        user: { $first: '$user' },
+                        caption: { $first: '$caption' },
+                        numberOfLikes: { $first: '$numberOfLikes' },
+                        numberOfReports: { $first: '$numberOfReports' },
+                        numberOfComments: { $sum: '$numberOfComments' },
+                        createdAt: { $first: '$createdAt' }
+                    }),
+                Post.countDocuments()
+            ]);
             posts.forEach((post, index) => {
                 posts[index].imgs = resourceHelper.getListPostImages(post._id);
             });
             return res.status(200).json({
                 status: 'success',
-                data: posts
+                data: posts,
+                numberOfPages: Math.ceil(count / numberRowPerPage)
             });
         } catch (error) {
             console.log(error);
@@ -138,6 +117,10 @@ module.exports = {
                     }
                 ])
                 .lean();
+            post.numberOfReports = post.reports.length;
+            post.numberOfComments = post.comments.reduce((pre, comment) => {
+                return pre + 1 + comment.replies.length;
+            }, 0);
             res.status(200).json({
                 status: 'success',
                 data: post

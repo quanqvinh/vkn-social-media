@@ -9,68 +9,67 @@ const UserSchema = new mongoose.Schema(
         username: {
             type: String,
             unique: true,
-            required: true,
+            required: true
         },
         email: {
             type: String,
             unique: true,
-            required: true,
+            required: true
         },
         auth: authSchema,
         name: {
             type: String,
-            default: null,
+            default: null
         },
         gender: {
             type: String,
-            default: null,
+            default: null
         },
         dob: {
             type: Date,
-            default: null,
+            default: null
         },
         bio: {
             type: String,
-            default: null,
+            default: null
         },
         posts: [
             {
                 type: ObjectId,
-                ref: 'Post',
-            },
+                ref: 'Post'
+            }
         ],
         friends: [
             {
                 type: ObjectId,
-                ref: 'User',
-            },
+                ref: 'User'
+            }
         ],
         rooms: [
             {
                 type: ObjectId,
-                ref: 'Room',
-            },
+                ref: 'Room'
+            }
         ],
         notifications: [
             {
                 type: ObjectId,
-                ref: 'Notification',
-            },
+                ref: 'Notification'
+            }
         ],
-        deletedAt: {
-            type: Date,
-            index: { expireAfterSeconds: 60 * 60 * 24 * 30 },
-        },
+        expireTag: {
+            type: ObjectId
+        }
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 
 UserSchema.plugin(mongooseDelete, {
     deletedAt: true,
-    overrideMethods: 'all',
+    overrideMethods: ['find', 'findOne', 'aggregate']
 });
 UserSchema.plugin(Timezone);
 
