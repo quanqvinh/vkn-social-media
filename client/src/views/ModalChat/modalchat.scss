@@ -1,0 +1,97 @@
+@import '../../assets/styles/variables';
+
+.css-1wnsr1i {
+  border: none !important;
+  border-radius: 10px;
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px solid #ccc;
+
+    &__close {
+      font-size: 1.5rem;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    &__title {
+      font-size: 0.95rem;
+    }
+
+    &__next {
+      font-size: 0.9rem;
+      color: $link-color;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .send-to {
+    padding: 15px 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid #ccc;
+    user-select: none;
+
+    &__label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #000;
+    }
+
+    &__search {
+      outline: none;
+      border: none;
+      display: block;
+      width: 80%;
+      font-size: 0.95rem;
+      margin-top: 2px;
+    }
+  }
+  .body {
+    height: 386px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $font-color-secondary;
+      border-radius: 10px;
+    }
+
+    &__item-search {
+      padding: 12px 15px;
+
+      .profile {
+        user-select: none;
+        pointer-events: none;
+
+        a {
+          pointer-events: none;
+        }
+      }
+
+      &:hover {
+        background-color: #dbdbdb;
+        cursor: pointer;
+      }
+    }
+    .profileIcon.big {
+      width: 47px;
+      height: 47px;
+    }
+  }
+}

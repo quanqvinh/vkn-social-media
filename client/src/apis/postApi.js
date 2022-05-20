@@ -37,16 +37,23 @@ const postApi = {
 
     add: data => {
         const url = '/post/new';
+        let accessToken = getCookie('accessToken');
+        console.log('accessToken', accessToken);
         return axiosClient.post(url, data, {
-            header: {
-                'content-type': 'multipart/form-data'
+            headers: {
+                'content-type': 'multipart/form-data',
+                'access-token': accessToken
             }
         });
     },
 
     delete: id => {
-        const url = `/posts/${id}`;
-        return axiosClient.delete(url);
+        let accessToken = getCookie('accessToken');
+        console.log(accessToken);
+        const url = `/post/${id}`;
+        return axiosClient.delete(url, {
+            headers: { 'access-token': accessToken }
+        });
     },
 
     update: (id, data) => {

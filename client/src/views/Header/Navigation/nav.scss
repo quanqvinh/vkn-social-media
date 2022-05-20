@@ -188,12 +188,15 @@ a.navLink--active {
       width: 490px;
       height: 380px;
       overflow-y: scroll;
+      overflow-x: hidden;
       box-shadow: 0px 1px 4px #888;
       border-radius: 4px;
       background-color: #fff;
 
       &::-webkit-scrollbar {
+        background-color: #fafafa;
         width: 5px;
+        border-radius: 4px;
       }
       &::-webkit-scrollbar-thumb {
         background: rgb(140, 140, 140);
@@ -211,7 +214,7 @@ a.navLink--active {
         }
 
         &--checked {
-          background-color: #dbdbdb;
+          background-color: #fafafa;
           &:hover {
             background-color: #dbdbdb;
             opacity: 0.7 !important;

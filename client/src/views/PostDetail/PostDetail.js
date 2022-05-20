@@ -117,7 +117,7 @@ const PostDetail = props => {
                         ...cmt.replies,
                         {
                             commentBy: {
-                                _id: receiverReply.commentOwnerId,
+                                _id: receiverReply.replyUserId,
                                 username: receiverReply.commentOwnerUsername
                             },
                             content: cmtContent.split(' ')[1],
@@ -157,6 +157,7 @@ const PostDetail = props => {
     useEffect(() => {
         socket &&
             socket.on('post:print_comment', payload => {
+                console.log(payload);
                 setListCmts([
                     ...listCmts,
                     {
@@ -251,7 +252,7 @@ const PostDetail = props => {
                                 <div className="right__body-list-messages">
                                     <>
                                         <div className="message">
-                                            <Comment user={postOwner} caption={post.caption} />
+                                            <Comment postOwner={postOwner} caption={post.caption} />
                                         </div>
                                     </>
                                     {listCmts?.length > 0 &&

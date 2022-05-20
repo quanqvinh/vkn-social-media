@@ -32,7 +32,7 @@ const ProfilePage = () => {
         const fetchUser = async () => {
             try {
                 let res = await userApi.getById(id);
-                console.log('res fetch user', user);
+                console.log('res fetch user', res);
                 res?.data && setUser(res.data);
                 setPosts([...res.data.posts]);
             } catch (error) {

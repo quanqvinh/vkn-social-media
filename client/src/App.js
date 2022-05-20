@@ -19,6 +19,7 @@ import Layout from './components/layout/Layout';
 import { addNotifications } from './actions/notification';
 
 import { useRef } from 'react';
+import ResetPassword from './views/ResetPassword/ResetPassword';
 
 export const SOCKET = createContext();
 
@@ -89,6 +90,9 @@ function App() {
                         </Route>
                         <Route path="/auth/verify-email">
                             <VerifyEmail />
+                        </Route>
+                        <Route path="/auth/reset-password">
+                            <ResetPassword />
                         </Route>
                         <Route path="/dashboard">
                             <Layout />

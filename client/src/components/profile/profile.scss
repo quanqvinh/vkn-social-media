@@ -10,6 +10,7 @@
   overflow-y: scroll;
   transform: translateX(100%);
   transition: 0.5s ease-in-out;
+  overflow-x: hidden;
 
   &--open {
     transform: translateX(0);
@@ -57,6 +58,7 @@
         align-items: center;
         gap: 4px;
         font-weight: 400;
+        min-width: 95px;
 
         &--active {
           fill: green;
@@ -74,8 +76,8 @@
       .switch {
         position: relative;
         display: inline-block;
-        width: 60px;
-        height: 34px;
+        width: 50px;
+        height: 24px;
       }
 
       .switch input {
@@ -99,27 +101,27 @@
       .slider:before {
         position: absolute;
         content: '';
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
+        height: 21px;
+        width: 21px;
+        left: 0px;
+        bottom: 1.4px;
         background-color: white;
         -webkit-transition: 0.4s;
         transition: 0.4s;
       }
 
       input:checked + .slider {
-        background-color: #2196f3;
+        background-color: var(--main-color-green);
       }
 
       input:focus + .slider {
-        box-shadow: 0 0 1px #2196f3;
+        box-shadow: 0 0 1px var(--main-color-green);
       }
 
       input:checked + .slider:before {
         -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
+        -ms-transform: translateX(23px);
+        transform: translateX(28px);
       }
 
       /* Rounded sliders */

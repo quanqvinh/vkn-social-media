@@ -7,11 +7,13 @@ import Badge from '../components/badge/Badge';
 import Profile from '../components/profile/Profile';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Popup from '../components/popup/Popup';
+
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [isSelectUser, setIsSelectUser] = useState({
         isSelect: false,
-        userId: null
+        userId: null,
+        element: null
     });
     const [isDelete, setIsDelete] = useState({
         state: false,
@@ -19,16 +21,18 @@ const Users = () => {
         userId: null
     });
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchKeyWords, setSearchKeyWords] = useState('');
 
     const renderHead = (item, index) => <th key={index}>{item}</th>;
 
     const renderBody = (item, index) => (
         <tr
             key={index}
-            onClick={() =>
+            onClick={e =>
                 setIsSelectUser({
                     isSelect: true,
-                    userId: item._id
+                    userId: item._id,
+                    element: e.target
                 })
             }>
             <td>{index + 1}</td>
@@ -59,16 +63,83 @@ const Users = () => {
             userId: id
         });
     };
+
+    const fetchUsers = async type => {
+        try {
+            let res;
+            switch (type) {
+                case 'active':
+                    res = await userApiAdmin.getAll({
+                        numberRowPerPage: 5,
+                        pageNumber: currentPage
+                    });
+                    break;
+                default:
+                    res = await userApiAdmin.getAllDisable({
+                        numberRowPerPage: 5,
+                        pageNumber: currentPage
+                    });
+                    break;
+            }
+
+            console.log(res);
+            setUsers({
+                head: ['', 'username', 'email', 'friends', 'posts', 'state', 'action'],
+                body: [
+                    ...res.data.map(user => {
+                        return {
+                            _id: user._id,
+                            username: user.username,
+                            email: user.email,
+                            friends: user.numberOfFriends,
+                            posts: user.numberOfPosts,
+                            state: user.isDisabled ? 'disable' : 'active'
+                        };
+                    })
+                ],
+                pageRange: res.numberOfPages
+            });
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsers = async () => {
+        fetchUsers('active');
+    }, [currentPage]);
+
+    const changePage = newPage => {
+        setCurrentPage(newPage);
+    };
+
+    const chooseState = e => {
+        if (activeRef.current.contains(e.target)) {
+            disableRef.current.classList.remove('state--active');
+            activeRef.current.classList.add('state--active');
+            fetchUsers('active');
+        } else {
+            activeRef.current.classList.remove('state--active');
+            disableRef.current.classList.add('state--active');
+            fetchUsers('disable');
+        }
+    };
+
+    const activeRef = useRef();
+    const disableRef = useRef();
+    const debounceRef = useRef(null);
+
+    const handelSearch = e => {
+        setSearchKeyWords(e.target.value);
+        const search = async () => {
             try {
-                let res = await userApiAdmin.getAll({
+                let res = await userApiAdmin.searchActive({
+                    keyword: e.target.value,
                     numberRowPerPage: 5,
                     pageNumber: currentPage
                 });
                 console.log(res);
                 setUsers({
-                    head: ['', 'username', 'email', 'friends', 'posts', 'state', 'action'],
+                    head: [...users.head],
                     body: [
                         ...res.data.map(user => {
                             return {
@@ -87,24 +158,46 @@ const Users = () => {
                 console.log(error.message);
             }
         };
-        fetchUsers();
-    }, [currentPage]);
 
-    const changePage = newPage => {
-        setCurrentPage(newPage);
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(() => {
+            search();
+        }, 300);
     };
 
     return (
         <>
             <div>
-                <h2 className="page-header">customers</h2>
+                <div className="topnav__search">
+                    <input
+                        value={searchKeyWords}
+                        onChange={e => handelSearch(e)}
+                        type="text"
+                        placeholder="Search here..."
+                    />
+                    <i className="bx bx-search"></i>
+                </div>
+                <h2 className="page-header">users</h2>
                 <div className="row">
+                    <div className="action-container col-12">
+                        <span
+                            ref={activeRef}
+                            className="state state--active"
+                            onClick={e => chooseState(e)}>
+                            active
+                        </span>
+                        <span ref={disableRef} className="state" onClick={e => chooseState(e)}>
+                            disable
+                        </span>
+                    </div>
                     <div className="col-12">
                         <div className="card-admin">
                             <div className="card__body">
                                 {users?.body?.length > 0 && (
                                     <Table
-                                        pageRange={users.pageRange || 2}
+                                        pageRange={users.pageRange}
                                         headData={users.head}
                                         renderHead={(item, index) => renderHead(item, index)}
                                         bodyData={users.body}
@@ -126,7 +219,9 @@ const Users = () => {
                     </div>
                 </div>
             </div>
-            {isSelectUser.isSelect && <Profile userId={isSelectUser.userId} />}
+            {isSelectUser.isSelect && (
+                <Profile userId={isSelectUser.userId} element={isSelectUser.element} />
+            )}
         </>
     );
 };

@@ -22,6 +22,17 @@ export const userApiAdmin = {
         });
     },
 
+    getAllDisable: params => {
+        let url = `/users/disabled`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.get(url, {
+            params,
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
+
     getById: id => {
         let url = `/user/${id}`;
         let accessToken = getCookie('accessToken');
@@ -36,6 +47,17 @@ export const userApiAdmin = {
         let url = `/user/${id}/disable?expireTime=${expireTime}`;
         let accessToken = getCookie('accessToken');
         return axiosAdmin.patch(url, {
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
+
+    searchActive: params => {
+        let url = `/users/search`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.get(url, {
+            params,
             headers: {
                 'access-token': accessToken
             }

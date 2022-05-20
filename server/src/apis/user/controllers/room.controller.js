@@ -11,7 +11,7 @@ async function loadMessage(req, res) {
         let roomId = req.params.roomId;
         let numberOfMessage = req.query.nMessage;
 
-        if (!(roomId && numberOfMessage))
+        if (!roomId || numberOfMessage === undefined)
             return res.status(400).json({ message: 'Missing parameters' });
 
         let [countMessage, data] = await Promise.all([

@@ -66,6 +66,9 @@
 
       .profile {
         gap: 17px;
+        user-select: none;
+        pointer-events: none;
+
         div {
           cursor: pointer;
           img {

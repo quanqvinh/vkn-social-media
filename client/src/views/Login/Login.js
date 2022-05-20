@@ -5,20 +5,41 @@ import Footer from '../Footer/Footer';
 import authApi from '../../apis/authApi';
 import ResMessage from '../Global/ResMessage';
 import { setCookie } from '../Global/cookie';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { getCookie } from '../Global/cookie';
+
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+
+const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4
+};
+
 export default function Login() {
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [resMessage, setResMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
+    const [open, setOpen] = useState(false);
+    const [emailForgotPassword, setEmailForgotPassword] = useState('');
+    const notificationRef = useRef(null);
     const history = useHistory();
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const handelCheckLogin = () => {
         if ((!username && !email) || !password) return false;
@@ -82,6 +103,27 @@ export default function Login() {
         setShowPassword(prev => !prev);
     };
 
+    const handelForgotPassword = () => {
+        if (!emailForgotPassword) return;
+
+        const sendRequestPassword = async () => {
+            try {
+                let res = await authApi.requestResetPassword({ email: emailForgotPassword });
+                console.log(res);
+
+                if (res.status.includes('success')) {
+                    notificationRef.current.innerHTML = 'Reset password email has been sent';
+                    notificationRef.current.style.color = 'green';
+                } else {
+                    notificationRef.current.innerHTML = 'Not found any account using this username';
+                    notificationRef.current.style.color = 'red';
+                }
+            } catch (error) {
+                console.log(error.message);
+            }
+        };
+        sendRequestPassword();
+    };
     useEffect(() => {
         sessionStorage.removeItem('USER_INFO');
         getCookie('accessToken') && setCookie('accessToken', '', 0);
@@ -105,10 +147,7 @@ export default function Login() {
                             <form onSubmit={handelLogin}>
                                 <div className="form__field">
                                     {resMessage && (
-                                        <ResMessage
-                                            resMessage={resMessage}
-                                            callBy="Login"
-                                        />
+                                        <ResMessage resMessage={resMessage} callBy="Login" />
                                     )}
                                     <input
                                         type="text"
@@ -117,9 +156,7 @@ export default function Login() {
                                         required
                                         placeholder="Username, or email"
                                         value={username ? username : email}
-                                        onChange={e =>
-                                            setUserName(e.target.value)
-                                        }
+                                        onChange={e => setUserName(e.target.value)}
                                         onBlur={() => handelUserName()}
                                     />
                                 </div>
@@ -132,9 +169,7 @@ export default function Login() {
                                             required
                                             placeholder="Password"
                                             value={password}
-                                            onChange={e =>
-                                                setPassword(e.target.value)
-                                            }
+                                            onChange={e => setPassword(e.target.value)}
                                         />
                                         {showPassword ? (
                                             <VisibilityOffIcon
@@ -154,19 +189,51 @@ export default function Login() {
                                         Login
                                     </button>
                                 ) : (
-                                    <button className="primary-insta-btn">
-                                        Login
-                                    </button>
+                                    <button className="primary-insta-btn">Login</button>
                                 )}
-                                <a href="#!" className="forgotPassword">
-                                    Forgot Password?
-                                </a>
+
+                                <div>
+                                    <span className="forgotPassword" onClick={handleOpen}>
+                                        Forgot Password?
+                                    </span>
+                                    <Modal
+                                        open={open}
+                                        onClose={handleClose}
+                                        aria-labelledby="modal-modal-title"
+                                        aria-describedby="modal-modal-description">
+                                        <Box sx={style}>
+                                            <p
+                                                className="forgot__notification"
+                                                ref={notificationRef}></p>
+                                            <span className="forgot__title">
+                                                Please fill in your email
+                                            </span>
+
+                                            <div className="forgot__content">
+                                                <label className="forgot__label">Email:</label>
+                                                <input
+                                                    onChange={e =>
+                                                        setEmailForgotPassword(e.target.value)
+                                                    }
+                                                    value={emailForgotPassword}
+                                                    type="text"
+                                                    className="forgot__email"
+                                                    placeholder="Your email..."
+                                                />
+                                            </div>
+                                            <button
+                                                className="forgot__send"
+                                                onClick={handelForgotPassword}>
+                                                Ok
+                                            </button>
+                                        </Box>
+                                    </Modal>
+                                </div>
                             </form>
                         </div>
                         <div className="signup__area">
                             <p>
-                                Don't have an account?{' '}
-                                <Link to="/signup">Sign up</Link>
+                                Don't have an account? <Link to="/signup">Sign up</Link>
                             </p>
                         </div>
                     </div>

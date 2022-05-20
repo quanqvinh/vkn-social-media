@@ -156,7 +156,6 @@ function Nav() {
         declineAddFriendRequest();
     };
 
-    console.log(notifications);
     // open drop-down notifications
     clickOutsideRef(notificationContentRef, notificationRef);
 

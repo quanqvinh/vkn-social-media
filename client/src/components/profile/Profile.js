@@ -7,10 +7,16 @@ import { userApiAdmin } from '../../apis/userApiAdmin';
 import Table from '../table/Table';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import Popup from '../popup/Popup';
 
-const Profile = ({ userId }) => {
+const Profile = ({ userId, element }) => {
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
+    const [isDelete, setIsDelete] = useState({
+        state: false,
+        e: null,
+        userId: null
+    });
 
     const renderHead = (item, index) => <th key={index}>{item}</th>;
 
@@ -34,7 +40,11 @@ const Profile = ({ userId }) => {
 
     const deletePost = (e, id) => {
         e.stopPropagation();
-        console.log(id, e.target);
+        setIsDelete({
+            state: true,
+            e: e.target.closest('td'),
+            postId: id
+        });
     };
 
     useEffect(() => {
@@ -67,7 +77,7 @@ const Profile = ({ userId }) => {
     const profileRef = useRef([]);
     useEffect(() => {
         profileRef.current.classList.add('profile__container--open');
-    }, [userId]);
+    }, [element]);
 
     const closeProfile = () => {
         profileRef.current.classList.remove('profile__container--open');
@@ -84,7 +94,8 @@ const Profile = ({ userId }) => {
     const handelCheckState = () => {
         const disableUser = async () => {
             try {
-                await userApiAdmin.disable(user._id, 60);
+                await userApiAdmin.disable(user._id, 60 * 60);
+                setUser({ ...user, disabled: !user.disabled });
             } catch (error) {
                 console.log(error.message);
             }
@@ -108,22 +119,22 @@ const Profile = ({ userId }) => {
                         <div className="header__name">
                             <h1 className="name">{user.username}</h1>
                             <div className="state">
-                                {user.disable ? (
+                                {user.disabled ? (
                                     <CancelIcon className="state--disable" />
                                 ) : (
                                     <CheckCircleOutlineIcon className="state--active" />
                                 )}
                                 <span className="state__description">
-                                    {user.disable ? 'disable' : 'active'}
+                                    {user.disabled ? 'disable' : 'active'}
                                 </span>
                             </div>
-                            <label class="switch">
+                            <label className="switch">
                                 <input
                                     type="checkbox"
-                                    checked={user.disable ? false : true}
+                                    checked={user.disabled ? false : true}
                                     onChange={handelCheckState}
                                 />
-                                <span class="slider round"></span>
+                                <span className="slider round"></span>
                             </label>
                         </div>
                         <div className="header__email">
@@ -166,6 +177,15 @@ const Profile = ({ userId }) => {
                                             />
                                         )}
                                     </div>
+                                    {isDelete.state && (
+                                        <Popup
+                                            title="This action will delete this post forever"
+                                            ok="delete"
+                                            cancel="cancel"
+                                            element={isDelete.e}
+                                            postId={isDelete.postId}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

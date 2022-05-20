@@ -30,6 +30,8 @@ function Post(props) {
     const [like, setLike] = useState(likedByNumber);
     const [isShowPost, setIsShowPost] = useState(false);
     const notifyRef = useRef(null);
+    const modalRef = useRef(null);
+    const overlayRef = useRef(null);
 
     const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
         <button
@@ -94,26 +96,25 @@ function Post(props) {
     );
 
     const openModal = () => {
-        const overlay = $('.overlay');
-        const modal = $('.modal');
-        modal.classList.add('modal--open');
-        overlay.classList.add('overlay--open');
+        modalRef.current.classList.add('modal--open');
+        overlayRef.current.classList.add('overlay--open');
     };
 
     const closeModal = () => {
         notifyRef.current.innerText = '';
-        const overlay = $('.overlay');
-        const modal = $('.modal');
-        modal.classList.remove('modal--open');
-        overlay.classList.remove('overlay--open');
+        modalRef.current.classList.remove('modal--open');
+        overlayRef.current.classList.remove('overlay--open');
     };
 
     const handelClickReport = data => {
         const reportPost = async () => {
             try {
-                let res = await postApi.report({ postId: post._id, content: data });
-                console.log(res);
-                closeModal();
+                await postApi.report({ postId: post._id, content: data });
+                notifyRef.current.classList.add('modal__notify--success');
+                notifyRef.current.innerText = 'Reported success';
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
             } catch (error) {
                 console.log(error.message);
                 notifyRef.current.innerText = 'You had reported this post before';
@@ -123,8 +124,8 @@ function Post(props) {
     };
     return (
         <div className="card-post">
-            <div className="overlay" onClick={closeModal}></div>
-            <div className="modal">
+            <div className="overlay" onClick={closeModal} ref={overlayRef}></div>
+            <div className="modal" ref={modalRef}>
                 <p className="modal__title">Report</p>
                 <p className="modal__notify" ref={notifyRef}></p>
                 {dataReport?.length > 0 &&

@@ -15,6 +15,16 @@ const authApi = {
         const url = '/auth/verify-email';
         return axiosClient.patch(url, data);
     },
+
+    requestResetPassword: data => {
+        const url = '/auth/request/reset-password';
+        return axiosClient.post(url, data);
+    },
+
+    resetPassword: data => {
+        const url = '/auth/reset-password';
+        return axiosClient.patch(url, data);
+    }
 };
 
 export default authApi;

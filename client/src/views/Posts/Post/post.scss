@@ -242,6 +242,10 @@
   &__notify {
     color: red;
     font-size: 0.82rem;
+
+    &--success {
+      color: green;
+    }
   }
 
   &__upload {

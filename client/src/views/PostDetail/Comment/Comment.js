@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
 import avatar from '../../../assets/images/profile.jpg';
 import './comment.scss';
@@ -6,15 +6,31 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useSelector } from 'react-redux';
 
 const Comment = props => {
-    const { handelReply, caption, cmt, disableReply } = props;
+    const { handelReply, caption, cmt, disableReply, postOwner } = props;
+    const [owner, setOwner] = useState();
     const user = useSelector(state => state.user);
-    const ownUser = caption ? user : cmt.commentBy ? cmt.commentBy : cmt.replyBy;
+
+    useEffect(() => {
+        setOwner(user);
+        if (postOwner === undefined) return;
+        if (user._id === postOwner._id) {
+            setOwner(user);
+            console.log('set user');
+        } else {
+            setOwner(postOwner);
+            console.log('set post');
+        }
+    }, [postOwner?._id]);
+
+    const ownUser = caption ? owner : cmt.commentBy ? cmt.commentBy : cmt.replyBy;
     const cmtContent = caption ? caption : cmt.content;
+
     const handelSendReply = () => {
         handelReply({
             commentId: cmt._id,
             commentOwnerId: ownUser._id,
-            commentOwnerUsername: ownUser.username
+            commentOwnerUsername: ownUser.username,
+            replyUserId: user._id
         });
     };
 

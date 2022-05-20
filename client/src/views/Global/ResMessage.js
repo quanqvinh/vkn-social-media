@@ -9,13 +9,14 @@ const ResMessage = props => {
     const listNotiesSignup = [
         'Username already exists',
         'User with given email already exist',
-        'Verification has been sent to your email',
+        'Verification email has been sent to your email'
     ];
 
-    const listKeysLogin = ['Username', 'Password'];
+    const listKeysLogin = ['Username', 'Password', 'Verify'];
     const listNotiesLogin = [
         'Username or email is incorrect',
         'Your password is incorrect',
+        'Verification email has been sent to your email'
     ];
     useEffect(() => {
         if (callBy === 'Signup') {
@@ -23,17 +24,15 @@ const ResMessage = props => {
                 if (resMessage.includes(key)) {
                     console.log(index);
                     setNoti(listNotiesSignup[index]);
-                    console.log(listNotiesSignup[index]);
                     return false;
                 }
                 return true;
             });
         } else {
             listKeysLogin.every((key, index) => {
+                console.log(resMessage);
                 if (resMessage.includes(key)) {
-                    console.log(index);
                     setNoti(listNotiesLogin[index]);
-                    console.log(listNotiesLogin[index]);
                     return false;
                 }
                 return true;
@@ -41,7 +40,14 @@ const ResMessage = props => {
         }
     }, [resMessage]);
 
-    return <p className="res-message">{noti}</p>;
+    return (
+        <p
+            className={`res-message ${
+                noti.includes('Verification') ? 'res-message--send-email' : ''
+            }`}>
+            {noti}
+        </p>
+    );
 };
 
 export default ResMessage;

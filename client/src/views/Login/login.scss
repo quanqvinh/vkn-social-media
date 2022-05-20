@@ -146,6 +146,10 @@
       color: #f60707;
       margin-bottom: 5px;
 
+      &--send-email {
+        color: green;
+      }
+
       @include medium {
         font-size: 15px;
       }
@@ -246,6 +250,75 @@
   display: block;
   margin-top: 8px;
   font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.css-1wnsr1i {
+  border: none !important;
+  border-radius: 10px;
+  padding: 0px !important;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
+  .forgot__title {
+    display: block;
+    text-align: center;
+    padding: 15px 0 10px;
+    color: #000;
+    font-weight: 500;
+  }
+
+  .forgot__notification {
+    font-size: 0.88rem;
+    color: green;
+    text-align: center;
+    margin: 10px 0 -10px;
+  }
+
+  .forgot__content {
+    padding: 0px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+
+    .forgot__label {
+      color: #242424;
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .forgot__email {
+      outline: none;
+      border: none;
+      font-size: 1rem;
+      color: #000;
+      display: block;
+      width: 90%;
+    }
+  }
+  .forgot__send {
+    outline: none;
+    border: none;
+    display: block;
+    width: 90%;
+    margin: 15px auto;
+    padding: 8px 15px;
+    text-transform: uppercase;
+    background-color: $primary-text-color;
+    color: #fff;
+    font-family: $font;
+    border-radius: 10px;
+    transition: 0.2s linear;
+    font-size: 1rem;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }
 
 .signup__area {
