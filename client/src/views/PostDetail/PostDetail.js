@@ -41,10 +41,7 @@ const PostDetail = props => {
     const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
         <button
             {...props}
-            className={
-                'slick-prev slick-arrow' +
-                (currentSlide === 0 ? ' slick-disabled' : '')
-            }
+            className={'slick-prev slick-arrow' + (currentSlide === 0 ? ' slick-disabled' : '')}
             aria-hidden="true"
             aria-disabled={currentSlide === 0 ? true : false}
             type="button">
@@ -130,10 +127,7 @@ const PostDetail = props => {
                             <div className="right__body-list-messages">
                                 <>
                                     <div className="message">
-                                        <Comment
-                                            user={postOwner}
-                                            caption={post.caption}
-                                        />
+                                        <Comment user={postOwner} caption={post.caption} />
                                     </div>
                                 </>
                                 {post?.comments?.length > 0 &&
@@ -155,12 +149,9 @@ const PostDetail = props => {
                                 <PostMenu />
                                 <div className="footer__title">
                                     <p>
-                                        Liked by <span>trungkien</span> and{' '}
-                                        <span>19 others</span>
+                                        Liked by <span>trungkien</span> and <span>19 others</span>
                                     </p>
-                                    <p className="footer__title-time">
-                                        {post.createdAt}
-                                    </p>
+                                    <p className="footer__title-time">{post.createdAt}</p>
                                 </div>
                             </div>
                             <div className="footer__input">
@@ -168,13 +159,9 @@ const PostDetail = props => {
                                     value={cmtContent}
                                     type="text"
                                     placeholder="Add a comment..."
-                                    onChange={e =>
-                                        setCmtContent(e.target.value)
-                                    }
+                                    onChange={e => setCmtContent(e.target.value)}
                                 />
-                                <span
-                                    className="footer__input-post"
-                                    onClick={handelSendCmt}>
+                                <span className="footer__input-post" onClick={handelSendCmt}>
                                     Post
                                 </span>
                             </div>

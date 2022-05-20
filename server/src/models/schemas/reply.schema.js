@@ -6,14 +6,14 @@ const ReplySchema = new mongoose.Schema(
         replyBy: {
             type: mongoose.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: true
         },
-        content: { type: String },
+        content: { type: String }
     },
     {
         timestamps: true,
         versionKey: false,
-        autoCreate: false,
+        autoCreate: false
     }
 );
 
@@ -21,5 +21,5 @@ ReplySchema.plugin(Timezone);
 
 module.exports = {
     schema: ReplySchema,
-    model: mongoose.model('Reply', ReplySchema),
+    model: mongoose.model('Reply', ReplySchema)
 };

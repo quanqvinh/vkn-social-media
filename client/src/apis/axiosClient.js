@@ -7,11 +7,11 @@ const axiosClient = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
     headers: {
         'content-type': 'application/json',
-        'access-token': getCookie('accessToken') || null,
+        'access-token': getCookie('accessToken') || null
     },
 
     // dùng querystring
-    paramsSerializer: params => queryString.stringify(params),
+    paramsSerializer: params => queryString.stringify(params)
 });
 
 axiosClient.interceptors.request.use(async config => {
@@ -20,7 +20,7 @@ axiosClient.interceptors.request.use(async config => {
         // Qs is already included in the Axios package
         return Qs.stringify(params, {
             arrayFormat: 'brackets',
-            encode: false,
+            encode: false
         });
     };
     return config;

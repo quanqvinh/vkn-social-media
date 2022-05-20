@@ -31,21 +31,21 @@ const VerifyEmail = () => {
         <React.Fragment>
             <CardContent
                 sx={{
-                    width: 400,
+                    width: 400
                 }}>
                 <Box>
                     {isVerified ? (
                         <CheckCircleIcon
                             sx={{
                                 fontSize: 70,
-                                fill: '#5a9cff',
+                                fill: '#5a9cff'
                             }}
                         />
                     ) : (
                         <CancelIcon
                             sx={{
                                 fontSize: 70,
-                                fill: 'red',
+                                fill: 'red'
                             }}
                         />
                     )}
@@ -65,7 +65,7 @@ const VerifyEmail = () => {
             </CardContent>
             <CardActions
                 sx={{
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                 }}>
                 <Button
                     style={{ display: `${isVerified ? '' : 'none'}` }}
@@ -76,7 +76,7 @@ const VerifyEmail = () => {
                         fontSize: 18,
                         mb: '10px',
                         background: '#5a9cff',
-                        borderRadius: '6px',
+                        borderRadius: '6px'
                     }}>
                     Ok
                 </Button>
@@ -90,7 +90,7 @@ const VerifyEmail = () => {
                 const token = new URLSearchParams(search).get('token');
 
                 const data = {
-                    token: token,
+                    token: token
                 };
                 console.log(token);
                 if (getCookie('accessToken')) {
@@ -120,10 +120,7 @@ const VerifyEmail = () => {
         <>
             {isLoading ? (
                 <div className="loading-container">
-                    <CircularProgress
-                        color="secondary"
-                        style={{ width: '50px', height: '50px' }}
-                    />
+                    <CircularProgress color="secondary" style={{ width: '50px', height: '50px' }} />
                     <p>Loading...</p>
                 </div>
             ) : (
@@ -134,7 +131,7 @@ const VerifyEmail = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: '#0a1929',
+                        background: '#0a1929'
                     }}>
                     <Card sx={{ borderRadius: '6px' }} variant="outlined">
                         {card}

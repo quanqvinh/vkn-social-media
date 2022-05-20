@@ -9,14 +9,11 @@ const ResMessage = props => {
     const listNotiesSignup = [
         'Username already exists',
         'User with given email already exist',
-        'Verification has been sent to your email',
+        'Verification has been sent to your email'
     ];
 
     const listKeysLogin = ['Username', 'Password'];
-    const listNotiesLogin = [
-        'Username or email is incorrect',
-        'Your password is incorrect',
-    ];
+    const listNotiesLogin = ['Username or email is incorrect', 'Your password is incorrect'];
     useEffect(() => {
         if (callBy === 'Signup') {
             listKeysSignup.every((key, index) => {

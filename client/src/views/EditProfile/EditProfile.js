@@ -21,7 +21,7 @@ const EditProfile = () => {
         username: user.username,
         bio: user.bio,
         dob: user.dob,
-        gender: user.gender || 'Male',
+        gender: user.gender || 'Male'
     });
 
     const handelSubmit = e => {
@@ -53,18 +53,13 @@ const EditProfile = () => {
                     </div>
                     <div className="body__right">
                         <ProfilePreview
-                            image={
-                                process.env.REACT_APP_STATIC_URL +
-                                `/avatars/${user._id}.png`
-                            }
+                            image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                             username={user.username}
                             name="Change Profile Photo"
                             iconSize="medium"
                             captionSize="small"
                         />
-                        <form
-                            className="right__form"
-                            onSubmit={e => handelSubmit(e)}>
+                        <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__name">
                                 <span className="form__name-label">Name</span>
                                 <div className="form__name-content">
@@ -74,22 +69,18 @@ const EditProfile = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                name: e.target.value,
+                                                name: e.target.value
                                             })
                                         }
                                     />
                                     <span className="form__name-content-description">
-                                        Help people discover your account by
-                                        using the name you're known by: either
-                                        your full name, nickname, or business
-                                        name.
+                                        Help people discover your account by using the name you're
+                                        known by: either your full name, nickname, or business name.
                                     </span>
                                 </div>
                             </div>
                             <div className="form__username">
-                                <span className="form__username-label">
-                                    Username
-                                </span>
+                                <span className="form__username-label">Username</span>
                                 <div className="form__username-content">
                                     <input
                                         type="text"
@@ -97,14 +88,13 @@ const EditProfile = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                username: e.target.value,
+                                                username: e.target.value
                                             })
                                         }
                                     />
                                     <span className="form__name-content-description">
-                                        In most cases, you'll be able to change
-                                        your username back to undefined for
-                                        another undefined days.
+                                        In most cases, you'll be able to change your username back
+                                        to undefined for another undefined days.
                                     </span>
                                 </div>
                             </div>
@@ -118,53 +108,46 @@ const EditProfile = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                bio: e.target.value,
+                                                bio: e.target.value
                                             })
                                         }
                                     />
                                     <span className="form__bio-content-description">
-                                        <span>Personal Information</span>{' '}
-                                        Provide your personal information, even
-                                        if the account is used for a business, a
-                                        pet or something else. This won't be a
-                                        part of your public profile.
+                                        <span>Personal Information</span> Provide your personal
+                                        information, even if the account is used for a business, a
+                                        pet or something else. This won't be a part of your public
+                                        profile.
                                     </span>
                                 </div>
                             </div>
                             <div className="form__dob">
                                 <span className="form__dob-label">DoB</span>
 
-                                <LocalizationProvider
-                                    dateAdapter={AdapterDateFns}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
                                     <DatePicker
                                         views={['day', 'month', 'year']}
                                         value={formInfos.dob}
                                         onChange={newValue => {
                                             setFormInfos({
                                                 ...formInfos,
-                                                dob: newValue,
+                                                dob: newValue
                                             });
                                         }}
                                         renderInput={params => (
-                                            <TextField
-                                                {...params}
-                                                helperText={null}
-                                            />
+                                            <TextField {...params} helperText={null} />
                                         )}
                                     />
                                 </LocalizationProvider>
                             </div>
                             <div className="form__gender">
-                                <span className="form__gender-label">
-                                    Gender
-                                </span>
+                                <span className="form__gender-label">Gender</span>
                                 <div className="form__gender-content">
                                     <select
                                         value={formInfos.gender || ''}
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                gender: e.target.value,
+                                                gender: e.target.value
                                             })
                                         }>
                                         <option value="male">Male</option>

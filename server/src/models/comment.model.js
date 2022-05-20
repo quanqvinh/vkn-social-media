@@ -7,29 +7,29 @@ const CommentSchema = new mongoose.Schema(
         commentBy: {
             type: mongoose.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: true
         },
         numberOfLikes: {
             type: Number,
             default: 0,
-            required: true,
+            required: true
         },
         likes: [
             {
                 type: mongoose.Types.ObjectId,
                 ref: 'User',
-                required: true,
-            },
+                required: true
+            }
         ],
         content: {
             type: String,
-            required: true,
+            required: true
         },
-        replies: [ReplySchema],
+        replies: [ReplySchema]
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

@@ -19,24 +19,35 @@ module.exports = {
     // [GET] /v1/users/disabled?numberRowPerPage=&pageNumber=&sortBy&order=
     // [GET] /v1/users/disabled/search?keyword=&numberRowPerPage=&pageNumber=&sortBy&order=
     async getUsersOfPage(req, res) {
-        let keyword, disabled = false;
+        let keyword,
+            disabled = false;
         let apiUrl = req.originalUrl;
         if (apiUrl.includes('/search')) {
             keyword = req.query.keyword;
             if (!keyword)
-            return res.status(400).json({
-                status: 'error',
-                message: 'Keyword is not provided'
-            });
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Keyword is not provided'
+                });
         }
         if (apiUrl.includes('/disabled')) disabled = true;
 
         let { sortBy, order } = req.query;
         console.log(sortBy, order);
-        if (!['username', 'email', 'isAdmin', 'numberOfFriends', 'numberOfPosts', 'isDisabled', 'disabledAt', 'createdAt'].includes(sortBy))
+        if (
+            ![
+                'username',
+                'email',
+                'isAdmin',
+                'numberOfFriends',
+                'numberOfPosts',
+                'isDisabled',
+                'disabledAt',
+                'createdAt'
+            ].includes(sortBy)
+        )
             sortBy = 'createdAt';
-        if (order !== 'asc' && order !== 'desc')
-            order = 'asc';
+        if (order !== 'asc' && order !== 'desc') order = 'asc';
         console.log(sortBy, order);
         try {
             let { numberRowPerPage, pageNumber } = req.query;
@@ -261,46 +272,63 @@ module.exports = {
         let id = req.params.id;
         mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
-                let [ deletedUser, deletedFriend, deletedRequest, deletedNotification, deletedToken, deletedPost, comments, reports ] = await Promise.all([
+                let [
+                    deletedUser,
+                    deletedFriend,
+                    deletedRequest,
+                    deletedNotification,
+                    deletedToken,
+                    deletedPost,
+                    comments,
+                    reports
+                ] = await Promise.all([
                     User.deleteOne({ _id: id }).session(session),
-                    User.updateMany({ friends: id }, { 
-                        $pull: { friends: id }
-                    }).session(session),
-                    Request.deleteMany({ 
-                        $or: [ { from: id }, { to: id } ] 
+                    User.updateMany(
+                        { friends: id },
+                        {
+                            $pull: { friends: id }
+                        }
+                    ).session(session),
+                    Request.deleteMany({
+                        $or: [{ from: id }, { to: id }]
                     }).session(session),
                     Notification.deleteMany({ user: id }).session(session),
                     Token.deleteMany({ 'payload.userId': id }).session(session),
                     Post.deleteMany({ user: id }).session(session),
                     Comment.find({ commentBy: id }).lean(),
-                    Report.find({ user: id }).lean(),
+                    Report.find({ user: id }).lean()
                 ]);
                 commentIds = comments.map(comment => comment._id);
                 reportIds = reports.map(report => report._id);
                 let deletedInPostStatus = await Promise.all([
-                    Post.updateMany({
-                        likes: id,
-                        reports: { $in: reportIds },
-                        comments: { $in: commentIds },
-                    }, {
-                        $pull: {
+                    Post.updateMany(
+                        {
                             likes: id,
                             reports: { $in: reportIds },
                             comments: { $in: commentIds }
+                        },
+                        {
+                            $pull: {
+                                likes: id,
+                                reports: { $in: reportIds },
+                                comments: { $in: commentIds }
+                            }
                         }
-                    }).session(session),
+                    ).session(session),
                     Comment.deleteMany({ _id: { $in: commentIds } }).session(session),
                     Report.deleteMany({ _id: { $in: reportIds } }).session(session)
                 ]);
-                let deletedRepliesStatus = await Comment.updateMany({
-                    'replies.replyBy': id
-                }, {
-                    $pull: {
-                        replies: { replyBy: new ObjectId(id) }
+                let deletedRepliesStatus = await Comment.updateMany(
+                    {
+                        'replies.replyBy': id
+                    },
+                    {
+                        $pull: {
+                            replies: { replyBy: new ObjectId(id) }
+                        }
                     }
-                }).session(session);
-                if (deletedUser.modifiedCount === 0)
-                    throw new Error('Delete user failed!');
+                ).session(session);
+                if (deletedUser.modifiedCount === 0) throw new Error('Delete user failed!');
             },
             successCallback() {
                 return res.status(200).json({
@@ -319,7 +347,7 @@ module.exports = {
 
     // [POST] /v1/user/add
     async addNewAccount(req, res) {
-        let { username, email, name, isAdmin } =  req.body;
+        let { username, email, name, isAdmin } = req.body;
         if (!(username && email && name && isAdmin))
             return res.status(400).json({
                 status: 'error',
@@ -334,15 +362,12 @@ module.exports = {
         mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 let user = await User.findOne({
-                    $or: [
-                        { username: username }, 
-                        { email: email }
-                    ]
-                }).select('username email').lean();
-                if (user?.username === username) 
-                    throw new Error('This username is already in use');
-                if (user?.email === email)
-                    throw new Error('This email is already in use');
+                    $or: [{ username: username }, { email: email }]
+                })
+                    .select('username email')
+                    .lean();
+                if (user?.username === username) throw new Error('This username is already in use');
+                if (user?.email === email) throw new Error('This email is already in use');
                 let initPassword = generator.generate({
                     length: 8,
                     numbers: true,
@@ -351,16 +376,21 @@ module.exports = {
                     uppercase: true,
                     strict: true
                 });
-                user = await User.create([{
-                    username,
-                    email,
-                    name,
-                    auth: {
-                        password: crypto.hash(initPassword),
-                        isAdmin,
-                        isVerified: true
-                    }
-                }], { session });
+                user = await User.create(
+                    [
+                        {
+                            username,
+                            email,
+                            name,
+                            auth: {
+                                password: crypto.hash(initPassword),
+                                isAdmin,
+                                isVerified: true
+                            }
+                        }
+                    ],
+                    { session }
+                );
                 mail.sendWelcomeToNewAccount({
                     to: email,
                     username,
@@ -384,7 +414,7 @@ module.exports = {
                     message: 'Error at server'
                 });
             }
-        })
+        });
     },
 
     // [PATCH] /v1/user/password
@@ -402,8 +432,7 @@ module.exports = {
                     throw new Error('Password is incorrect');
                 user.auth.password = crypto.hash(newPassword);
                 let savedUser = await user.save({ session });
-                if (user !== savedUser)
-                    throw new Error('Update password failed');
+                if (user !== savedUser) throw new Error('Update password failed');
             },
             successCallback() {
                 return res.status(200).json({ status: 'success' });
@@ -420,6 +449,6 @@ module.exports = {
                     message: 'Error at server'
                 });
             }
-        })
+        });
     }
 };

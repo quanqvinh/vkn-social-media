@@ -18,44 +18,34 @@ const chartOptions = {
   series: [
     {
       name: 'New Users',
-      data: [40, 70, 20, 90, 36, 80, 30, 91, 60],
+      data: [40, 70, 20, 90, 36, 80, 30, 91, 60]
     },
     {
       name: 'New Posts',
-      data: [40, 10, 30, 80, 60, 90, 60, 40, 60],
-    },
+      data: [40, 10, 30, 80, 60, 90, 60, 40, 60]
+    }
   ],
   options: {
     color: ['#6ab04c', '#2980b9'],
     chart: {
-      background: 'transparent',
+      background: 'transparent'
     },
     dataLabels: {
-      enabled: false,
+      enabled: false
     },
     stroke: {
-      curve: 'smooth',
+      curve: 'smooth'
     },
     xaxis: {
-      categories: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-      ],
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
     },
     legend: {
-      position: 'top',
+      position: 'top'
     },
     grid: {
-      show: false,
-    },
-  },
+      show: false
+    }
+  }
 };
 
 const topCustomers = {
@@ -64,29 +54,29 @@ const topCustomers = {
     {
       username: 'john doe',
       order: '490',
-      price: '$15,870',
+      price: '$15,870'
     },
     {
       username: 'frank iva',
       order: '250',
-      price: '$12,251',
+      price: '$12,251'
     },
     {
       username: 'anthony baker',
       order: '120',
-      price: '$10,840',
+      price: '$10,840'
     },
     {
       username: 'frank iva',
       order: '110',
-      price: '$9,251',
+      price: '$9,251'
     },
     {
       username: 'anthony baker',
       order: '80',
-      price: '$8,840',
-    },
-  ],
+      price: '$8,840'
+    }
+  ]
 };
 
 const renderCusomerHead = (item, index) => <th key={index}>{item}</th>;
@@ -107,44 +97,44 @@ const latestOrders = {
       user: 'john doe',
       date: '17 Jun 2021',
       price: '$900',
-      status: 'shipping',
+      status: 'shipping'
     },
     {
       id: '#OD1712',
       user: 'frank iva',
       date: '1 Jun 2021',
       price: '$400',
-      status: 'paid',
+      status: 'paid'
     },
     {
       id: '#OD1713',
       user: 'anthony baker',
       date: '27 Jun 2021',
       price: '$200',
-      status: 'pending',
+      status: 'pending'
     },
     {
       id: '#OD1712',
       user: 'frank iva',
       date: '1 Jun 2021',
       price: '$400',
-      status: 'paid',
+      status: 'paid'
     },
     {
       id: '#OD1713',
       user: 'anthony baker',
       date: '27 Jun 2021',
       price: '$200',
-      status: 'refund',
-    },
-  ],
+      status: 'refund'
+    }
+  ]
 };
 
 const orderStatus = {
   shipping: 'primary',
   pending: 'warning',
   paid: 'success',
-  refund: 'danger',
+  refund: 'danger'
 };
 
 const renderOrderHead = (item, index) => <th key={index}>{item}</th>;
@@ -172,11 +162,7 @@ const Dashboard = () => {
           <div className="row">
             {statusCards.map((item, index) => (
               <div className="col-6" key={index}>
-                <StatusCard
-                  icon={item.icon}
-                  count={item.count}
-                  title={item.title}
-                />
+                <StatusCard icon={item.icon} count={item.count} title={item.title} />
               </div>
             ))}
           </div>
@@ -188,11 +174,11 @@ const Dashboard = () => {
                 themeReducer === 'theme-mode-dark'
                   ? {
                       ...chartOptions.options,
-                      theme: { mode: 'dark' },
+                      theme: { mode: 'dark' }
                     }
                   : {
                       ...chartOptions.options,
-                      theme: { mode: 'light' },
+                      theme: { mode: 'light' }
                     }
               }
               series={chartOptions.series}

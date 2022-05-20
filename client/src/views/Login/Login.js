@@ -105,10 +105,7 @@ export default function Login() {
                             <form onSubmit={handelLogin}>
                                 <div className="form__field">
                                     {resMessage && (
-                                        <ResMessage
-                                            resMessage={resMessage}
-                                            callBy="Login"
-                                        />
+                                        <ResMessage resMessage={resMessage} callBy="Login" />
                                     )}
                                     <input
                                         type="text"
@@ -117,9 +114,7 @@ export default function Login() {
                                         required
                                         placeholder="Username, or email"
                                         value={username ? username : email}
-                                        onChange={e =>
-                                            setUserName(e.target.value)
-                                        }
+                                        onChange={e => setUserName(e.target.value)}
                                         onBlur={() => handelUserName()}
                                     />
                                 </div>
@@ -132,9 +127,7 @@ export default function Login() {
                                             required
                                             placeholder="Password"
                                             value={password}
-                                            onChange={e =>
-                                                setPassword(e.target.value)
-                                            }
+                                            onChange={e => setPassword(e.target.value)}
                                         />
                                         {showPassword ? (
                                             <VisibilityOffIcon
@@ -154,9 +147,7 @@ export default function Login() {
                                         Login
                                     </button>
                                 ) : (
-                                    <button className="primary-insta-btn">
-                                        Login
-                                    </button>
+                                    <button className="primary-insta-btn">Login</button>
                                 )}
                                 <a href="#!" className="forgotPassword">
                                     Forgot Password?
@@ -165,8 +156,7 @@ export default function Login() {
                         </div>
                         <div className="signup__area">
                             <p>
-                                Don't have an account?{' '}
-                                <Link to="/signup">Sign up</Link>
+                                Don't have an account? <Link to="/signup">Sign up</Link>
                             </p>
                         </div>
                     </div>

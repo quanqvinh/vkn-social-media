@@ -23,26 +23,16 @@ const SidebarItem = props => {
 
 const Sidebar = props => {
   const history = useHistory();
-  const activeItem = sidebar_items.findIndex(
-    item => item.route === props.location.pathname
-  );
+  const activeItem = sidebar_items.findIndex(item => item.route === props.location.pathname);
 
   return (
     <div className="sidebar">
       <div className="sidebar__logo">
-        <img
-          src={logo}
-          alt="company logo"
-          onClick={() => history.push('/dashboard')}
-        />
+        <img src={logo} alt="company logo" onClick={() => history.push('/dashboard')} />
       </div>
       {sidebar_items.map((item, index) => (
         <Link to={item.route} key={index}>
-          <SidebarItem
-            title={item.display_name}
-            icon={item.icon}
-            active={index === activeItem}
-          />
+          <SidebarItem title={item.display_name} icon={item.icon} active={index === activeItem} />
         </Link>
       ))}
     </div>

@@ -50,10 +50,7 @@ function Posts(props) {
                     <Post
                         handelLike={handelLike}
                         post={post}
-                        avatar={
-                            process.env.REACT_APP_STATIC_URL +
-                            `/avatars/${post.user}.png`
-                        }
+                        avatar={process.env.REACT_APP_STATIC_URL + `/avatars/${post.user}.png`}
                         key={post._id}
                         accountName={post.username}
                         content={post.caption}

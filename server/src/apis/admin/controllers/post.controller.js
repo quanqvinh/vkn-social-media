@@ -24,10 +24,18 @@ module.exports = {
                     message: 'Parameters must numbers'
                 });
 
-            if (!['user', 'caption', 'numberOfLikes', 'numberOfReports', 'numberOfComments', 'createdAt'].includes(sortBy))
+            if (
+                ![
+                    'user',
+                    'caption',
+                    'numberOfLikes',
+                    'numberOfReports',
+                    'numberOfComments',
+                    'createdAt'
+                ].includes(sortBy)
+            )
                 sortBy = 'createdAt';
-            if (order !== 'asc' && order !== 'desc')
-                order = 'asc';
+            if (order !== 'asc' && order !== 'desc') order = 'asc';
 
             let [posts, count] = await Promise.all([
                 Post.aggregate()
@@ -147,16 +155,17 @@ module.exports = {
             async executeCallback(session) {
                 let post = await Post.findOne({
                     _id: id
-                }).select('reports comments').lean();
+                })
+                    .select('reports comments')
+                    .lean();
 
-                if (!post)
-                    throw new Error('400');
+                if (!post) throw new Error('400');
 
                 let deletedStatus = await Promise.all([
-                    Post.deleteOne({ 
-                        _id: post._id 
+                    Post.deleteOne({
+                        _id: post._id
                     }).session(session),
-                    Comment.deleteMany({ 
+                    Comment.deleteMany({
                         _id: { $in: commentIds }
                     }).session(session),
                     Report.deleteMany({
@@ -171,7 +180,8 @@ module.exports = {
             },
             errorCallback(error) {
                 console.log(error);
-                let code = 500, message = 'Error at server';
+                let code = 500,
+                    message = 'Error at server';
                 if (error?.message === '400') {
                     code = 400;
                     message = 'No post ID is found';
@@ -181,6 +191,6 @@ module.exports = {
                     message
                 });
             }
-        })
+        });
     }
 };

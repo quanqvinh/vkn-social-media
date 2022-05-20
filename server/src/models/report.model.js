@@ -6,20 +6,20 @@ const ReportSchema = new mongoose.Schema(
         user: {
             type: mongoose.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: true
         },
         tag: {
             type: mongoose.Types.ObjectId,
-            required: true,
+            required: true
         },
         content: {
             type: String,
-            required: true,
-        },
+            required: true
+        }
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

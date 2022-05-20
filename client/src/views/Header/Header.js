@@ -67,16 +67,12 @@ function Header() {
                 </Link>
                 <div className="search">
                     <img
-                        className={`searchIcon ${
-                            isSearch ? 'searchIcon--search' : ''
-                        }`}
+                        className={`searchIcon ${isSearch ? 'searchIcon--search' : ''}`}
                         src={searchIcon}
                         alt="search icon"
                     />
                     <input
-                        className={`searchText ${
-                            !isSearch ? 'searchText--no-search' : ''
-                        }`}
+                        className={`searchText ${!isSearch ? 'searchText--no-search' : ''}`}
                         placeholder="Search"
                         onFocus={handelSearching}
                         onBlur={handelSearchBlur}

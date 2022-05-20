@@ -12,7 +12,7 @@ const EditEmail = () => {
     const [notify, setNotify] = useState('');
     const [formInfos, setFormInfos] = useState({
         email: user.email,
-        newEmail: '',
+        newEmail: ''
     });
 
     const handelSubmit = e => {
@@ -21,7 +21,7 @@ const EditEmail = () => {
             try {
                 let data = {
                     username: user.username,
-                    email: formInfos.newEmail,
+                    email: formInfos.newEmail
                 };
                 let res = await userApi.requestEditEmail(data);
                 console.log(res);
@@ -42,26 +42,17 @@ const EditEmail = () => {
                     </div>
                     <div className="body__right">
                         <ProfilePreview
-                            image={
-                                process.env.REACT_APP_STATIC_URL +
-                                `/avatars/${user._id}.png`
-                            }
+                            image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                             username={user.username}
                             iconSize="medium"
                             captionSize="small"
                         />
-                        <p
-                            className="body__right-notify"
-                            style={{ marginLeft: 95 }}>
+                        <p className="body__right-notify" style={{ marginLeft: 95 }}>
                             {notify}
                         </p>
-                        <form
-                            className="right__form"
-                            onSubmit={e => handelSubmit(e)}>
+                        <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__email">
-                                <span className="form__email-label">
-                                    Old Email
-                                </span>
+                                <span className="form__email-label">Old Email</span>
                                 <div className="form__email-content">
                                     <input
                                         type="text"
@@ -69,16 +60,14 @@ const EditEmail = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                email: e.target.value,
+                                                email: e.target.value
                                             })
                                         }
                                     />
                                 </div>
                             </div>
                             <div className="form__email">
-                                <span className="form__email-label">
-                                    New Email
-                                </span>
+                                <span className="form__email-label">New Email</span>
                                 <div className="form__email-content">
                                     <input
                                         type="text"
@@ -86,7 +75,7 @@ const EditEmail = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                newEmail: e.target.value,
+                                                newEmail: e.target.value
                                             })
                                         }
                                     />

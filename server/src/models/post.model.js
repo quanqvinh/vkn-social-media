@@ -7,39 +7,39 @@ const PostSchema = new mongoose.Schema(
         user: {
             type: ObjectId,
             ref: 'User',
-            required: true,
+            required: true
         },
         caption: {
             type: String,
-            required: true,
+            required: true
         },
         numberOfLikes: {
             type: Number,
             default: 0,
-            required: true,
+            required: true
         },
         likes: [
             {
                 type: ObjectId,
-                ref: 'User',
-            },
+                ref: 'User'
+            }
         ],
         reports: [
             {
                 type: ObjectId,
-                ref: 'Report',
-            },
+                ref: 'Report'
+            }
         ],
         comments: [
             {
                 type: ObjectId,
-                ref: 'Comment',
-            },
-        ],
+                ref: 'Comment'
+            }
+        ]
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

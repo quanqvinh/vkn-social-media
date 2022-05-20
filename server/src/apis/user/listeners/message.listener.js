@@ -42,20 +42,13 @@ module.exports = (io, socket) => {
                     content
                 });
 
-                let validate = await validateRoom(
-                    roomId,
-                    userId,
-                    socket.handshake.auth.userId
-                );
+                let validate = await validateRoom(roomId, userId, socket.handshake.auth.userId);
                 if (validate === null) {
                     let savedRoom = await Room.create(
                         [
                             {
                                 _id: roomId,
-                                chatMate: [
-                                    userId,
-                                    socket.handshake.auth.userId
-                                ],
+                                chatMate: [userId, socket.handshake.auth.userId],
                                 messages: [message]
                             }
                         ],
@@ -78,8 +71,7 @@ module.exports = (io, socket) => {
                     { session }
                 );
 
-                if (updatedRoom.modifiedCount < 1)
-                    throw new Error('Add new message failed');
+                if (updatedRoom.modifiedCount < 1) throw new Error('Add new message failed');
             },
             successCallback() {
                 io.to(username).emit('chat:print_message', {
@@ -112,20 +104,13 @@ module.exports = (io, socket) => {
                 });
                 let imageBase64 = image.split(';base64,')[1];
 
-                let validate = await validateRoom(
-                    roomId,
-                    userId,
-                    socket.handshake.auth.userId
-                );
+                let validate = await validateRoom(roomId, userId, socket.handshake.auth.userId);
                 if (validate === null) {
                     let savedRoom = await Room.create(
                         [
                             {
                                 _id: roomId,
-                                chatMate: [
-                                    userId,
-                                    socket.handshake.auth.userId
-                                ],
+                                chatMate: [userId, socket.handshake.auth.userId],
                                 messages: [message]
                             }
                         ],
@@ -148,15 +133,12 @@ module.exports = (io, socket) => {
                     { session }
                 );
 
-                if (updatedRoom.modifiedCount < 1)
-                    throw new Error('Add new message failed');
+                if (updatedRoom.modifiedCount < 1) throw new Error('Add new message failed');
 
                 if (!fs.existsSync(roomResource)) fs.mkdirSync(roomResource);
-                fs.writeFileSync(
-                    roomResource + `/${message._id.toString()}.png`,
-                    imageBase64,
-                    { encoding: 'base64' }
-                );
+                fs.writeFileSync(roomResource + `/${message._id.toString()}.png`, imageBase64, {
+                    encoding: 'base64'
+                });
             },
             successCallback() {
                 io.to(username).emit('chat:print_message', {
@@ -174,10 +156,7 @@ module.exports = (io, socket) => {
                         recursive: true,
                         maxRetries: 5
                     });
-                if (
-                    fs.existsSync(roomResource) &&
-                    fse.emptyDirSync(roomResource)
-                )
+                if (fs.existsSync(roomResource) && fse.emptyDirSync(roomResource))
                     fs.rmdirSync(roomResource, {
                         recursive: true,
                         maxRetries: 5

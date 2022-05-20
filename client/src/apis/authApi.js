@@ -14,7 +14,7 @@ const authApi = {
     verify: data => {
         const url = '/auth/verify-email';
         return axiosClient.patch(url, data);
-    },
+    }
 };
 
 export default authApi;

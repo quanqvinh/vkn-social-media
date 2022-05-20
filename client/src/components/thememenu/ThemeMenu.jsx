@@ -11,14 +11,14 @@ const mode_settings = [
     id: 'light',
     name: 'Light',
     background: 'light-background',
-    class: 'theme-mode-light',
+    class: 'theme-mode-light'
   },
   {
     id: 'dark',
     name: 'Dark',
     background: 'dark-background',
-    class: 'theme-mode-dark',
-  },
+    class: 'theme-mode-dark'
+  }
 ];
 
 const color_settings = [
@@ -26,32 +26,32 @@ const color_settings = [
     id: 'blue',
     name: 'Blue',
     background: 'blue-color',
-    class: 'theme-color-blue',
+    class: 'theme-color-blue'
   },
   {
     id: 'red',
     name: 'Red',
     background: 'red-color',
-    class: 'theme-color-red',
+    class: 'theme-color-red'
   },
   {
     id: 'cyan',
     name: 'Cyan',
     background: 'cyan-color',
-    class: 'theme-color-cyan',
+    class: 'theme-color-cyan'
   },
   {
     id: 'green',
     name: 'Green',
     background: 'green-color',
-    class: 'theme-color-green',
+    class: 'theme-color-green'
   },
   {
     id: 'orange',
     name: 'Orange',
     background: 'orange-color',
-    class: 'theme-color-orange',
-  },
+    class: 'theme-color-orange'
+  }
 ];
 
 const clickOutsideRef = (content_ref, toggle_ref) => {
@@ -112,10 +112,7 @@ const ThemeMenu = () => {
 
   return (
     <div>
-      <button
-        ref={menu_toggle_ref}
-        className="dropdown__toggle"
-        onClick={() => setActiveMenu()}>
+      <button ref={menu_toggle_ref} className="dropdown__toggle" onClick={() => setActiveMenu()}>
         <i className="bx bx-palette"></i>
       </button>
       <div ref={menu_ref} className="theme-menu">

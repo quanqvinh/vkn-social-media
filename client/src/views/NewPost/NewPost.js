@@ -15,7 +15,7 @@ const NewPost = props => {
     const [selectImgs, setSelectImgs] = useState({
         isImgFilled: false,
         imgs: [],
-        fileImgs: null,
+        fileImgs: null
     });
     const user = useSelector(state => state.user);
 
@@ -24,10 +24,7 @@ const NewPost = props => {
     const SlickArrowLeft = ({ currentSlide, slideCount, ...props }) => (
         <button
             {...props}
-            className={
-                'slick-prev slick-arrow' +
-                (currentSlide === 0 ? ' slick-disabled' : '')
-            }
+            className={'slick-prev slick-arrow' + (currentSlide === 0 ? ' slick-disabled' : '')}
             aria-hidden="true"
             aria-disabled={currentSlide === 0 ? true : false}
             type="button">
@@ -55,7 +52,7 @@ const NewPost = props => {
         slidesToShow: 1,
         slidesToScroll: 1,
         nextArrow: <SlickArrowRight />,
-        prevArrow: <SlickArrowLeft />,
+        prevArrow: <SlickArrowLeft />
     };
 
     const handelUpLoadImg = e => {
@@ -66,16 +63,14 @@ const NewPost = props => {
         for (let i = 0; i < files.length; i++) {
             var binaryData = [];
             binaryData.push(files[i]);
-            let tmp = window.URL.createObjectURL(
-                new Blob(binaryData, { type: 'application/zip' })
-            );
+            let tmp = window.URL.createObjectURL(new Blob(binaryData, { type: 'application/zip' }));
             imgs.push(tmp);
         }
 
         setSelectImgs({
             isImgFilled: true,
             imgs,
-            fileImgs: files,
+            fileImgs: files
         });
     };
 
@@ -106,9 +101,7 @@ const NewPost = props => {
             <div className="post-container">
                 <div className="post__header">
                     <p className="post__header-title">Create New Post</p>
-                    <span
-                        className="post__header-share"
-                        onClick={() => handelSubmit()}>
+                    <span className="post__header-share" onClick={() => handelSubmit()}>
                         Share
                     </span>
                 </div>
@@ -116,9 +109,7 @@ const NewPost = props => {
                     {!selectImgs.isImgFilled ? (
                         <div className="post__body-remind">
                             <PostImg />
-                            <p className="post__body-remind-title">
-                                Drag photos here
-                            </p>
+                            <p className="post__body-remind-title">Drag photos here</p>
                             <input
                                 multiple
                                 hidden
@@ -127,9 +118,7 @@ const NewPost = props => {
                                 accept="image/*"
                                 onChange={e => handelUpLoadImg(e)}
                             />
-                            <label
-                                htmlFor="select-img"
-                                className="post__body-remind-select">
+                            <label htmlFor="select-img" className="post__body-remind-select">
                                 Select from computer
                             </label>
                         </div>
@@ -137,11 +126,7 @@ const NewPost = props => {
                         <Slider {...settings} className="post__body-img">
                             {selectImgs?.imgs?.length > 0 &&
                                 selectImgs.imgs.map((img, index) => (
-                                    <img
-                                        key={index}
-                                        src={`${img}`}
-                                        alt="postImg"
-                                    />
+                                    <img key={index} src={`${img}`} alt="postImg" />
                                 ))}
                         </Slider>
                     )}
@@ -151,10 +136,7 @@ const NewPost = props => {
                             name={user.name}
                             username={user.username}
                             iconSize={iconSize}
-                            image={
-                                process.env.REACT_APP_STATIC_URL +
-                                `/avatars/${user._id}.png`
-                            }
+                            image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                         />
                         <textarea
                             aria-label="Write a caption..."
@@ -163,9 +145,7 @@ const NewPost = props => {
                             autoComplete="off"
                             autoCorrect="off"
                             value={caption}
-                            onChange={e =>
-                                setCaption(e.target.value)
-                            }></textarea>
+                            onChange={e => setCaption(e.target.value)}></textarea>
                     </div>
                 </div>
             </div>

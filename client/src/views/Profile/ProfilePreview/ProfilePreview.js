@@ -16,7 +16,7 @@ function ProfilePreview(props) {
         image,
         src,
         getToRoom,
-        room,
+        room
     } = props;
 
     const history = useHistory();
@@ -35,7 +35,7 @@ function ProfilePreview(props) {
 
         let selectedRoom = {
             chatMate: room.chatMate,
-            roomId: room._id,
+            roomId: room._id
         };
 
         getToRoom(selectedRoom);
@@ -44,16 +44,10 @@ function ProfilePreview(props) {
         <div
             className={`profile ${src === 'ListChat' ? 'profile--chat' : ''}`}
             onClick={handelGetToRoom}>
-            <ProfileIcon
-                iconSize={iconSize}
-                storyBorder={storyBorder}
-                image={image}
-            />
+            <ProfileIcon iconSize={iconSize} storyBorder={storyBorder} image={image} />
             {username && !hideAccountName && (
                 <div className="textContainer">
-                    <span className={`accountName ${captionSize}`}>
-                        {username}
-                    </span>
+                    <span className={`accountName ${captionSize}`}>{username}</span>
                     <span className={`name ${captionSize}`}>{name}</span>
                 </div>
             )}

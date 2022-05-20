@@ -20,8 +20,7 @@ module.exports = {
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 const { username, email, password, name } = req.body;
-                if (!(username && email && password && name))
-                    throw new Error('400');
+                if (!(username && email && password && name)) throw new Error('400');
                 // Check username exists
                 let user = await User.findOne({ username }).lean();
                 if (user) throw new Error('Username already exists');
@@ -36,8 +35,7 @@ module.exports = {
 
                 // Check email is used ?
                 user = await User.findOne({ email }).lean();
-                if (user)
-                    throw new Error('User with given email already exist');
+                if (user) throw new Error('User with given email already exist');
 
                 // Save account to database
                 user = await new User({
@@ -79,9 +77,7 @@ module.exports = {
             errorCallback(error) {
                 console.log(error);
                 if (error?.message == 400)
-                    return res
-                        .status(400)
-                        .json({ message: 'Missing parameters' });
+                    return res.status(400).json({ message: 'Missing parameters' });
                 if (error?.name === 'Error')
                     return res.status(200).json({
                         status: 'error',
@@ -114,10 +110,7 @@ module.exports = {
                     message: 'Not contain account using this username or email'
                 });
 
-            if (
-                user.auth.isVerified &&
-                req.originalUrl.includes('auth/request/verify-email')
-            )
+            if (user.auth.isVerified && req.originalUrl.includes('auth/request/verify-email'))
                 return res.status(200).json({
                     status: 'warning',
                     message: 'Email is verified already before'
@@ -126,9 +119,7 @@ module.exports = {
             let token = jwt.sign(
                 {
                     username,
-                    email: req.originalUrl.includes('auth/request/verify-email')
-                        ? email
-                        : newEmail
+                    email: req.originalUrl.includes('auth/request/verify-email') ? email : newEmail
                 },
                 secretKey,
                 {
@@ -139,9 +130,7 @@ module.exports = {
 
             // Send mail
             mail.sendVerify({
-                to: req.originalUrl.includes('auth/request/verify-email')
-                    ? email
-                    : newEmail,
+                to: req.originalUrl.includes('auth/request/verify-email') ? email : newEmail,
                 username: username,
                 token
             });
@@ -163,8 +152,7 @@ module.exports = {
         try {
             const { token } = req.body;
 
-            if (!token)
-                return res.status(400).json({ message: 'Missing parameters' });
+            if (!token) return res.status(400).json({ message: 'Missing parameters' });
 
             // Check token is valid
             let tokenErr;
@@ -182,13 +170,11 @@ module.exports = {
                         });
                         if (
                             !user ||
-                            (user.auth.isVerified &&
-                                req.originalUrl.includes('/auth/verify-email'))
+                            (user.auth.isVerified && req.originalUrl.includes('/auth/verify-email'))
                         )
                             tokenErr = {
                                 name: 'AccountError',
-                                message:
-                                    'Account is not found or is already verified'
+                                message: 'Account is not found or is already verified'
                             };
                         else {
                             user.auth.isVerified = true;
@@ -305,8 +291,7 @@ module.exports = {
             if (!user)
                 return res.status(200).json({
                     status: 'error',
-                    message:
-                        'Not found an account with this username (or email)'
+                    message: 'Not found an account with this username (or email)'
                 });
 
             let token = jwt.sign(
@@ -364,8 +349,7 @@ module.exports = {
                         });
                         user.auth.password = crypto.hash(newPassword);
                         let savedUser = await user.save();
-                        if (savedUser !== user)
-                            tokenErr = new Error('Password is not updated');
+                        if (savedUser !== user) tokenErr = new Error('Password is not updated');
                     }
                 }
             );
@@ -394,8 +378,7 @@ module.exports = {
         try {
             let { refreshToken } = req.body;
 
-            if (!refreshToken)
-                return res.status(400).json({ message: 'Missing parameters' });
+            if (!refreshToken) return res.status(400).json({ message: 'Missing parameters' });
 
             let token = await Token.findOne({
                 refreshToken
@@ -410,8 +393,7 @@ module.exports = {
             jwt.verify(refreshToken, refreshSecretKey, (err, decoded) => {
                 if (err) {
                     if (err.name === 'TokenExpiredError')
-                        errorMessage =
-                            'Expired refresh token. Login again to create new one';
+                        errorMessage = 'Expired refresh token. Login again to create new one';
                     else errorMessage = 'Invalid refresh token. Login again';
                 }
             });

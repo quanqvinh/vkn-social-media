@@ -14,16 +14,10 @@ const Comment = props => {
             <ProfilePreview
                 username={ownUser.username}
                 iconSize="medium"
-                image={
-                    process.env.REACT_APP_STATIC_URL +
-                    `/avatars/${ownUser._id}.png`
-                }
+                image={process.env.REACT_APP_STATIC_URL + `/avatars/${ownUser._id}.png`}
                 hideAccountName={true}
             />
-            <div
-                className={`message__content ${
-                    caption ? 'message__content--caption' : ''
-                }`}>
+            <div className={`message__content ${caption ? 'message__content--caption' : ''}`}>
                 <div className={`message__content-header`}>
                     <span className="username">{ownUser.username}</span>
                     {cmtContent}
@@ -32,9 +26,7 @@ const Comment = props => {
                 {!caption && (
                     <>
                         <div className="message__content-footer">
-                            <span className="message-footer-time">
-                                {cmt.createdAt}
-                            </span>
+                            <span className="message-footer-time">{cmt.createdAt}</span>
                             <span className="message-footer-reply">Reply</span>
                             <MoreHorizIcon className="message-footer-option" />
                         </div>

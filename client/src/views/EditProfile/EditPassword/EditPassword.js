@@ -12,7 +12,7 @@ const EditPassword = () => {
     const [formInfos, setFormInfos] = useState({
         password: '',
         newPassword: '',
-        passwordConfirm: '',
+        passwordConfirm: ''
     });
 
     const handelSubmit = e => {
@@ -44,22 +44,15 @@ const EditPassword = () => {
                     </div>
                     <div className="body__right">
                         <ProfilePreview
-                            image={
-                                process.env.REACT_APP_STATIC_URL +
-                                `/avatars/${user._id}.png`
-                            }
+                            image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                             username={user.username}
                             iconSize="medium"
                             captionSize="small"
                         />
                         <p className="body__right-notify">{notify}</p>
-                        <form
-                            className="right__form"
-                            onSubmit={e => handelSubmit(e)}>
+                        <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__password">
-                                <span className="form__password-label">
-                                    Old Password
-                                </span>
+                                <span className="form__password-label">Old Password</span>
                                 <div className="form__password-content">
                                     <input
                                         type="password"
@@ -67,16 +60,14 @@ const EditPassword = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                password: e.target.value,
+                                                password: e.target.value
                                             })
                                         }
                                     />
                                 </div>
                             </div>
                             <div className="form__password">
-                                <span className="form__password-label">
-                                    New Password
-                                </span>
+                                <span className="form__password-label">New Password</span>
                                 <div className="form__password-content">
                                     <input
                                         type="password"
@@ -84,16 +75,14 @@ const EditPassword = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                newPassword: e.target.value,
+                                                newPassword: e.target.value
                                             })
                                         }
                                     />
                                 </div>
                             </div>
                             <div className="form__password">
-                                <span className="form__password-label">
-                                    Confirm New Password
-                                </span>
+                                <span className="form__password-label">Confirm New Password</span>
                                 <div className="form__password-content">
                                     <input
                                         type="password"
@@ -101,7 +90,7 @@ const EditPassword = () => {
                                         onChange={e =>
                                             setFormInfos({
                                                 ...formInfos,
-                                                passwordConfirm: e.target.value,
+                                                passwordConfirm: e.target.value
                                             })
                                         }
                                     />

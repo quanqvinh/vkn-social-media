@@ -4,9 +4,7 @@ import './table.css';
 
 const Table = props => {
   const initDataShow =
-    props.limit && props.bodyData
-      ? props.bodyData.slice(0, Number(props.limit))
-      : props.bodyData;
+    props.limit && props.bodyData ? props.bodyData.slice(0, Number(props.limit)) : props.bodyData;
 
   const [dataShow, setDataShow] = useState(initDataShow);
 
@@ -37,17 +35,11 @@ const Table = props => {
         <table>
           {props.headData && props.renderHead ? (
             <thead>
-              <tr>
-                {props.headData.map((item, index) =>
-                  props.renderHead(item, index)
-                )}
-              </tr>
+              <tr>{props.headData.map((item, index) => props.renderHead(item, index))}</tr>
             </thead>
           ) : null}
           {props.bodyData && props.renderBody ? (
-            <tbody>
-              {dataShow.map((item, index) => props.renderBody(item, index))}
-            </tbody>
+            <tbody>{dataShow.map((item, index) => props.renderBody(item, index))}</tbody>
           ) : null}
         </table>
       </div>
@@ -56,9 +48,7 @@ const Table = props => {
           {range.map((item, index) => (
             <div
               key={index}
-              className={`table__pagination-item ${
-                currPage === index ? 'active' : ''
-              }`}
+              className={`table__pagination-item ${currPage === index ? 'active' : ''}`}
               onClick={() => selectPage(index)}>
               {item + 1}
             </div>

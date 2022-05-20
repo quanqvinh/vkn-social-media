@@ -8,19 +8,19 @@ const RoomSchema = new mongoose.Schema(
             {
                 type: mongoose.Types.ObjectId,
                 ref: 'User',
-                required: true,
-            },
+                required: true
+            }
         ],
         isChecked: [
             {
-                type: String,
-            },
+                type: String
+            }
         ],
-        messages: [MessageSchema],
+        messages: [MessageSchema]
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

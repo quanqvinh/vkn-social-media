@@ -28,7 +28,7 @@ const ChatRoom = props => {
             username: currentRoom.chatMate.username,
             roomId: currentRoom.roomId,
             content: inputContent,
-            userId: user._id,
+            userId: user._id
         });
 
         listRef.current = [
@@ -37,8 +37,8 @@ const ChatRoom = props => {
                 content: inputContent,
                 img: null,
                 sendBy: user.username,
-                isMine: true,
-            },
+                isMine: true
+            }
         ];
 
         setListMessage([...listRef.current]);
@@ -56,7 +56,7 @@ const ChatRoom = props => {
                     image: reader.result,
                     username: currentRoom.chatMate.username,
                     roomId: currentRoom.roomId,
-                    userId: user._id,
+                    userId: user._id
                 });
             };
             reader.readAsDataURL(image);
@@ -73,8 +73,8 @@ const ChatRoom = props => {
                     content: null,
                     img: imgSrc,
                     sendBy: user.username,
-                    isMine: true,
-                },
+                    isMine: true
+                }
             ]);
             handelLastestMessage(currentRoom.roomId, inputContent);
             setInputContent('');
@@ -86,7 +86,7 @@ const ChatRoom = props => {
         const fetchMessages = async () => {
             try {
                 let res = await userApi.getRoomById(currentRoom.roomId, {
-                    nMessage: currentPageMessages * 20,
+                    nMessage: currentPageMessages * 20
                 });
 
                 if (res.status === 'success') {
@@ -97,10 +97,7 @@ const ChatRoom = props => {
                         console.log('het tin nhan roi');
                         return;
                     }
-                    listRef.current = [
-                        ...res.data.messages,
-                        ...listRef.current,
-                    ];
+                    listRef.current = [...res.data.messages, ...listRef.current];
                     setListMessage([...listRef.current]);
                     setIsFetchMessage(false);
                 }
@@ -161,10 +158,7 @@ const ChatRoom = props => {
                 <Option className="header__icon" />
             </div>
 
-            <div
-                className="content"
-                ref={chatContentRef}
-                onScroll={e => handelScrollFetch(e)}>
+            <div className="content" ref={chatContentRef} onScroll={e => handelScrollFetch(e)}>
                 {isFetchMessage && <p>Loading...</p>}
                 {listMessage?.length > 0 &&
                     listMessage.map((message, index) => (
@@ -174,9 +168,7 @@ const ChatRoom = props => {
                      </p> */}
                             {message.sendBy === user.username ? (
                                 message.content !== null ? (
-                                    <p className="content__day-message">
-                                        {message.content}
-                                    </p>
+                                    <p className="content__day-message">{message.content}</p>
                                 ) : (
                                     <div className="content__day-img">
                                         <img src={message.img} alt="img" />
@@ -187,9 +179,7 @@ const ChatRoom = props => {
                                     <div className="content__day-partner-avatar">
                                         <img src={avatar} alt="" />
                                     </div>
-                                    <p className="content__day-message">
-                                        {message.content}
-                                    </p>
+                                    <p className="content__day-message">{message.content}</p>
                                 </div>
                             )}
                         </div>
