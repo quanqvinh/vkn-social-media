@@ -13,6 +13,8 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+router.get('/test', async (req, res) => {});
+
 router.get('/getMessage', async (req, res) => {
     let { roomId, messageId } = req.query;
     // let room = await Room.findOne({ _id: roomId });
@@ -43,24 +45,24 @@ router.post('/room/create', async (req, res) => {
                 [
                     {
                         _id: roomId,
-                        chatMate: [user1, user2],
-                    },
+                        chatMate: [user1, user2]
+                    }
                 ],
                 { session }
             ),
             User.updateMany(
                 { _id: { $in: [user1, user2] } },
                 {
-                    $push: { rooms: roomId },
+                    $push: { rooms: roomId }
                 },
                 { session }
-            ),
+            )
         ]);
 
         await session.commitTransaction();
         res.status(201).json({
             status: 'success',
-            roomId,
+            roomId
         });
     } catch (err) {
         console.log(err);
@@ -77,13 +79,13 @@ router.post('/room/message/create', async (req, res) => {
         let { roomId } = req.body;
         let room = await Room.findById(roomId).populate({
             path: 'chatMate',
-            select: 'username',
+            select: 'username'
         });
 
         for (let i = 0; i < 10; i++) {
             room.messages.push({
                 sendBy: room.chatMate[Math.floor(Math.random() * 2)].username,
-                content: faker.lorem.sentence(),
+                content: faker.lorem.sentence()
             });
             await room.save({ session });
             sleep(1000);
@@ -102,7 +104,7 @@ router.get('/user/search', async (req, res) => {
     let keyword = req.query.keyword;
     let regex = new RegExp(keyword);
     let users = await User.find({
-        $or: [{ username: regex }, { name: regex }],
+        $or: [{ username: regex }, { name: regex }]
     });
     res.json(users);
 });
@@ -119,7 +121,7 @@ router.get('/room', async (req, res) => {
                 : Object.keys(item).reduce(
                       (total, key) => sizeOf(key) + sizeOf(item[key]) + total,
                       0
-                  ),
+                  )
     };
 
     const sizeOf = value => typeSizes[typeof value](value);
@@ -131,14 +133,14 @@ router.get('/room', async (req, res) => {
             path: 'rooms',
             populate: {
                 path: 'chatMate',
-                select: 'username name',
+                select: 'username name'
             },
             select: {
-                messages: { $slice: [-1, 1] },
+                messages: { $slice: [-1, 1] }
             },
             options: {
-                sort: { updatedAt: -1 },
-            },
+                sort: { updatedAt: -1 }
+            }
         })
         .lean();
     t1 = performance.now();
@@ -149,37 +151,37 @@ router.get('/room', async (req, res) => {
     user = await User.aggregate([
         {
             $match: {
-                _id: ObjectId('624000cb773430adfd378d86'),
-            },
+                _id: ObjectId('624000cb773430adfd378d86')
+            }
         },
         {
             $lookup: {
                 from: 'rooms',
                 localField: 'rooms',
                 foreignField: '_id',
-                as: 'rooms',
-            },
+                as: 'rooms'
+            }
         },
         {
-            $unwind: '$rooms',
+            $unwind: '$rooms'
         },
         {
             $lookup: {
                 from: 'users',
                 localField: 'rooms.chatMate',
                 foreignField: '_id',
-                as: 'rooms.chatMate',
-            },
+                as: 'rooms.chatMate'
+            }
         },
         {
-            $unwind: '$rooms.chatMate',
+            $unwind: '$rooms.chatMate'
         },
         {
             $match: {
                 'rooms.chatMate._id': {
-                    $not: { $eq: ObjectId('624000cb773430adfd378d86') },
-                },
-            },
+                    $not: { $eq: ObjectId('624000cb773430adfd378d86') }
+                }
+            }
         },
         {
             $project: {
@@ -191,7 +193,7 @@ router.get('/room', async (req, res) => {
                     chatMate: {
                         _id: 1,
                         username: 1,
-                        name: 1,
+                        name: 1
                     },
                     messages: {
                         $slice: [
@@ -202,28 +204,25 @@ router.get('/room', async (req, res) => {
                                         $or: [
                                             { $eq: ['$$this.showWith', 'all'] },
                                             {
-                                                $eq: [
-                                                    '$$this.showWith',
-                                                    '624000cb773430adfd378d86',
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                },
+                                                $eq: ['$$this.showWith', '624000cb773430adfd378d86']
+                                            }
+                                        ]
+                                    }
+                                }
                             },
                             -1,
-                            1,
-                        ],
-                    },
-                },
-            },
+                            1
+                        ]
+                    }
+                }
+            }
         },
         {
             $group: {
                 _id: '$_id',
-                rooms: { $push: '$rooms' },
-            },
-        },
+                rooms: { $push: '$rooms' }
+            }
+        }
     ]);
     t1 = performance.now();
     console.log(t1 - t0);
@@ -235,18 +234,18 @@ router.get('/room', async (req, res) => {
                 _id: {
                     $in: [
                         ObjectId('625d05d91d214d7596c393b5'),
-                        ObjectId('625d079b996991a462b50c70'),
-                    ],
-                },
-            },
+                        ObjectId('625d079b996991a462b50c70')
+                    ]
+                }
+            }
         },
         {
             $sort: {
                 updatedAt: -1,
                 createdAt: -1,
-                'messages.createdAt': -1,
-            },
-        },
+                'messages.createdAt': -1
+            }
+        }
     ]);
 
     // user = await User.findById('624000cb773430adfd378d86')
@@ -272,12 +271,11 @@ router.get('/room/message/deleteAll', async (req, res) => {
             let updatedRoom = await Room.updateOne(
                 { _id: roomId },
                 {
-                    messages: [],
+                    messages: []
                 },
                 { session }
             );
-            if (updatedRoom.modifiedCount < 1)
-                throw new Error('Update data failed');
+            if (updatedRoom.modifiedCount < 1) throw new Error('Update data failed');
             console.log(updatedRoom);
         },
         successCallback() {
@@ -286,7 +284,7 @@ router.get('/room/message/deleteAll', async (req, res) => {
         errorCallback(error) {
             console.log(error);
             res.json(error);
-        },
+        }
     });
 });
 

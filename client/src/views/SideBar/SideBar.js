@@ -18,10 +18,7 @@ function Sidebar({ listOnline }) {
                     name={user.name || 'null'}
                     urlText="Switch"
                     iconSize="big"
-                    image={
-                        process.env.REACT_APP_STATIC_URL +
-                        `/avatars/${user._id}.png`
-                    }
+                    image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                     storyBorder={true}
                 />
                 <ListsOnline listOnline={listOnline} />

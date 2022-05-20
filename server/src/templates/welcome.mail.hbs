@@ -41,7 +41,7 @@
       class='preheader'
       style='display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;'
     >
-      Verify this email to confirm your action in VKN Social Media
+      A VKN account is created using this email
     </div>
     <!-- end preheader -->
 
@@ -113,7 +113,7 @@
               >
                 <h1
                   style='margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 48px; text-align: center;'
-                >Confirm Your Email Address</h1>
+                >Welcome to VKN</h1>
               </td>
             </tr>
           </table>
@@ -149,7 +149,7 @@
                 bgcolor='#ffffff'
                 style="padding: 24px 24px 0; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"
               >
-                <p style='margin: 0;'>Hi {{username}},</p>
+                <p style='margin: 0;'>Hi {{name}},</p>
               </td>
             </tr>
             <tr>
@@ -158,10 +158,16 @@
                 bgcolor='#ffffff'
                 style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"
               >
-                <p style='margin: 0;'>Tap the button below to confirm your email
-                  address. If you didn't create an account with
-                  <a href='http://localhost:3000' style="text-decoration: none">VKN</a>, you can safely delete
-                  this email.</p>
+                <p style='margin: 0;'>We just created an <a href='http://localhost:3000' style="text-decoration: none">VKN Social Media</a> account with <b>{{role}}</b> access for you using this email. Your account using username <b>{{username}}</b> with the password is <b>{{password}}</b></p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                align='left'
+                bgcolor='#ffffff'
+                style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;"
+              >
+                <p style='margin: 0;'>You can sign-in with either username or email. Now click the button below to login promptly.</p>
               </td>
             </tr>
             <!-- end copy -->
@@ -180,10 +186,10 @@
                             style='border-radius: 6px;'
                           >
                             <a
-                              href='http://localhost:3000/auth/verify-email?token={{token}}'
+                              href='http://localhost:3000/login'
                               target='_blank'
                               style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;"
-                            >Verify your email</a>
+                            >Login now</a>
                           </td>
                         </tr>
                       </table>
@@ -232,21 +238,6 @@
             style='max-width: 600px;'
           >
 
-            <!-- start permission -->
-            <tr>
-              <td
-                align='center'
-                bgcolor='#e9ecef'
-                style="padding: 12px 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; color: #666;"
-              >
-                <p style='margin: 0;'>You received this email because we
-                  received a request for email verification for your account. If
-                  you didn't request verifying email you can safely delete this
-                  email.</p>
-              </td>
-            </tr>
-            <!-- end permission -->
-
             <!-- start unsubscribe -->
             <tr>
               <td
@@ -258,6 +249,7 @@
                   <a
                     href='http://localhost:3000'
                     target='_blank'
+                    style='text-decoration: none'
                   >unsubscribe</a>
                   at any time.</p>
                 <p style='margin: 0;'>Vo Van Ngan Street, Thu Duc City</p>

@@ -3,8 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 module.exports = (function () {
     function isValidObjectId(id) {
         if (ObjectId.isValid(id)) {
-            if (new ObjectId(id.toString()).toString() === id.toString())
-                return true;
+            if (new ObjectId(id.toString()).toString() === id.toString()) return true;
         }
         console.log(id, 'is not ObjectId');
         return false;
@@ -21,10 +20,7 @@ module.exports = (function () {
             return array.map(id => id.toString());
         },
         compareArray(array1, array2) {
-            return (
-                this.listString(array1).toString() ===
-                this.listString(array2).toString()
-            );
-        },
+            return this.listString(array1).toString() === this.listString(array2).toString();
+        }
     };
 })();

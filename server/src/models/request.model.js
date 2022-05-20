@@ -8,22 +8,22 @@ const RequestSchema = mongoose.Schema(
             type: String,
             enum: ['add_friend'],
             required: true,
-            default: 'add_friend',
+            default: 'add_friend'
         },
         from: {
             type: ObjectId,
             ref: 'User',
-            required: true,
+            required: true
         },
         to: {
             type: ObjectId,
             ref: 'User',
-            required: true,
-        },
+            required: true
+        }
     },
     {
         timestamps: true,
-        versionKey: false,
+        versionKey: false
     }
 );
 

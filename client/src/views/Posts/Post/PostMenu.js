@@ -11,9 +11,7 @@ function PostMenu({ postId, handelLikePost, like }) {
         const likePost = async () => {
             try {
                 let res = await postApi.like(postId);
-                res.message === 'liked post'
-                    ? handelLikePost(like + 1)
-                    : handelLikePost(like - 1);
+                res.message === 'liked post' ? handelLikePost(like + 1) : handelLikePost(like - 1);
             } catch (error) {
                 console.log(error.message);
             }

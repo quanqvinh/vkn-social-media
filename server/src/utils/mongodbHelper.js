@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 
 module.exports = {
-    async executeTransactionWithRetry({
-        executeCallback,
-        successCallback,
-        errorCallback,
-    }) {
+    async executeTransactionWithRetry({ executeCallback, successCallback, errorCallback }) {
         try {
             const session = await mongoose.startSession();
             let i,
@@ -20,9 +16,7 @@ module.exports = {
                     await session.abortTransaction();
                     if (
                         error.hasErrorLabel &&
-                        (error.hasErrorLabel(
-                            'UnknownTransactionCommitResult'
-                        ) ||
+                        (error.hasErrorLabel('UnknownTransactionCommitResult') ||
                             error.hasErrorLabel('TransientTransactionError'))
                     ) {
                         console.log(error);
@@ -46,19 +40,15 @@ module.exports = {
             console.log('Transaction committed.');
         } catch (error) {
             if (error.hasErrorLabel('UnknownTransactionCommitResult')) {
-                console.log(
-                    'UnknownTransactionCommitResult, retrying commit operation ...'
-                );
+                console.log('UnknownTransactionCommitResult, retrying commit operation ...');
                 await commitWithRetry(session);
             } else if (error.hasErrorLabel('TransientTransactionError')) {
-                console.log(
-                    'TransientTransactionError, retrying commit operation ...'
-                );
+                console.log('TransientTransactionError, retrying commit operation ...');
                 await commitWithRetry(session);
             } else {
                 console.log('Error during commit ...');
                 throw error;
             }
         }
-    },
+    }
 };

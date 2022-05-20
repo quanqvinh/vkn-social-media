@@ -1,23 +1,23 @@
 const initState = {
-   mode: localStorage.getItem('themeMode'),
-   color: localStorage.getItem('colorMode'),
+    mode: localStorage.getItem('themeMode'),
+    color: localStorage.getItem('colorMode')
 };
 
 const ThemeReducer = (state = initState, action) => {
-   switch (action.type) {
-      case 'SET_MODE':
-         return {
-            ...state,
-            mode: action.payload,
-         };
-      case 'SET_COLOR':
-         return {
-            ...state,
-            color: action.payload,
-         };
-      default:
-         return state;
-   }
+    switch (action.type) {
+        case 'SET_MODE':
+            return {
+                ...state,
+                mode: action.payload
+            };
+        case 'SET_COLOR':
+            return {
+                ...state,
+                color: action.payload
+            };
+        default:
+            return state;
+    }
 };
 
 export default ThemeReducer;

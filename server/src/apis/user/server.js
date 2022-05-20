@@ -24,8 +24,8 @@ const io = require('socket.io')(server, {
     cors: {
         // origin: process.env.CLIENT_DOMAIN,
         origin: '*',
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    },
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+    }
 });
 const socketHandler = require('./listeners');
 

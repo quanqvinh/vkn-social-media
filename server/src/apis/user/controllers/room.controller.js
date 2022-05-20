@@ -245,8 +245,7 @@ module.exports = {
                 .populate('rooms')
                 .lean();
 
-            let roomId = null,
-                room = null;
+            let roomId = null;
             user.rooms.some(room => {
                 if (objectIdHelper.include(room.chatMate, userId)) {
                     roomId = room._id;
