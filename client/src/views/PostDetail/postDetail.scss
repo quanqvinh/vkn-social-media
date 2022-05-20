@@ -60,7 +60,7 @@
     }
 
     .right__body {
-      height: 476px;
+      height: 487px;
       padding: 10px 0;
       overflow-y: scroll;
       border-bottom: 1px solid rgba($color: #239, $alpha: 0.15);
@@ -76,7 +76,34 @@
         .message {
           display: flex;
           flex-direction: column;
-          padding: 15px;
+
+          .message-view-reply {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #8e8e8e;
+            text-align: left;
+            font-weight: 500;
+            transition: 0.3s all linear;
+            margin-top: 10px;
+
+            &:hover {
+              opacity: 0.7;
+            }
+
+            &:active {
+              transform: translateY(2px);
+            }
+
+            span {
+              display: inline-block;
+              width: 25px;
+              border-top: 1px solid #8e8e8e;
+              font-weight: bold;
+            }
+          }
 
           &-list-reply {
             margin-left: 47px;

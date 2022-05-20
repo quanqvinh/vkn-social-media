@@ -67,7 +67,10 @@ module.exports = {
                         numberOfReports: { $first: '$numberOfReports' },
                         numberOfComments: { $sum: '$numberOfComments' },
                         createdAt: { $first: '$createdAt' }
-                    }),
+                    })
+                    .sort('createdAt')
+                    .skip(numberRowPerPage * (pageNumber > 0 ? pageNumber - 1 : 0))
+                    .limit(numberRowPerPage),
                 Post.countDocuments()
             ]);
             posts.forEach((post, index) => {

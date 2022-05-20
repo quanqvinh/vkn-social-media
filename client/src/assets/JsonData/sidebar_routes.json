@@ -11,12 +11,7 @@
     },
     {
         "display_name": "Posts",
-        "route": "/products",
-        "icon": "bx bx-package"
-    },
-    {
-        "display_name": "settings",
-        "route": "/settings",
-        "icon": "bx bx-cog"
+        "route": "/posts",
+        "icon": "bx bx-news"
     }
 ]

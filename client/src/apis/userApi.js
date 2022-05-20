@@ -21,6 +21,17 @@ const userApi = {
         });
     },
 
+    checkRoom: params => {
+        const url = '/room/check';
+        let accessToken = getCookie('accessToken');
+        return axiosClient.get(url, {
+            params,
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
+
     getRoomById: (roomId, params) => {
         let accessToken = getCookie('accessToken');
         const url = `/room/${roomId}`;

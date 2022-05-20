@@ -63,20 +63,21 @@ function Header() {
         <div className="navigation">
             <div className="container">
                 <Link to="/">
-                    <img className="logo" src={logo} alt="instagram logo" />
+                    <img
+                        className="logo"
+                        src={process.env.REACT_APP_STATIC_URL + `/defaults/logo_dark.png`}
+                        alt="instagram logo"
+                        onClick={() => sessionStorage.setItem('STATE_PAGE', 'home')}
+                    />
                 </Link>
                 <div className="search">
                     <img
-                        className={`searchIcon ${
-                            isSearch ? 'searchIcon--search' : ''
-                        }`}
+                        className={`searchIcon ${isSearch ? 'searchIcon--search' : ''}`}
                         src={searchIcon}
                         alt="search icon"
                     />
                     <input
-                        className={`searchText ${
-                            !isSearch ? 'searchText--no-search' : ''
-                        }`}
+                        className={`searchText ${!isSearch ? 'searchText--no-search' : ''}`}
                         placeholder="Search"
                         onFocus={handelSearching}
                         onBlur={handelSearchBlur}

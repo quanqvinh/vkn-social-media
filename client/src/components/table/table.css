@@ -18,7 +18,7 @@ tr {
 
 th,
 td {
-  text-transform: capitalize;
+  /* text-transform: capitalize; */
   padding: 15px 10px;
 }
 
@@ -30,9 +30,10 @@ tbody > tr:hover {
 .table__pagination {
   display: flex;
   width: 100%;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   margin-top: 20px;
+  user-select: none;
 }
 
 .table__pagination-item ~ .table__pagination-item {

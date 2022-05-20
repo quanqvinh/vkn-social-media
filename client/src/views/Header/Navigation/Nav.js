@@ -4,7 +4,7 @@ import NewPost from '../../NewPost/NewPost';
 import ProfileIcon from '../../Profile/ProfilePreview/ProfileIcon';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
 
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { getCookie, setCookie } from '../../Global/cookie';
@@ -21,10 +21,8 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import HomeIcon from '@mui/icons-material/Home';
 
 import friendApi from '../../../apis/friendApi';
-import {
-    checkNotifications,
-    formatNotifications
-} from '../../../actions/notification';
+import { checkNotifications, formatNotifications } from '../../../actions/notification';
+import PostDetail from '../../PostDetail/PostDetail';
 
 const clickOutsideRef = (content_ref, toggle_ref) => {
     document.addEventListener('mousedown', e => {
@@ -37,10 +35,7 @@ const clickOutsideRef = (content_ref, toggle_ref) => {
             toggle_ref.current.classList.toggle('notification--open');
         } else {
             // user click outside toggle and content
-            if (
-                content_ref.current &&
-                !content_ref.current.contains(e.target)
-            ) {
+            if (content_ref.current && !content_ref.current.contains(e.target)) {
                 toggle_ref.current.classList.remove('notification--open');
             }
         }
@@ -59,6 +54,11 @@ function Nav() {
     const notificationContentRef = useRef(null);
     const notificationInit = useSelector(user => user.notifications);
     const [notifications, setNotifications] = useState({});
+    const [postSelected, setPostSelected] = useState({
+        isSelected: false,
+        postId: null
+    });
+
     const socket = useContext(SOCKET);
     const history = useHistory();
     const dispatch = useDispatch();
@@ -108,6 +108,9 @@ function Nav() {
                         notificationId: notiId
                     });
                     console.log(res);
+                    setPostSelected({ isSelected: true, postId: res.post._id });
+                    notificationRef.current.classList.remove('notification--open');
+                    dispatch(checkNotifications(notiId));
                 } catch (error) {
                     console.log(error.message);
                 }
@@ -135,7 +138,7 @@ function Nav() {
         acceptAddFriendRequest();
     };
 
-    const clickDecline = (e, reqUId, reqUname) => {
+    const clickDecline = (e, notiId, reqUId, reqUname) => {
         e.stopPropagation();
         const declineAddFriendRequest = async () => {
             try {
@@ -143,6 +146,9 @@ function Nav() {
                     requestedUserId: reqUId,
                     requestedUsername: reqUname
                 });
+                if (res.status.includes('success')) {
+                    dispatch(checkNotifications(notiId));
+                }
             } catch (error) {
                 console.log(error.message);
             }
@@ -157,6 +163,10 @@ function Nav() {
         setNotifications({ ...notificationInit });
     }, [notificationInit]);
 
+    const closePost = useCallback(() => {
+        setPostSelected({ isSelected: false, postId: null });
+    }, [postSelected]);
+
     return (
         <>
             <div className="menu">
@@ -167,10 +177,7 @@ function Nav() {
                             onClick={() => handelClickHome()}
                         />
                     ) : (
-                        <HomeOutlinedIcon
-                            className={'icon'}
-                            onClick={() => handelClickHome()}
-                        />
+                        <HomeOutlinedIcon className={'icon'} onClick={() => handelClickHome()} />
                     )}
                 </NavLink>
                 <NavLink to="/inbox" activeClassName="navLink--active">
@@ -192,10 +199,7 @@ function Nav() {
                         onClick={() => handelClickNewPost()}
                     />
                 ) : (
-                    <AddIcon
-                        className={'icon'}
-                        onClick={() => handelClickNewPost()}
-                    />
+                    <AddIcon className={'icon'} onClick={() => handelClickNewPost()} />
                 )}
 
                 <div className="notification" ref={notificationRef}>
@@ -208,27 +212,22 @@ function Nav() {
                         onClick={() => handelClickNotification()}
                     />
                     {notifications?.uncheck > 0 && (
-                        <span className="notification-quantity">
-                            {notifications.uncheck}
-                        </span>
+                        <span className="notification-quantity">{notifications.uncheck}</span>
                     )}
 
                     <div className="arrow"></div>
-                    <ul
-                        className="dropdown dropdown__notification"
-                        ref={notificationContentRef}>
+                    <ul className="dropdown dropdown__notification" ref={notificationContentRef}>
                         {notifications?.listNotifications?.length > 0 &&
                             notifications.listNotifications.map(noti => (
                                 <li
-                                    className="dropdown__notification-item"
+                                    className={`dropdown__notification-item ${
+                                        noti.isChecked ? 'dropdown__notification-item--checked' : ''
+                                    } ${
+                                        !noti.type.includes('add_friend') ? 'max-width-280px' : ''
+                                    }`}
                                     key={noti._id}
                                     onClick={e =>
-                                        handelClickNotify(
-                                            e,
-                                            noti._id,
-                                            noti.type,
-                                            noti.tag
-                                        )
+                                        handelClickNotify(e, noti._id, noti.type, noti.tag)
                                     }>
                                     <ProfilePreview
                                         username={noti.relatedUsers.from}
@@ -236,7 +235,7 @@ function Nav() {
                                         iconSize="medium"
                                         image={
                                             process.env.REACT_APP_STATIC_URL +
-                                            `/avatars/${noti.user}.png`
+                                            `/avatars/${noti.requestedUserId}.png`
                                         }
                                     />
                                     {noti.type.includes('add_friend') && (
@@ -258,6 +257,7 @@ function Nav() {
                                                 onClick={e =>
                                                     clickDecline(
                                                         e,
+                                                        noti._id,
                                                         noti.tag[0],
                                                         noti.relatedUsers.from
                                                     )
@@ -271,22 +271,14 @@ function Nav() {
                     </ul>
                 </div>
 
-                <div
-                    className="profile"
-                    onClick={() => setIsDropDown(!isDropDown)}>
+                <div className="profile" onClick={() => setIsDropDown(!isDropDown)}>
                     <ProfileIcon
                         iconSize="small"
-                        image={
-                            process.env.REACT_APP_STATIC_URL +
-                            `/avatars/${user._id}.png`
-                        }
+                        image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                     />
                 </div>
 
-                <div
-                    className={`profile__option ${
-                        isDropDown ? 'profile__option--active' : ''
-                    }`}>
+                <div className={`profile__option ${isDropDown ? 'profile__option--active' : ''}`}>
                     <div className="arrow"></div>
                     <ul className="dropdown">
                         <li>
@@ -326,17 +318,12 @@ function Nav() {
                                     strokeWidth="2"></circle>
                             </svg>
 
-                            <Link
-                                to={`/profile/${user._id}`}
-                                className="nav__profile">
+                            <Link to={`/profile/${user._id}`} className="nav__profile">
                                 Profile
                             </Link>
                         </li>
                         <li>
-                            <Link
-                                to="/login"
-                                className="login"
-                                onClick={handelLogout}>
+                            <Link to="/login" className="login" onClick={handelLogout}>
                                 Log Out
                             </Link>
                         </li>
@@ -350,6 +337,10 @@ function Nav() {
                     iconSize="small"
                     image={user.image}
                 />
+            )}
+
+            {postSelected.isSelected && (
+                <PostDetail postId={postSelected.postId} closePost={closePost} />
             )}
         </>
     );

@@ -2,6 +2,7 @@
   --main-bg: var(--main-bg-light);
   --second-bg: var(--second-bg-light);
   --txt-color: var(--txt-color-light);
+  --txt-color-second: #000;
   --box-shadow: var(--box-shadow-light);
 }
 
@@ -9,6 +10,8 @@
   --main-bg: var(--main-bg-dark);
   --second-bg: var(--second-bg-dark);
   --txt-color: var(--txt-color-dark);
+  --txt-color-second: #fff;
+
   --box-shadow: var(--box-shadow-dark);
 }
 

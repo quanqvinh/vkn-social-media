@@ -19,6 +19,7 @@ import Layout from './components/layout/Layout';
 import { addNotifications } from './actions/notification';
 
 import { useRef } from 'react';
+import ResetPassword from './views/ResetPassword/ResetPassword';
 
 export const SOCKET = createContext();
 
@@ -45,7 +46,7 @@ function App() {
     useEffect(() => {
         socket &&
             socket.on('user:print_notification', payload => {
-                console.log('add', payload);
+                console.log(payload);
                 let action = addNotifications(payload.notification);
                 dispatch(action);
             });
@@ -89,6 +90,9 @@ function App() {
                         </Route>
                         <Route path="/auth/verify-email">
                             <VerifyEmail />
+                        </Route>
+                        <Route path="/auth/reset-password">
+                            <ResetPassword />
                         </Route>
                         <Route path="/dashboard">
                             <Layout />

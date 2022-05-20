@@ -5,18 +5,10 @@
   box-shadow: var(--box-shadow);
 }
 
-.badge-danger {
+.badge-disable {
   background-color: var(--main-color-red);
 }
 
-.badge-success {
+.badge-active {
   background-color: var(--main-color-green);
-}
-
-.badge-primary {
-  background-color: var(--main-color-blue);
-}
-
-.badge-warning {
-  background-color: var(--main-color-orange);
 }

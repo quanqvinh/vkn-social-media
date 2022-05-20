@@ -1,0 +1,58 @@
+.loading-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #0a1929;
+
+  p {
+    font-size: 20px;
+    color: white;
+
+    // rgb(90, 156, 255, 0.3)
+  }
+}
+
+.css-rb3hx7-MuiCardContent-root {
+  padding: 0px !important;
+
+  .forgot__title {
+    display: block;
+    text-align: center;
+    padding: 15px 0 10px;
+    color: #000;
+    font-weight: 500;
+  }
+
+  .forgot__content {
+    padding: 0px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    .forgot__label {
+      color: #242424;
+      font-size: 0.9rem;
+      font-weight: 400;
+      min-width: 120px;
+    }
+
+    .forgot__email {
+      outline: none;
+      border: none;
+      font-size: 1rem;
+      color: #000;
+      display: block;
+      width: 80%;
+    }
+  }
+}
+
+.forgot__ok {
+  width: 90% !important;
+  text-transform: capitalize;
+  font-weight: 400;
+}
