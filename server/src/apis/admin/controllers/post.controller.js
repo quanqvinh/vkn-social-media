@@ -10,7 +10,7 @@ module.exports = {
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {
         try {
-            let { numberRowPerPage, pageNumber } = req.query;
+            let { numberRowPerPage, pageNumber, sortBy, order } = req.query;
             if (!(numberRowPerPage && pageNumber))
                 return res.status(400).json({
                     status: 'error',
@@ -23,6 +23,12 @@ module.exports = {
                     status: 'error',
                     message: 'Parameters must numbers'
                 });
+
+            if (!['user', 'caption', 'numberOfLikes', 'numberOfReports', 'numberOfComments', 'createdAt'].includes(sortBy))
+                sortBy = 'createdAt';
+            if (order !== 'asc' && order !== 'desc')
+                order = 'asc';
+
             let [posts, count] = await Promise.all([
                 Post.aggregate()
                     .lookup({
@@ -43,10 +49,7 @@ module.exports = {
                         preserveNullAndEmptyArrays: true
                     })
                     .project({
-                        user: {
-                            username: 1,
-                            email: 1
-                        },
+                        user: '$user.username',
                         caption: 1,
                         numberOfLikes: 1,
                         numberOfReports: { $size: '$reports' },
@@ -67,7 +70,10 @@ module.exports = {
                         numberOfReports: { $first: '$numberOfReports' },
                         numberOfComments: { $sum: '$numberOfComments' },
                         createdAt: { $first: '$createdAt' }
-                    }),
+                    })
+                    .sort((order === 'asc' ? '' : '-') + sortBy)
+                    .skip(numberRowPerPage * (pageNumber > 0 ? pageNumber - 1 : 0))
+                    .limit(numberRowPerPage),
                 Post.countDocuments()
             ]);
             posts.forEach((post, index) => {
@@ -134,123 +140,47 @@ module.exports = {
         }
     },
 
-    async getPostByUserId(req, res, next) {
-        let userId = req.params.userId;
-        try {
-            await Post.find({
-                user: userId
-            })
-                .lean()
-                .then(data => {
-                    res.status(200).json(data);
-                })
-                .catch(err => {
-                    res.status(400).json({
-                        status: 'error',
-                        message: 'Post not found.'
-                    });
-                });
-        } catch (err) {
-            res.status(500).json({
-                status: 'error',
-                message: 'Error at server'
-            });
-        }
-    },
+    // [DELETE] /v1/post/:id/delete
     async deletePost(req, res, next) {
         let id = req.params.id;
-        let post = await Post.findOne({
-            _id: id
-        }).lean();
-        let listCommentId = post.comments;
-        let listReportId = post.reports;
+        mongodbHelper.executeTransactionWithRetry({
+            async executeCallback(session) {
+                let post = await Post.findOne({
+                    _id: id
+                }).select('reports comments').lean();
 
-        Promise.all([
-            Post.deleteOne({
-                _id: id
-            }),
-            Comment.deleteMany({
-                _id: {
-                    $in: listCommentId
+                if (!post)
+                    throw new Error('400');
+
+                let deletedStatus = await Promise.all([
+                    Post.deleteOne({ 
+                        _id: post._id 
+                    }).session(session),
+                    Comment.deleteMany({ 
+                        _id: { $in: commentIds }
+                    }).session(session),
+                    Report.deleteMany({
+                        _id: { $in: reportIds }
+                    }).session(session)
+                ]);
+                if (deletedStatus.some(status => status.deletedCount === 0))
+                    throw new Error('Delete failed');
+            },
+            successCallback() {
+                return res.status(200).json({ status: 'success' });
+            },
+            errorCallback(error) {
+                console.log(error);
+                let code = 500, message = 'Error at server';
+                if (error?.message === '400') {
+                    code = 400;
+                    message = 'No post ID is found';
                 }
-            }),
-            Report.deleteMany({
-                _id: {
-                    $in: listReportId
-                }
-            })
-        ])
-            .then(() => {
-                res.status(200).json({
-                    status: 'success',
-                    message: 'Post has been deleted.'
-                });
-            })
-            .catch(() => {
-                res.status(500).json({
+                return res.status(code).json({
                     status: 'error',
-                    message: 'Error at server'
+                    message
                 });
-            });
-    },
-    async getAllPost(req, res, next) {
-        let sortByNumberOfReport = req.query.sortByNumberOfReport;
-        if (sortByNumberOfReport === 'true') {
-            await Post.aggregate([
-                {
-                    $addFields: {
-                        report_count: {
-                            $size: {
-                                $ifNull: ['$reports', []]
-                            }
-                        }
-                    }
-                },
-                {
-                    $sort: {
-                        report_count: -1
-                    }
-                }
-            ])
-                .then(data => {
-                    let lengthData = data.length;
-                    let totalPageCount =
-                        parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) ===
-                        parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE
-                            ? parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE)
-                            : parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) + 1;
-                    res.status(200).json({
-                        posts: data,
-                        totalPageCount: totalPageCount
-                    });
-                })
-                .catch(() => {
-                    res.status(500).json({
-                        status: 'error',
-                        message: 'Error at server'
-                    });
-                });
-        } else {
-            await Post.find({})
-                .lean()
-                .then(data => {
-                    let lengthData = data.length;
-                    let totalPageCount =
-                        parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) ===
-                        parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE
-                            ? parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE)
-                            : parseInt(parseFloat(lengthData) / COUNT_ITEM_OF_A_PAGE) + 1;
-                    res.status(200).json({
-                        posts: data,
-                        totalPageCount: totalPageCount
-                    });
-                })
-                .catch(() => {
-                    res.status(500).json({
-                        status: 'error',
-                        message: 'Error at server'
-                    });
-                });
-        }
+            }
+        })
     }
 };

@@ -164,20 +164,22 @@ module.exports = {
 
     // [POST] /v1/user/edit/email/request
     async requestEditUserEmail(req, res) {
-        let newEmail = req.body.newEmail;
-        if (!newEmail) return res.status(400).json({ message: 'Missing parameters' });
+        let email = req.body.email;
+        if (!email) return res.status(400).json({ message: 'Missing parameters' });
 
         let [user, checkUser] = await Promise.all([
-            User.findById(req.auth.userId).select('username').lean(),
-            User.findOne({ email: newEmail }).lean()
+            User.findById(req.auth.userId).select('username email').lean(),
+            User.findOne({ email }).lean()
         ]);
 
         if (checkUser)
-            return res.status(200).json({
+            return res.status(400).json({
                 status: 'warning',
                 message: 'This email has already been used by another user'
             });
         req.body.username = user.username;
+        req.body.newEmail = email;
+        req.body.email = user.email;
 
         return await Auth.requestVerifyEmail(req, res);
     },
@@ -274,8 +276,13 @@ module.exports = {
     // [GET] /v1/user/search
     async searchUser(req, res) {
         try {
-            let keyword = req.query.keyword;
-            let regex = new RegExp('' + keyword, 'i');
+            let keyword = req.query.keyword?.trim();
+            if (!keyword)
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Invalid keyword'
+                });
+            let regex = new RegExp('^' + keyword, 'i');
             let result = await User.find({
                 $or: [{ username: regex }, { email: regex }]
             })

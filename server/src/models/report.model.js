@@ -3,7 +3,7 @@ const Timezone = require('mongoose-timezone');
 
 const ReportSchema = new mongoose.Schema(
     {
-        userId: {
+        user: {
             type: mongoose.Types.ObjectId,
             ref: 'User',
             required: true,

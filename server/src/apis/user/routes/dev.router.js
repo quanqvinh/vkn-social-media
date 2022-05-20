@@ -13,6 +13,10 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+router.get('/test', async (req, res) => {
+    
+})
+
 router.get('/getMessage', async (req, res) => {
     let { roomId, messageId } = req.query;
     // let room = await Room.findOne({ _id: roomId });

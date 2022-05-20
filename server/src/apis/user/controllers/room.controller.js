@@ -11,7 +11,7 @@ async function loadMessage(req, res) {
         let roomId = req.params.roomId;
         let numberOfMessage = req.query.nMessage;
 
-        if (!(roomId && numberOfMessage))
+        if (!roomId || numberOfMessage === undefined)
             return res.status(400).json({ message: 'Missing parameters' });
 
         let [countMessage, data] = await Promise.all([
@@ -238,15 +238,15 @@ module.exports = {
         try {
             let { userId } = req.query;
 
-            if (!userId) return res.status(400).json({ message: 'Missing parameters' });
+            if (!userId)
+                return res.status(400).json({ message: 'Missing parameters' });
 
             let user = await User.findById(req.auth.userId)
                 .select('rooms')
                 .populate('rooms')
                 .lean();
 
-            let roomId = null,
-                room = null;
+            let roomId = null;                  
             user.rooms.some(room => {
                 if (objectIdHelper.include(room.chatMate, userId)) {
                     roomId = room._id;

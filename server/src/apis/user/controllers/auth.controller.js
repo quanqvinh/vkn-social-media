@@ -191,14 +191,12 @@ module.exports = {
                                     'Account is not found or is already verified'
                             };
                         else {
-                            console.log('OK');
                             user.auth.isVerified = true;
                             user.auth.remainingTime = undefined;
                             user.email = decoded.email;
                             await user.save();
                         }
                     }
-                    console.log(tokenErr);
                 }
             );
             if (tokenErr)
