@@ -1,13 +1,11 @@
 import axios from 'axios';
 import queryString from 'query-string';
 import Qs from 'qs';
-import { getCookie } from '../views/Global/cookie';
 
 const axiosClient = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
     headers: {
-        'content-type': 'application/json',
-        'access-token': getCookie('accessToken') || null
+        'content-type': 'application/json'
     },
 
     // dùng querystring
