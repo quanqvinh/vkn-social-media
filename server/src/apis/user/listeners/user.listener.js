@@ -3,10 +3,12 @@ const Notification = require('../../../models/notification.model');
 const Request = require('../../../models/request.model');
 const User = require('../../../models/user.model');
 const mongodbHelper = require('../../../utils/mongodbHelper');
+const objectIdHelper = require('../../../utils/objectIdHelper');
 
 module.exports = (() => {
     return (io, socket) => {
         socket.on('user:add_friend_request', addFriendRequest);
+        socket.on('user:accept_add_friend', acceptAddFriend);
 
         async function addFriendRequest(payload) {
             const { receivedUserId, receivedUsername } = payload;
@@ -25,6 +27,13 @@ module.exports = (() => {
                         })
                     )
                         throw new Error('Add friend request have sent before');
+
+                    let user = await User.findOne({ _id: socket.handshake.auth.userId })
+                        .select('friends')
+                        .lean();
+
+                    if (objectIdHelper.include(user.friends, receivedUserId))
+                        throw new Error('You were friends');
 
                     notification = new Notification({
                         user: receivedUserId,
@@ -89,6 +98,16 @@ module.exports = (() => {
                     socket.emit('error');
                 }
             });
+        }
+
+        async function acceptAddFriend(payload) {
+            let { userId, username } = payload;
+            if (!userId || !username) {
+                console.log('user:accept_add_friend => Missing parameters');
+                return;
+            }
+            if (io.sockets.adapter.rooms.has(userId))
+                socket.emit('home:friend_connect', { userId, username });
         }
     };
 })();

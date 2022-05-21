@@ -368,10 +368,10 @@ module.exports = {
             let index = post.likes.findIndex(id => objectIdHelper.compare(id, userId));
             if (index === -1) {
                 post.likes.push(userId);
-                post.numberOfLikes++;
+                post.numberOfLikes = post.likes.length;
             } else {
                 post.likes.splice(index, 1);
-                post.numberOfLikes--;
+                post.numberOfLikes = post.likes.length;
             }
             await post.save();
             res.status(200).json({
@@ -396,10 +396,10 @@ module.exports = {
             let index = comment.likes.findIndex(id => objectIdHelper.compare(id, userId));
             if (index === -1) {
                 comment.likes.push(userId);
-                comment.numberOfLikes++;
+                comment.numberOfLikes = comment.likes.length;
             } else {
                 comment.likes.splice(index, 1);
-                comment.numberOfLikes--;
+                comment.numberOfLikes = comment.likes.length;
             }
             await comment.save();
             res.status(200).json({
