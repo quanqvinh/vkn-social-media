@@ -8,7 +8,6 @@ module.exports = {
                 req.body.accessToken || req.query.accessToken || req.headers['access-token'];
             if (!token) throw new Error('Token is not provided');
 
-            console.log(token);
             let payload = await jwt.verify(token, process.env.SECRET_KEY);
             if (payload.isAdmin) throw new Error('Admin is not allowed to access');
             else req.auth = payload;
