@@ -19,7 +19,7 @@ module.exports = {
                         (error.hasErrorLabel('UnknownTransactionCommitResult') ||
                             error.hasErrorLabel('TransientTransactionError'))
                     ) {
-                        console.log(error);
+                        console.log(error.name + ': ' + error.message);
                         console.log('Retrying transaction ...');
                         await new Promise(resolve => setTimeout(resolve, 50));
                         continue;

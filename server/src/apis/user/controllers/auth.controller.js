@@ -231,12 +231,30 @@ module.exports = {
                     message: 'Password is wrong'
                 });
 
-            if (user.auth.isVerified === false)
+            if (user.auth.isVerified === false) {
+                let token = jwt.sign(
+                    {
+                        username: user.username,
+                        email: user.email
+                    },
+                    secretKey,
+                    {
+                        expiresIn: requestVerifyTokenLife,
+                        subject: 'verify-email'
+                    }
+                );
+                // Send mail
+                mail.sendVerify({
+                    to: user.email,
+                    username: user.username,
+                    token
+                });
                 return res.status(307).json({
                     status: 'error',
                     message: 'Verify email of account',
                     email: user.auth.email
                 });
+            }
 
             let payload = {
                 userId: user._id,
@@ -244,7 +262,7 @@ module.exports = {
             };
 
             let accessToken = jwt.sign(payload, secretKey, {
-                expiresIn: tokenLife
+                expiresIn: '10m'
             });
             let refreshToken = jwt.sign(payload, refreshSecretKey, {
                 expiresIn: refreshTokenLife
