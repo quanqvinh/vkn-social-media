@@ -14,6 +14,8 @@ const postApi = {
     newFeeds: () => {
         const url = '/post/new-feed';
         let accessToken = getCookie('accessToken');
+        console.log('accesstoken new-ffeed', accessToken);
+        console.log('');
         return axiosClient.get(url, {
             headers: { 'access-token': accessToken }
         });
@@ -30,8 +32,9 @@ const postApi = {
     like: postId => {
         const url = `/post/${postId}/like`;
         let accessToken = getCookie('accessToken');
+        console.log('token like', accessToken);
         return axiosClient.patch(url, {
-            headers: { 'access-token': accessToken }
+            accessToken
         });
     },
 

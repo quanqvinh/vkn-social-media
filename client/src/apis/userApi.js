@@ -5,6 +5,7 @@ const userApi = {
     get: params => {
         const url = `/user/me/profile`;
         let accessToken = getCookie('accessToken');
+        console.log('token get', accessToken);
         return axiosClient.get(url, {
             params,
             headers: { 'access-token': accessToken }
