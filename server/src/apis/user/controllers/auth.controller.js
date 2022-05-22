@@ -262,7 +262,7 @@ module.exports = {
             };
 
             let accessToken = jwt.sign(payload, secretKey, {
-                expiresIn: '10m'
+                expiresIn: tokenLife
             });
             let refreshToken = jwt.sign(payload, refreshSecretKey, {
                 expiresIn: refreshTokenLife

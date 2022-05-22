@@ -80,6 +80,12 @@ async function loadMessage(req, res) {
             ])
         ]);
 
+        if (countMessage.length === 0)
+            return res.status(200).json({
+                status: 'success',
+                data: []
+            });
+
         countMessage = countMessage[0];
         data = data[0];
 
@@ -115,7 +121,10 @@ module.exports = {
     // [GET] /v1/room
     async getRooms(req, res) {
         try {
-            let user = await User.findById(req.auth.userId).select('username name rooms').lean();
+            let user = await User.findById(req.auth.userId)
+                .select('username name rooms')
+                .populate('rooms')
+                .lean();
 
             if (!user) throw new Error('Not found user');
 
@@ -125,99 +134,86 @@ module.exports = {
                     data: user
                 });
 
-            user = await User.aggregate([
-                {
-                    $match: {
-                        _id: ObjectId(req.auth.userId)
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'rooms',
-                        localField: 'rooms',
-                        foreignField: '_id',
-                        as: 'rooms'
-                    }
-                },
-                {
-                    $unwind: '$rooms'
-                },
-                {
-                    $lookup: {
-                        from: 'users',
-                        localField: 'rooms.chatMate',
-                        foreignField: '_id',
-                        as: 'rooms.chatMate'
-                    }
-                },
-                {
-                    $unwind: '$rooms.chatMate'
-                },
-                {
-                    $match: {
-                        'rooms.chatMate._id': {
-                            $not: {
-                                $eq: ObjectId(req.auth.userId)
-                            }
+            user = await User.aggregate()
+                .match({
+                    _id: ObjectId(req.auth.userId)
+                })
+                .lookup({
+                    from: 'rooms',
+                    localField: 'rooms',
+                    foreignField: '_id',
+                    as: 'rooms'
+                })
+                .unwind({
+                    path: '$rooms',
+                    preserveNullAndEmptyArrays: true
+                })
+                .lookup({
+                    from: 'users',
+                    localField: 'rooms.chatMate',
+                    foreignField: '_id',
+                    as: 'rooms.chatMate'
+                })
+                .unwind({
+                    path: '$rooms.chatMate',
+                    preserveNullAndEmptyArrays: true
+                })
+                .match({
+                    'rooms.chatMate._id': {
+                        $not: {
+                            $eq: ObjectId(req.auth.userId)
                         }
                     }
-                },
-                {
-                    $project: {
-                        username: 1,
-                        name: 1,
-                        rooms: {
+                })
+                .project({
+                    username: 1,
+                    name: 1,
+                    rooms: {
+                        _id: 1,
+                        updatedAt: 1,
+                        chatMate: {
                             _id: 1,
-                            updatedAt: 1,
-                            chatMate: {
-                                _id: 1,
-                                username: 1,
-                                name: 1
-                            },
-                            messages: {
-                                $slice: [
-                                    {
-                                        $filter: {
-                                            input: '$rooms.messages',
-                                            cond: {
-                                                $or: [
-                                                    {
-                                                        $eq: ['$$this.showWith', 'all']
-                                                    },
-                                                    {
-                                                        $eq: ['$$this.showWith', req.auth.userId]
-                                                    }
-                                                ]
-                                            }
+                            username: 1,
+                            name: 1
+                        },
+                        messages: {
+                            $slice: [
+                                {
+                                    $filter: {
+                                        input: '$rooms.messages',
+                                        cond: {
+                                            $or: [
+                                                {
+                                                    $eq: ['$$this.showWith', 'all']
+                                                },
+                                                {
+                                                    $eq: ['$$this.showWith', req.auth.userId]
+                                                }
+                                            ]
                                         }
-                                    },
-                                    -1,
-                                    1
-                                ]
-                            }
+                                    }
+                                },
+                                -1,
+                                1
+                            ]
                         }
                     }
-                },
-                {
-                    $project: {
-                        'rooms.messages.showWith': 0
+                })
+                .project({
+                    'rooms.messages.showWith': 0
+                })
+                .group({
+                    _id: '$_id',
+                    username: {
+                        $first: '$username'
+                    },
+                    name: {
+                        $first: '$name'
+                    },
+                    rooms: {
+                        $push: '$rooms'
                     }
-                },
-                {
-                    $group: {
-                        _id: '$_id',
-                        username: {
-                            $first: '$username'
-                        },
-                        name: {
-                            $first: '$name'
-                        },
-                        rooms: {
-                            $push: '$rooms'
-                        }
-                    }
-                }
-            ]);
+                });
 
             user[0].rooms = user[0].rooms.filter(room => room.messages.length > 0);
 

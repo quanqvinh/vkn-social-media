@@ -4,6 +4,7 @@ const Post = require('../../../models/post.model');
 const Report = require('../../../models/report.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
+const mongodbHelper = require('../../../utils/mongodbHelper');
 
 const COUNT_ITEM_OF_A_PAGE = 10;
 const mongodbHelper = require('../../../utils/mongodbHelper');
