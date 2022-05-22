@@ -25,14 +25,6 @@ module.exports = {
                 let user = await User.findOne({ username }).lean();
                 if (user) throw new Error('Username already exists');
 
-                if (
-                    username
-                        .replace(/[^a-zA-Z ]/g, '')
-                        .toLowerCase()
-                        .includes('admin')
-                )
-                    throw new Error('This username is forbidden');
-
                 // Check email is used ?
                 user = await User.findOne({ email }).lean();
                 if (user) throw new Error('User with given email already exist');

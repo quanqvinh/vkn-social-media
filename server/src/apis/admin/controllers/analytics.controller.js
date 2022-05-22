@@ -17,6 +17,9 @@ module.exports = {
                 newPostByMonth
             ] = await Promise.all([
                 User.aggregate()
+                    .match({
+                        username: { $nin: ['admin', 'vknuser'] }
+                    })
                     .lookup({
                         from: 'posts',
                         localField: 'posts',
@@ -134,6 +137,9 @@ module.exports = {
                 Post.countDocuments(),
                 Comment.countDocuments(),
                 User.aggregate()
+                    .match({
+                        username: { $nin: ['admin', 'vknuser'] }
+                    })
                     .project({
                         year: { $year: '$createdAt' },
                         month: { $month: '$createdAt' }

@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const User = require('../../../models/user.model');
 const Notification = require('../../../models/notification.model');
 const Request = require('../../../models/request.model');
@@ -284,7 +283,7 @@ module.exports = {
                 });
             let regex = new RegExp('^' + keyword, 'i');
             let result = await User.find({
-                $or: [{ username: regex }, { email: regex }]
+                $and: [{ $or: [{ username: regex }, { email: regex }] }, { 'auth.isAdmin': false }]
             })
                 .select('username name email')
                 .lean();

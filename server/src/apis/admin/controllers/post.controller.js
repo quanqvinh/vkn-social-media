@@ -6,8 +6,6 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
 const mongodbHelper = require('../../../utils/mongodbHelper');
 
-const COUNT_ITEM_OF_A_PAGE = 10;
-const mongodbHelper = require('../../../utils/mongodbHelper');
 module.exports = {
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {
@@ -167,6 +165,12 @@ module.exports = {
                     Post.deleteOne({
                         _id: post._id
                     }).session(session),
+                    User.updateOne(
+                        { posts: post._id },
+                        {
+                            $pull: { posts: post._id }
+                        }
+                    ),
                     Comment.deleteMany({
                         _id: { $in: post.comments }
                     }).session(session),
@@ -175,6 +179,12 @@ module.exports = {
                     }).session(session)
                 ]);
                 if (deletedStatus[0].deletedCount === 0) throw new Error('Delete failed');
+
+                fs.rmSync(resourceHelper.createPostPath(id.toString()), {
+                    force: true,
+                    recursive: true
+                });
+                console.log('Deleted image resource');
             },
             successCallback() {
                 return res.status(200).json({ status: 'success' });
