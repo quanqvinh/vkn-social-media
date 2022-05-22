@@ -1,3 +1,6 @@
+@import '../assets/styles/variables';
+$main-color: var(--main-color);
+
 .action-container {
   display: flex;
   align-items: center;
@@ -17,6 +20,10 @@
     transition: ease 0.2s;
     user-select: none;
 
+    &:last-child {
+      margin-left: auto;
+    }
+
     &:hover {
       background-color: var(--main-color);
       color: var(--txt-color-second);
@@ -33,9 +40,99 @@
   height: 470px;
   position: relative;
   user-select: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--main-color);
+    border-radius: 10px;
+  }
 
   .table__pagination {
     position: absolute;
     bottom: 20px;
+  }
+}
+
+.css-1wnsr1i {
+  border: none !important;
+  border-radius: 10px;
+  padding: 0px !important;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  width: 500px !important;
+  max-width: 95% !important;
+
+  .forgot__title {
+    display: block;
+    text-align: center;
+    padding: 15px 0 20px;
+    color: #000;
+    font-weight: 500;
+    font-size: 1.2rem;
+  }
+
+  .forgot__notification {
+    font-size: 0.95rem;
+    color: red;
+    text-align: center;
+    margin: 10px 0 -10px;
+  }
+
+  .forgot__content {
+    display: block;
+    padding: 0;
+
+    &-item {
+      padding: 0px 20px 10px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      .forgot__label {
+        color: #242424;
+        font-size: 1rem;
+        font-weight: 400;
+        min-width: 100px;
+      }
+
+      .forgot__email {
+        outline: none;
+        border: none;
+        font-size: 1rem;
+        color: #000;
+        display: block;
+        width: 90%;
+        border: 2px solid #ccc;
+        padding: 10px 6px;
+        border-radius: 10px;
+        font-family: $font;
+
+        &:focus {
+          border-color: #d68102;
+        }
+      }
+    }
+  }
+  .forgot__send {
+    outline: none;
+    border: none;
+    display: block;
+    width: 92%;
+    margin: 15px auto;
+    padding: 10px 15px;
+    text-transform: uppercase;
+    background-color: #d68102;
+    color: #fff;
+    border-radius: 10px;
+    transition: 0.2s linear;
+    font-size: 1rem;
+
+    &:hover {
+      opacity: 0.8;
+    }
   }
 }

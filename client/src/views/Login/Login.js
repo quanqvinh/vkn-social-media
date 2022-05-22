@@ -78,10 +78,17 @@ export default function Login() {
 
                 setCookie('accessToken', accessToken, 3);
                 setCookie('refreshToken', refreshToken, 3);
-                sessionStorage.setItem('USER_INFO', null);
                 sessionStorage.setItem('STATE_PAGE', 'home');
 
-                if (res.status === 'success') history.push('/');
+                console.log(res);
+                if (res.data.isAdmin) {
+                    sessionStorage.setItem('USER_INFO', JSON.stringify({ ...res.data }));
+
+                    history.push('/dashboard');
+                } else {
+                    sessionStorage.setItem('USER_INFO', null);
+                    history.push('/');
+                }
             } catch (error) {
                 if (error.response) {
                     console.log(error.message);
@@ -126,6 +133,9 @@ export default function Login() {
     };
     useEffect(() => {
         sessionStorage.removeItem('USER_INFO');
+        sessionStorage.removeItem('NOTIFICATIONS');
+        sessionStorage.removeItem('STATE_PAGE');
+
         getCookie('accessToken') && setCookie('accessToken', '', 0);
         getCookie('refreshToken') && setCookie('refreshToken', '', 0);
     }, []);

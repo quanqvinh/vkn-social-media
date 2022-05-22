@@ -1,32 +1,51 @@
 import React, { useEffect, useRef } from 'react';
 import './popup.scss';
 import postApi from '../../apis/postApi';
+import { userApiAdmin } from '../../apis/userApiAdmin';
+import { postApiAdmin } from '../../apis/postApiAdmin';
 
 const Popup = props => {
-    const { title, ok, cancel, element, userId, postId } = props;
+    const {
+        title,
+        ok,
+        cancel,
+        element,
+        userId,
+        postId,
+        refetchUsers,
+        refetchProfile,
+        refetchPosts
+    } = props;
 
     const popupRef = useRef(null);
 
     useEffect(() => {
         popupRef.current.classList.add('overlay-popup--open');
-
-        // popupRef.current.style.top = `${element.offsetTop + 40}px`;
-        // setTimeout(() => {
-        //     popupRef.current.classList.add('popup__container--open');
-        // }, 160);
     }, [element]);
 
     const handelDelete = () => {
         if (userId) {
-            console.log(userId);
+            deleteUser(userId);
         } else {
             deletePost(postId);
         }
     };
 
+    const deleteUser = async userId => {
+        try {
+            await userApiAdmin.delete(userId);
+            refetchUsers();
+            popupRef.current.classList.remove('overlay-popup--open');
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
     const deletePost = async postId => {
         try {
-            let res = await postApi.delete(postId);
+            let res = await postApiAdmin.delete(postId);
+            refetchPosts !== undefined ? refetchPosts() : refetchProfile();
+            popupRef.current.classList.remove('overlay-popup--open');
             console.log(res);
         } catch (error) {
             console.log(error.message);

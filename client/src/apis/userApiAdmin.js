@@ -43,10 +43,18 @@ export const userApiAdmin = {
         });
     },
 
-    disable: (id, expireTime) => {
-        let url = `/user/${id}/disable?expireTime=${expireTime}`;
+    disable: id => {
+        let url = `/user/${id}/disable`;
         let accessToken = getCookie('accessToken');
         return axiosAdmin.patch(url, {
+            accessToken
+        });
+    },
+
+    delete: id => {
+        let url = `/user/${id}/delete`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.delete(url, {
             headers: {
                 'access-token': accessToken
             }
@@ -58,6 +66,26 @@ export const userApiAdmin = {
         let accessToken = getCookie('accessToken');
         return axiosAdmin.get(url, {
             params,
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
+
+    add: data => {
+        let url = `/user/add`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.post(url, data, {
+            headers: {
+                'access-token': accessToken
+            }
+        });
+    },
+
+    changePassword: data => {
+        let url = `/user/password`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.patch(url, data, {
             headers: {
                 'access-token': accessToken
             }

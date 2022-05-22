@@ -28,7 +28,7 @@ const PostDetail = props => {
     const user = useSelector(state => state.user);
     const handelClosePost = e => {
         if (!e.target.classList.contains('post__overlay')) return;
-        closePost();
+        closePost(postId);
     };
 
     useEffect(() => {
@@ -138,6 +138,7 @@ const PostDetail = props => {
                 postOwnerUsername: post.user.username,
                 content: cmtContent
             });
+
             setListCmts([
                 ...listCmts,
                 {

@@ -8,6 +8,21 @@ import Profile from '../components/profile/Profile';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Popup from '../components/popup/Popup';
 
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+
+const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4
+};
+
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [isSelectUser, setIsSelectUser] = useState({
@@ -22,6 +37,18 @@ const Users = () => {
     });
     const [currentPage, setCurrentPage] = useState(1);
     const [searchKeyWords, setSearchKeyWords] = useState('');
+    const [refetch, setRefetch] = useState(false);
+    const [open, setOpen] = useState(false);
+    const notificationRef = useRef(null);
+    const [formInfos, setFormInfos] = useState({
+        role: 'Admin'
+    });
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        setOpen(false);
+        setFormInfos({});
+    };
 
     const renderHead = (item, index) => <th key={index}>{item}</th>;
 
@@ -64,8 +91,13 @@ const Users = () => {
         });
     };
 
+    const refetchUsers = () => {
+        setRefetch(!refetch);
+    };
+
     const fetchUsers = async type => {
         try {
+            if (searchKeyWords) return;
             let res;
             switch (type) {
                 case 'active':
@@ -106,7 +138,7 @@ const Users = () => {
 
     useEffect(() => {
         fetchUsers('active');
-    }, [currentPage]);
+    }, [currentPage, refetch, searchKeyWords]);
 
     const changePage = newPage => {
         setCurrentPage(newPage);
@@ -132,6 +164,7 @@ const Users = () => {
         setSearchKeyWords(e.target.value);
         const search = async () => {
             try {
+                if (!e.target.value) return;
                 let res = await userApiAdmin.searchActive({
                     keyword: e.target.value,
                     numberRowPerPage: 5,
@@ -167,6 +200,40 @@ const Users = () => {
         }, 300);
     };
 
+    const handelAddUser = () => {
+        const addUser = async () => {
+            let { email, username, name, role } = formInfos;
+            if (!email || !username || !name || !role) {
+                notificationRef.current.innerHTML = 'Please fill in all fields';
+                return;
+            }
+
+            try {
+                let res = await userApiAdmin.add({
+                    username,
+                    email,
+                    name,
+                    isAdmin: role === 'Admin' ? true : false
+                });
+                console.log(res);
+                notificationRef.current.innerHTML = `Account has been sent to ${email}`;
+                notificationRef.current.style.color = 'green';
+
+                setTimeout(() => {
+                    handleClose();
+                }, 500);
+            } catch (error) {
+                console.log(error.response.data.message);
+                if (error.response.data.message.includes('username')) {
+                    notificationRef.current.innerHTML = 'This username already in use';
+                } else {
+                    notificationRef.current.innerHTML = 'This email already in use';
+                }
+            }
+        };
+        addUser();
+    };
+
     return (
         <>
             <div>
@@ -191,6 +258,82 @@ const Users = () => {
                         <span ref={disableRef} className="state" onClick={e => chooseState(e)}>
                             disable
                         </span>
+                        <span className="state" onClick={handleOpen}>
+                            New User
+                        </span>
+                        <Modal
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby="modal-modal-title"
+                            aria-describedby="modal-modal-description">
+                            <Box sx={style}>
+                                <p className="forgot__notification" ref={notificationRef}></p>
+                                <span className="forgot__title">New User</span>
+
+                                <div className="forgot__content">
+                                    <div className="forgot__content-item">
+                                        <label className="forgot__label">Email:</label>
+                                        <input
+                                            onChange={e =>
+                                                setFormInfos({
+                                                    ...formInfos,
+                                                    email: e.target.value
+                                                })
+                                            }
+                                            value={formInfos.email || ''}
+                                            type="text"
+                                            className="forgot__email"
+                                            placeholder="Email"
+                                        />
+                                    </div>
+                                    <div className="forgot__content-item">
+                                        <label className="forgot__label">Username:</label>
+                                        <input
+                                            onChange={e =>
+                                                setFormInfos({
+                                                    ...formInfos,
+                                                    username: e.target.value
+                                                })
+                                            }
+                                            value={formInfos.username || ''}
+                                            type="text"
+                                            className="forgot__email"
+                                            placeholder="Username"
+                                        />
+                                    </div>
+                                    <div className="forgot__content-item">
+                                        <label className="forgot__label">Name:</label>
+                                        <input
+                                            onChange={e =>
+                                                setFormInfos({ ...formInfos, name: e.target.value })
+                                            }
+                                            value={formInfos.name || ''}
+                                            type="text"
+                                            className="forgot__email"
+                                            placeholder="Name"
+                                        />
+                                    </div>
+                                    <div className="forgot__content-item">
+                                        <label className="forgot__label">Role:</label>
+                                        <select
+                                            className="forgot__email"
+                                            value={formInfos.gender || 'Admin'}
+                                            onChange={e =>
+                                                setFormInfos({
+                                                    ...formInfos,
+                                                    gender: e.target.value
+                                                })
+                                            }>
+                                            <option value="male">Admin</option>
+                                            <option value="female">User</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button className="forgot__send" onClick={handelAddUser}>
+                                    Add
+                                </button>
+                            </Box>
+                        </Modal>
                     </div>
                     <div className="col-12">
                         <div className="card-admin">
@@ -213,6 +356,7 @@ const Users = () => {
                                     cancel="cancel"
                                     element={isDelete.e}
                                     userId={isDelete.userId}
+                                    refetchUsers={refetchUsers}
                                 />
                             )}
                         </div>

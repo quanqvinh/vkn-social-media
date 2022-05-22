@@ -6,6 +6,7 @@ const clickOutsideRef = (content_ref, toggle_ref) => {
   document.addEventListener('mousedown', e => {
     // user click toggle
     if (toggle_ref.current && toggle_ref.current.contains(e.target)) {
+      console.log('cliclk');
       content_ref.current.classList.toggle('active');
     } else {
       // user click outside toggle and content

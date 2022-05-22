@@ -10,9 +10,18 @@ async function loadMessage(req, res) {
     try {
         let roomId = req.params.roomId;
         let numberOfMessage = req.query.nMessage;
+        let userId = req.query.userId;
 
         if (!roomId || numberOfMessage === undefined)
             return res.status(400).json({ message: 'Missing parameters' });
+
+        if (!(await Room.aggregate().match({ _id: ObjectId(roomId) }))) {
+            let room = await Room.create({
+                _id: roomId,
+                chatMate: [req.auth.userId, userId]
+            });
+            if (!room) throw new Error('Create room failed');
+        }
 
         let [countMessage, data] = await Promise.all([
             Room.aggregate([
