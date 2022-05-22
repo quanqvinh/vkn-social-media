@@ -6,8 +6,6 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
 const mongodbHelper = require('../../../utils/mongodbHelper');
 
-const COUNT_ITEM_OF_A_PAGE = 10;
-const mongodbHelper = require('../../../utils/mongodbHelper');
 module.exports = {
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {
