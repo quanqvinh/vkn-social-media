@@ -6,12 +6,16 @@ const Request = require('../../../models/request.model');
 const Notification = require('../../../models/notification.model');
 const Comment = require('../../../models/comment.model');
 const Report = require('../../../models/report.model');
+const Room = require('../../../models/room.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
 const mongodbHelper = require('../../../utils/mongodbHelper');
 const generator = require('generate-password');
 const crypto = require('../../../utils/crypto');
 const mail = require('../../../utils/nodemailer');
+const fs = require('fs');
+const vknUserId = '628a49a3b8976f364fa3ca3c';
+const vknUsername = 'vknuser';
 
 module.exports = {
     // [GET] /v1/users?numberRowPerPage=&pageNumber=&sortBy&order=
@@ -78,13 +82,19 @@ module.exports = {
                 : {};
             let [users, count] = await Promise.all([
                 (disabled ? User.aggregateDeleted() : User.aggregate())
+                    .match({
+                        $and: [
+                            { username: { $nin: ['vknuser'] } },
+                            { _id: { $nin: [req.auth.userId] } }
+                        ]
+                    })
                     .match(searchFilter)
                     .project({
                         username: 1,
                         email: 1,
                         isAdmin: '$auth.isAdmin',
-                        numberOfFriends: { $size: '$friends' },
-                        numberOfPosts: { $size: '$posts' },
+                        numberOfFriends: { $size: { $ifNull: ['$friends', []] } },
+                        numberOfPosts: { $size: { $ifNull: ['$posts', []] } },
                         isDisabled: '$deleted',
                         disabledAt: { $cond: ['$deleted', '$deletedAt', undefined] },
                         createdAt: 1
@@ -127,8 +137,8 @@ module.exports = {
                         bio: 1,
                         disabled: '$deleted',
                         joinedAt: '$createdAt',
-                        numberOfPosts: { $size: '$posts' },
-                        numberOfFriends: { $size: '$friends' },
+                        numberOfPosts: { $size: { $ifNull: ['$posts', []] } },
+                        numberOfFriends: { $size: { $ifNull: ['$friends', []] } },
                         rooms: 1
                     })
                     .lookup({
@@ -278,9 +288,10 @@ module.exports = {
                     deletedRequest,
                     deletedNotification,
                     deletedToken,
-                    deletedPost,
+                    posts,
                     comments,
-                    reports
+                    reports,
+                    updatedRooms
                 ] = await Promise.all([
                     User.deleteOne({ _id: id }).session(session),
                     User.updateMany(
@@ -294,10 +305,20 @@ module.exports = {
                     }).session(session),
                     Notification.deleteMany({ user: id }).session(session),
                     Token.deleteMany({ 'payload.userId': id }).session(session),
-                    Post.deleteMany({ user: id }).session(session),
+                    Post.find({ user: id }).lean(),
                     Comment.find({ commentBy: id }).lean(),
-                    Report.find({ user: id }).lean()
+                    Report.find({ user: id }).lean(),
+                    Room.updateMany(
+                        { chatMate: id },
+                        {
+                            $push: { chatMate: vknUserId }
+                        }
+                    )
                 ]);
+
+                if (deletedUser.modifiedCount === 0) throw new Error('Delete user failed!');
+
+                postIds = posts.map(post => post._id);
                 commentIds = comments.map(comment => comment._id);
                 reportIds = reports.map(report => report._id);
                 let deletedInPostStatus = await Promise.all([
@@ -316,19 +337,47 @@ module.exports = {
                         }
                     ).session(session),
                     Comment.deleteMany({ _id: { $in: commentIds } }).session(session),
-                    Report.deleteMany({ _id: { $in: reportIds } }).session(session)
-                ]);
-                let deletedRepliesStatus = await Comment.updateMany(
-                    {
-                        'replies.replyBy': id
-                    },
-                    {
-                        $pull: {
-                            replies: { replyBy: new ObjectId(id) }
+                    Report.deleteMany({ _id: { $in: reportIds } }).session(session),
+                    Room.updateMany(
+                        { chatMate: id },
+                        {
+                            $pull: { chatMate: id }
                         }
+                    )
+                ]);
+                let [deletedRepliesStatus, deletedPostStatus] = await Promise.all([
+                    Comment.updateMany(
+                        {
+                            'replies.replyBy': id
+                        },
+                        {
+                            $pull: {
+                                replies: { replyBy: new ObjectId(id) }
+                            }
+                        }
+                    ).session(session),
+                    Post.deleteMany({ _id: { $in: postIds } }).session(session)
+                ]);
+                let count = postIds.reduce((pre, id) => {
+                    let postResource = resourceHelper.createPostPath(id.toString());
+                    if (fs.existsSync(postResource)) {
+                        fs.rmSync(postResource, {
+                            force: true,
+                            recursive: true
+                        });
+                        return pre + 1;
                     }
-                ).session(session);
-                if (deletedUser.modifiedCount === 0) throw new Error('Delete user failed!');
+                    return pre;
+                }, 0);
+                console.log(`Deleted ${count} post${count > 1 ? 's' : ''} resources`);
+                let avatarResource = resourceHelper.createAvatarFile(id);
+                if (fs.existsSync(avatarResource)) {
+                    fs.rmSync(avatarResource, {
+                        force: true,
+                        recursive: true
+                    });
+                    console.log('Avatar resource deleted');
+                }
             },
             successCallback() {
                 return res.status(200).json({

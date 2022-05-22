@@ -134,7 +134,7 @@ module.exports = {
                     data: user
                 });
 
-            user = await User.aggregate()
+            user = await User.aggregateWithDeleted()
                 .match({
                     _id: ObjectId(req.auth.userId)
                 })
