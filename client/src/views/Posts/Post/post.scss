@@ -121,6 +121,27 @@
       }
     }
   }
+
+  .slick-list {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 600px !important;
+    width: 614px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba($color: #000, $alpha: 0.8);
+
+    img {
+      display: block;
+      object-fit: contain;
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 @media only screen and (max-width: 640px) {

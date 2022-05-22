@@ -10,8 +10,11 @@ import StatusCard from '../components/status-card/StatusCard';
 
 import Table from '../components/table/Table';
 
+import { useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { userApiAdmin } from '../apis/userApiAdmin';
+
 const chartOptions = {
     series: [
         {
@@ -76,11 +79,13 @@ const Dashboard = () => {
     const [statusCards, setStatusCards] = useState([]);
     const [topUsers, setTopUsers] = useState([]);
     const [topPosts, setTopPosts] = useState([]);
+    const history = useHistory();
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
                 let res = await userApiAdmin.analytics();
+                console.log(res);
                 setAnalytics({ ...res });
                 setStatusCards([
                     {
@@ -127,6 +132,8 @@ const Dashboard = () => {
                 });
             } catch (error) {
                 console.log(error.message);
+                history.push('/');
+                window.location.reload();
             }
         };
         fetchAnalytics();
@@ -134,82 +141,94 @@ const Dashboard = () => {
 
     return (
         <div>
-            <h2 className="page-header">Dashboard</h2>
-            <div className="row">
-                <div className="col-6">
+            {analytics && (
+                <>
+                    <h2 className="page-header">Dashboard</h2>
                     <div className="row">
-                        {statusCards.map((item, index) => (
-                            <div className="col-6" key={index}>
-                                <StatusCard
-                                    icon={item.icon}
-                                    count={item.count}
-                                    title={item.title}
+                        <div className="col-6">
+                            <div className="row">
+                                {statusCards.map((item, index) => (
+                                    <div className="col-6" key={index}>
+                                        <StatusCard
+                                            icon={item.icon}
+                                            count={item.count}
+                                            title={item.title}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="col-6">
+                            <div className="card-admin full-height">
+                                <Chart
+                                    options={
+                                        themeReducer === 'theme-mode-dark'
+                                            ? {
+                                                  ...chartOptions.options,
+                                                  theme: { mode: 'dark' }
+                                              }
+                                            : {
+                                                  ...chartOptions.options,
+                                                  theme: { mode: 'light' }
+                                              }
+                                    }
+                                    series={chartOptions.series}
+                                    type="line"
+                                    height="100%"
                                 />
                             </div>
-                        ))}
-                    </div>
-                </div>
-                <div className="col-6">
-                    <div className="card-admin full-height">
-                        <Chart
-                            options={
-                                themeReducer === 'theme-mode-dark'
-                                    ? {
-                                          ...chartOptions.options,
-                                          theme: { mode: 'dark' }
-                                      }
-                                    : {
-                                          ...chartOptions.options,
-                                          theme: { mode: 'light' }
-                                      }
-                            }
-                            series={chartOptions.series}
-                            type="line"
-                            height="100%"
-                        />
-                    </div>
-                </div>
-                <div className="col-6">
-                    <div className="card-admin">
-                        <div className="card-admin__header">
-                            <h3>Famous Users</h3>
                         </div>
-                        <div className="card-admin__body">
-                            {topUsers?.body?.length > 0 && (
-                                <Table
-                                    headData={topUsers.head}
-                                    renderHead={(item, index) => renderCusomerHead(item, index)}
-                                    bodyData={topUsers.body}
-                                    renderBody={(item, index) => renderCusomerBody(item, index)}
-                                />
-                            )}
-                        </div>
-                        {/* <div className="card-admin__footer">
+                        <div className="col-6">
+                            <div className="card-admin">
+                                <div className="card-admin__header">
+                                    <h3>Famous Users</h3>
+                                </div>
+                                <div className="card-admin__body">
+                                    {topUsers?.body?.length > 0 && (
+                                        <Table
+                                            headData={topUsers.head}
+                                            renderHead={(item, index) =>
+                                                renderCusomerHead(item, index)
+                                            }
+                                            bodyData={topUsers.body}
+                                            renderBody={(item, index) =>
+                                                renderCusomerBody(item, index)
+                                            }
+                                        />
+                                    )}
+                                </div>
+                                {/* <div className="card-admin__footer">
                             <Link to="/">view all</Link>
                         </div> */}
-                    </div>
-                </div>
-                <div className="col-6">
-                    <div className="card-admin">
-                        <div className="card-admin__header">
-                            <h3>Posts Recently</h3>
+                            </div>
                         </div>
-                        <div className="card-admin__body">
-                            {topPosts?.body?.length > 0 && (
-                                <Table
-                                    headData={topPosts.header}
-                                    renderHead={(item, index) => renderOrderHead(item, index)}
-                                    bodyData={topPosts.body}
-                                    renderBody={(item, index) => renderOrderBody(item, index)}
-                                />
-                            )}
-                        </div>
-                        {/* <div className="card-admin__footer">
+                        <div className="col-6">
+                            <div className="card-admin">
+                                <div className="card-admin__header">
+                                    <h3>Posts Recently</h3>
+                                </div>
+                                <div className="card-admin__body">
+                                    {topPosts?.body?.length > 0 && (
+                                        <Table
+                                            headData={topPosts.header}
+                                            renderHead={(item, index) =>
+                                                renderOrderHead(item, index)
+                                            }
+                                            bodyData={topPosts.body}
+                                            renderBody={(item, index) =>
+                                                renderOrderBody(item, index)
+                                            }
+                                        />
+                                    )}
+                                </div>
+                                {/* <div className="card-admin__footer">
                             <Link to="/">view all</Link>
                         </div> */}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 };

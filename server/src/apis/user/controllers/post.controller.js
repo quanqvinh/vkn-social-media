@@ -366,17 +366,18 @@ module.exports = {
                 userId = req.auth.userId;
             let post = await Post.findById(postId);
             let index = post.likes.findIndex(id => objectIdHelper.compare(id, userId));
+            let temp = post.numberOfLikes;
             if (index === -1) {
                 post.likes.push(userId);
-                post.numberOfLikes++;
+                post.numberOfLikes = post.likes.length;
             } else {
                 post.likes.splice(index, 1);
-                post.numberOfLikes--;
+                post.numberOfLikes = post.likes.length;
             }
             await post.save();
             res.status(200).json({
                 status: 'success',
-                message: index === -1 ? 'liked post' : 'unliked post'
+                message: temp < post.numberOfLikes ? 'liked post' : 'unliked post'
             });
         } catch (error) {
             console.log(error);

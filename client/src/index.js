@@ -9,14 +9,17 @@ import './assets/boxicons-2.0.7/css/boxicons.min.css';
 
 import './assets/styles/grid.css';
 import './assets/styles/theme.css';
+import { createBrowserHistory } from 'history';
+import { Router } from 'react-router-dom';
 
+const history = createBrowserHistory();
 document.title = 'VKN Social Media';
 
 ReactDOM.render(
     <Provider store={store}>
-        <React.StrictMode>
+        <Router history={history}>
             <App waitBeforeShow={500} />
-        </React.StrictMode>
+        </Router>
     </Provider>,
     document.getElementById('root')
 );

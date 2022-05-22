@@ -17,6 +17,7 @@ const Profile = ({ userId, element }) => {
         e: null,
         userId: null
     });
+    const [refetch, setRefetch] = useState(false);
 
     const renderHead = (item, index) => <th key={index}>{item}</th>;
 
@@ -47,6 +48,10 @@ const Profile = ({ userId, element }) => {
         });
     };
 
+    const refetchProfile = () => {
+        setRefetch(!refetch);
+    };
+
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -72,7 +77,7 @@ const Profile = ({ userId, element }) => {
             }
         };
         fetchUser();
-    }, [userId]);
+    }, [userId, refetch]);
 
     const profileRef = useRef([]);
     useEffect(() => {
@@ -94,7 +99,7 @@ const Profile = ({ userId, element }) => {
     const handelCheckState = () => {
         const disableUser = async () => {
             try {
-                await userApiAdmin.disable(user._id, 60 * 60);
+                await userApiAdmin.disable(user._id);
                 setUser({ ...user, disabled: !user.disabled });
             } catch (error) {
                 console.log(error.message);
@@ -177,19 +182,20 @@ const Profile = ({ userId, element }) => {
                                             />
                                         )}
                                     </div>
-                                    {isDelete.state && (
-                                        <Popup
-                                            title="This action will delete this post forever"
-                                            ok="delete"
-                                            cancel="cancel"
-                                            element={isDelete.e}
-                                            postId={isDelete.postId}
-                                        />
-                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {isDelete.state && (
+                        <Popup
+                            title="This action will delete this post forever"
+                            ok="delete"
+                            cancel="cancel"
+                            element={isDelete.e}
+                            postId={isDelete.postId}
+                            refetchProfile={refetchProfile}
+                        />
+                    )}
                 </>
             )}
         </div>

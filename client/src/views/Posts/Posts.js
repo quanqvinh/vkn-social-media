@@ -18,6 +18,7 @@ function Posts(props) {
 
                 res?.status === 'success' && setPosts([...res.posts]);
 
+                console.log(res);
                 dispatch(fetchNotificationsRequest(res.uncheckedNotifications));
             } catch (error) {
                 console.log(error.message);

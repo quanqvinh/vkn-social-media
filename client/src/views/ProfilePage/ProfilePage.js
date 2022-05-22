@@ -24,9 +24,15 @@ const ProfilePage = () => {
     });
     const [posts, setPosts] = useState([]);
 
-    const closePost = useCallback(() => {
-        setPostSelected({ isSelected: false, post: null });
-    }, [postSelected]);
+    const closePost = useCallback(
+        postId => {
+            setPostSelected({ isSelected: false, post: null });
+
+            console.log('leave', socket);
+            socket.emit('post:leave_post_room', { postId: postId });
+        },
+        [postSelected]
+    );
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -107,6 +113,16 @@ const ProfilePage = () => {
         };
         unFriend();
     };
+
+    const handelSelectPost = post => {
+        setPostSelected({
+            isSelected: true,
+            post
+        });
+
+        console.log('join', socket);
+        socket.emit('post:join_post_room', { postId: post._id });
+    };
     return (
         <>
             <Header />
@@ -179,12 +195,7 @@ const ProfilePage = () => {
                                     <div
                                         className="post"
                                         key={post._id}
-                                        onClick={() =>
-                                            setPostSelected({
-                                                isSelected: true,
-                                                post
-                                            })
-                                        }>
+                                        onClick={() => handelSelectPost(post)}>
                                         <div className="post__img">
                                             <img
                                                 src={

@@ -10,5 +10,15 @@ export const postApiAdmin = {
                 'access-token': accessToken
             }
         });
+    },
+
+    delete: id => {
+        let url = `/post/${id}/delete`;
+        let accessToken = getCookie('accessToken');
+        return axiosAdmin.delete(url, {
+            headers: {
+                'access-token': accessToken
+            }
+        });
     }
 };

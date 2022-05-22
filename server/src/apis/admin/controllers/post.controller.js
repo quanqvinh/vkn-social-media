@@ -6,6 +6,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
 
 const COUNT_ITEM_OF_A_PAGE = 10;
+const mongodbHelper = require('../../../utils/mongodbHelper');
 module.exports = {
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {
@@ -166,14 +167,13 @@ module.exports = {
                         _id: post._id
                     }).session(session),
                     Comment.deleteMany({
-                        _id: { $in: commentIds }
+                        _id: { $in: post.comments }
                     }).session(session),
                     Report.deleteMany({
-                        _id: { $in: reportIds }
+                        _id: { $in: post.reports }
                     }).session(session)
                 ]);
-                if (deletedStatus.some(status => status.deletedCount === 0))
-                    throw new Error('Delete failed');
+                if (deletedStatus[0].deletedCount === 0) throw new Error('Delete failed');
             },
             successCallback() {
                 return res.status(200).json({ status: 'success' });

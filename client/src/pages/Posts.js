@@ -18,8 +18,9 @@ const Posts = () => {
     const [isDelete, setIsDelete] = useState({
         state: false,
         e: null,
-        userId: null
+        postId: null
     });
+
     const [currentPage, setCurrentPage] = useState(1);
     const [searchKeyWords, setSearchKeyWords] = useState('');
 
@@ -49,8 +50,14 @@ const Posts = () => {
         setIsDelete({
             state: true,
             e: e.target.closest('td'),
-            userId: id
+            postId: id
         });
+    };
+
+    const [refetch, setRefetch] = useState(false);
+
+    const refetchPosts = () => {
+        setRefetch(!refetch);
     };
 
     useEffect(() => {
@@ -83,7 +90,7 @@ const Posts = () => {
             }
         };
         fetchPosts();
-    }, [currentPage]);
+    }, [currentPage, refetch]);
 
     const changePage = newPage => {
         setCurrentPage(newPage);
@@ -164,7 +171,8 @@ const Posts = () => {
                                 ok="delete"
                                 cancel="cancel"
                                 element={isDelete.e}
-                                userId={isDelete.postId}
+                                postId={isDelete.postId}
+                                refetchPosts={refetchPosts}
                             />
                         )}
                     </div>

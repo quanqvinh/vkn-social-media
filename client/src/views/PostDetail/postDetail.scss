@@ -20,12 +20,29 @@
   grid-template-columns: 0.58fr 0.42fr;
 
   .post__left {
-    img {
-      object-fit: cover;
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
-      width: 100%;
-      height: 100%;
+    position: relative;
+    background-color: rgba($color: #333, $alpha: 1);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+
+    .slick-list {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      height: 700px !important;
+      width: 700px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        display: block;
+        object-fit: cover;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 

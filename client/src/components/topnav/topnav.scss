@@ -69,6 +69,7 @@
   display: flex;
   align-items: center;
   padding: 20px;
+  cursor: pointer;
 
   &:hover {
     background-color: var(--second-bg);
@@ -78,4 +79,8 @@
     margin-right: 20px;
     font-size: 1.5rem;
   }
+}
+
+.forgot__label {
+  min-width: 120px !important;
 }
