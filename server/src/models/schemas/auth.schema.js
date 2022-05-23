@@ -19,7 +19,7 @@ const authSchema = new mongoose.Schema(
         },
         remainingTime: {
             type: Date,
-            default: new Date(Date.now()),
+            default: undefined,
             index: { expireAfterSeconds: 60 * 60 * 24 * 7 }
         }
     },

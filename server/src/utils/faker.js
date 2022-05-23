@@ -88,12 +88,12 @@ module.exports = {
         let endDate = new Date().getTime();
         let userIds = [],
             postIds = [];
-        await mongodbHelper.executeTransactionWithRetry({
-            async executeCallback(session) {
-                console.log(`Start create ${numberOfUsers} user...`);
+        console.log(`Start create ${numberOfUsers} user...`);
+        console.log('\nCreate user and post data...');
 
-                console.log('\nCreate user and post data...');
-                for (let i = 0; i < numberOfUsers; i++) {
+        for (let i = 0; i < numberOfUsers; i++) {
+            await mongodbHelper.executeTransactionWithRetry({
+                async executeCallback(session) {
                     const userId = new ObjectId();
                     const firstName = faker.name.firstName();
                     const lastName = faker.name.lastName();
@@ -155,16 +155,16 @@ module.exports = {
                         postIds.push(postId);
                     }
                     userIds.push(userId);
+                },
+                successCallback() {
+                    console.log(`Created user and post data successfully`);
+                },
+                errorCallback(error) {
+                    console.log(error);
+                    console.log('Created failed');
                 }
-            },
-            successCallback() {
-                console.log(`Created user and post data successfully`);
-            },
-            errorCallback(error) {
-                console.log(error);
-                console.log('Created failed');
-            }
-        });
+            });
+        }
         while (true) {
             try {
                 console.log(`\nSave ${numberOfUsers} avatars`);

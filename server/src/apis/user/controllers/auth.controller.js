@@ -34,7 +34,8 @@ module.exports = {
                     username,
                     email,
                     auth: {
-                        password: crypto.hash(password)
+                        password: crypto.hash(password),
+                        remainingTime: Date.now()
                     },
                     name
                 }).save({

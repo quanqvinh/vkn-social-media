@@ -5,7 +5,7 @@ module.exports = {
         try {
             const session = await mongoose.startSession();
             let i,
-                retryTime = 20;
+                retryTime = 100;
             for (i = 0; i < retryTime; i++) {
                 try {
                     session.startTransaction();
