@@ -41,7 +41,7 @@ const Users = () => {
     const [open, setOpen] = useState(false);
     const notificationRef = useRef(null);
     const [formInfos, setFormInfos] = useState({
-        role: 'Admin'
+        role: 'admin'
     });
 
     const handleOpen = () => setOpen(true);
@@ -203,6 +203,7 @@ const Users = () => {
     const handelAddUser = () => {
         const addUser = async () => {
             let { email, username, name, role } = formInfos;
+            console.log(formInfos);
             if (!email || !username || !name || !role) {
                 notificationRef.current.innerHTML = 'Please fill in all fields';
                 return;
@@ -213,7 +214,7 @@ const Users = () => {
                     username,
                     email,
                     name,
-                    isAdmin: role === 'Admin' ? true : false
+                    isAdmin: role === 'admin' ? true : false
                 });
                 console.log(res);
                 notificationRef.current.innerHTML = `Account has been sent to ${email}`;
@@ -317,15 +318,15 @@ const Users = () => {
                                         <label className="forgot__label">Role:</label>
                                         <select
                                             className="forgot__email"
-                                            value={formInfos.gender || 'Admin'}
+                                            value={formInfos.role || 'admin'}
                                             onChange={e =>
                                                 setFormInfos({
                                                     ...formInfos,
-                                                    gender: e.target.value
+                                                    role: e.target.value
                                                 })
                                             }>
-                                            <option value="male">Admin</option>
-                                            <option value="female">User</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="user">User</option>
                                         </select>
                                     </div>
                                 </div>
@@ -340,7 +341,7 @@ const Users = () => {
                             <div className="card__body">
                                 {users?.body?.length > 0 && (
                                     <Table
-                                        pageRange={users.pageRange}
+                                        pageRange={users.pageRange > 15 ? 15 : users.pageRange}
                                         headData={users.head}
                                         renderHead={(item, index) => renderHead(item, index)}
                                         bodyData={users.body}

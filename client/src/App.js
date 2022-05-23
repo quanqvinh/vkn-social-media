@@ -17,6 +17,7 @@ import { useState } from 'react';
 import EditEmail from './views/EditProfile/EditEmail/EditEmail';
 import Layout from './components/layout/Layout';
 import { addNotifications } from './actions/notification';
+import Dashboard from './pages/Dashboard';
 
 import { useRef } from 'react';
 import ResetPassword from './views/ResetPassword/ResetPassword';

@@ -6,6 +6,8 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const resourceHelper = require('../../../utils/resourceHelper');
 const mongodbHelper = require('../../../utils/mongodbHelper');
 
+const fs = require('fs');
+
 module.exports = {
     // [GET] /v1/posts
     async getPostsOfPage(req, res) {

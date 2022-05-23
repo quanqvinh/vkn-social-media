@@ -1,17 +1,14 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
 import Chart from 'react-apexcharts';
 
-import { useSelector, useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import StatusCard from '../components/status-card/StatusCard';
 
 import Table from '../components/table/Table';
 
 import { useHistory } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { userApiAdmin } from '../apis/userApiAdmin';
 
@@ -79,14 +76,76 @@ const Dashboard = () => {
     const [statusCards, setStatusCards] = useState([]);
     const [topUsers, setTopUsers] = useState([]);
     const [topPosts, setTopPosts] = useState([]);
-    const history = useHistory();
 
+    const formatAnalytics = (users, posts) => {
+        let newUsers = [];
+        let newPosts = [];
+        if (!users || !posts) return;
+
+        for (let i = users.length - 12; i < users.length; i++) {
+            newUsers.push(users[i].amountNewUsers);
+            newPosts.push(posts[i].amountNewUsers);
+        }
+
+        return {
+            series: [
+                {
+                    name: 'New Users',
+                    data: [...newUsers]
+                },
+                {
+                    name: 'New Posts',
+                    data: [...newPosts]
+                }
+            ],
+            options: {
+                color: ['#6ab04c', '#2980b9'],
+                chart: {
+                    background: 'transparent'
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+
+                xaxis: {
+                    categories: [
+                        'Jun',
+                        'Jul',
+                        'Aug',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dec',
+                        'Jan',
+                        'Feb',
+                        'Mar',
+                        'Apr',
+                        'May'
+                    ]
+                },
+                legend: {
+                    position: 'top'
+                },
+                grid: {
+                    show: false
+                }
+            }
+        };
+    };
+
+    console.log(analytics);
+    console.log('char', chartOptions);
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
                 let res = await userApiAdmin.analytics();
-                console.log(res);
-                setAnalytics({ ...res });
+                setAnalytics({
+                    ...formatAnalytics(res.newUserByMonth, res.newPostByMonth)
+                });
+
                 setStatusCards([
                     {
                         icon: 'bx bxs-user-pin',
@@ -132,8 +191,6 @@ const Dashboard = () => {
                 });
             } catch (error) {
                 console.log(error.message);
-                history.push('/');
-                window.location.reload();
             }
         };
         fetchAnalytics();
@@ -160,22 +217,24 @@ const Dashboard = () => {
                         </div>
                         <div className="col-6">
                             <div className="card-admin full-height">
-                                <Chart
-                                    options={
-                                        themeReducer === 'theme-mode-dark'
-                                            ? {
-                                                  ...chartOptions.options,
-                                                  theme: { mode: 'dark' }
-                                              }
-                                            : {
-                                                  ...chartOptions.options,
-                                                  theme: { mode: 'light' }
-                                              }
-                                    }
-                                    series={chartOptions.series}
-                                    type="line"
-                                    height="100%"
-                                />
+                                {analytics?.series?.length > 0 && (
+                                    <Chart
+                                        options={
+                                            themeReducer === 'theme-mode-dark'
+                                                ? {
+                                                      ...analytics.options,
+                                                      theme: { mode: 'dark' }
+                                                  }
+                                                : {
+                                                      ...analytics.options,
+                                                      theme: { mode: 'light' }
+                                                  }
+                                        }
+                                        series={analytics.series}
+                                        type="line"
+                                        height="100%"
+                                    />
+                                )}
                             </div>
                         </div>
                         <div className="col-6">

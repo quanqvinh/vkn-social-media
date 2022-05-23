@@ -35,6 +35,7 @@ const ChatRoom = props => {
             ...listRef.current,
             {
                 content: inputContent,
+                isImage: false,
                 img: null,
                 sendBy: user.username,
                 isMine: true
@@ -56,7 +57,7 @@ const ChatRoom = props => {
                     image: reader.result,
                     username: currentRoom.chatMate.username,
                     roomId: currentRoom.roomId,
-                    userId: user._id
+                    userId: currentRoom.chatMate._id
                 });
             };
             reader.readAsDataURL(image);
@@ -70,14 +71,14 @@ const ChatRoom = props => {
             setListMessage([
                 ...listMessage,
                 {
-                    content: null,
+                    content: '',
+                    isImage: true,
                     img: imgSrc,
                     sendBy: user.username,
                     isMine: true
                 }
             ]);
             handelLastestMessage(currentRoom.roomId, inputContent);
-            setInputContent('');
         },
         [listMessage, inputContent]
     );
@@ -115,6 +116,8 @@ const ChatRoom = props => {
         fetchMessages();
     }, [currentPageMessages, currentRoom.roomId]);
 
+    console.log(listMessage);
+
     useEffect(() => {
         setCurrentPageMessages(0);
     }, [currentRoom.roomId]);
@@ -122,6 +125,7 @@ const ChatRoom = props => {
     useEffect(() => {
         socket &&
             socket.on('chat:print_message', ({ message }) => {
+                console.log(message);
                 listRef.current = [...listRef.current, message];
                 setListMessage([...listRef.current]);
             });
@@ -163,15 +167,19 @@ const ChatRoom = props => {
                 {listMessage?.length > 0 &&
                     listMessage.map((message, index) => (
                         <div className="content__day" key={index}>
-                            {/* <p className="content__day-time">
-                        July 10, 2021, 11:27 am
-                     </p> */}
                             {message.sendBy === user.username ? (
-                                message.content !== null ? (
+                                !message.isImage ? (
                                     <p className="content__day-message">{message.content}</p>
                                 ) : (
                                     <div className="content__day-img">
-                                        <img src={message.img} alt="img" />
+                                        <img
+                                            src={
+                                                message.img ||
+                                                process.env.REACT_APP_STATIC_URL +
+                                                    `/messages/${currentRoom.roomId}.png/${message._id}.png`
+                                            }
+                                            alt="img"
+                                        />
                                     </div>
                                 )
                             ) : (
@@ -185,7 +193,19 @@ const ChatRoom = props => {
                                             alt=""
                                         />
                                     </div>
-                                    <p className="content__day-message">{message.content}</p>
+                                    {!message.isImage ? (
+                                        <p className="content__day-message">{message.content} </p>
+                                    ) : (
+                                        <div className="content__day-img">
+                                            <img
+                                                src={
+                                                    process.env.REACT_APP_STATIC_URL +
+                                                    `/messages/${currentRoom.roomId}.png/${message._id}.png`
+                                                }
+                                                alt="img"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

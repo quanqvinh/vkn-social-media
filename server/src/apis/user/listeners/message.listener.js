@@ -105,11 +105,11 @@ module.exports = (io, socket) => {
             return;
         }
         let message,
-            roomResource = resourceHelper.createRoomImageFile(roomId);
+            roomResource = resourceHelper.createMessageImageFile(roomId);
         await mongodbHelper.executeTransactionWithRetry({
             async executeCallback(session) {
                 message = new Message({
-                    sendBy: username,
+                    sendBy: socket.handshake.auth.username,
                     isImage: true
                 });
                 let imageBase64 = image.split(';base64,')[1];
