@@ -116,19 +116,28 @@ module.exports = (io, socket) => {
 
                 let validate = await validateRoom(roomId, userId, socket.handshake.auth.userId);
                 if (validate === null) {
-                    let savedRoom = await Room.create(
-                        [
+                    let [room, userUpdateStatus] = await Promise.all([
+                        Room.create(
+                            [
+                                {
+                                    _id: roomId,
+                                    chatMate: [socket.handshake.auth.userId, userId]
+                                }
+                            ],
+                            { session }
+                        ),
+                        User.updateMany(
                             {
-                                _id: roomId,
-                                chatMate: [userId, socket.handshake.auth.userId],
-                                messages: [message]
-                            }
-                        ],
-                        { session }
-                    );
-
-                    if (!savedRoom) throw new Error('Create room failed');
-                    return;
+                                _id: { $in: [socket.handshake.auth.userId, userId] }
+                            },
+                            {
+                                $push: { rooms: roomId }
+                            },
+                            { session }
+                        )
+                    ]);
+                    if (!room || userUpdateStatus.modifiedCount < 2)
+                        throw new Error('Cannot create room');
                 } else if (validate === false) throw new Error('Unauthorized');
 
                 let updatedRoom = await Room.updateOne(
