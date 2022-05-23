@@ -106,7 +106,7 @@ const Topnav = props => {
     );
 
     const setDefault = e => {
-        console.clear();
+        // console.clear();
         e.target.onerror = null;
         e.target.src = avatarDefault;
     };

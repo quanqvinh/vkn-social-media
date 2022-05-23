@@ -156,7 +156,7 @@ const Posts = () => {
                         <div className="card__body">
                             {posts?.body?.length > 0 && (
                                 <Table
-                                    pageRange={posts.pageRange}
+                                    pageRange={posts.pageRange > 15 ? 15 : posts.pageRange}
                                     headData={posts.head}
                                     renderHead={(item, index) => renderHead(item, index)}
                                     bodyData={posts.body}

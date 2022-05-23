@@ -136,7 +136,7 @@ const ProfilePage = () => {
                     hidden
                     onChange={e => handelChangeAvatar(e)}
                 />
-                <label htmlFor="input-file-avatar" className="modal__upload">
+                <label htmlFor="input-file-avatar" className="modal__upload-label">
                     Upload Photo
                 </label>
                 <p className="modal__cancel" onClick={closeModal}>

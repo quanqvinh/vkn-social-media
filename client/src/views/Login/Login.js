@@ -212,30 +212,32 @@ export default function Login() {
                                         aria-labelledby="modal-modal-title"
                                         aria-describedby="modal-modal-description">
                                         <Box sx={style}>
-                                            <p
-                                                className="forgot__notification"
-                                                ref={notificationRef}></p>
-                                            <span className="forgot__title">
-                                                Please fill in your email
-                                            </span>
+                                            <div className="form__forgotPassword-login">
+                                                <p
+                                                    className="forgot__notification"
+                                                    ref={notificationRef}></p>
+                                                <span className="forgot__title">
+                                                    Please fill in your email
+                                                </span>
 
-                                            <div className="forgot__content">
-                                                <label className="forgot__label">Email:</label>
-                                                <input
-                                                    onChange={e =>
-                                                        setEmailForgotPassword(e.target.value)
-                                                    }
-                                                    value={emailForgotPassword}
-                                                    type="text"
-                                                    className="forgot__email"
-                                                    placeholder="Your email..."
-                                                />
+                                                <div className="forgot__content-login">
+                                                    <label className="forgot__label">Email:</label>
+                                                    <input
+                                                        onChange={e =>
+                                                            setEmailForgotPassword(e.target.value)
+                                                        }
+                                                        value={emailForgotPassword}
+                                                        type="text"
+                                                        className="forgot__email"
+                                                        placeholder="Your email..."
+                                                    />
+                                                </div>
+                                                <button
+                                                    className="forgot__send"
+                                                    onClick={handelForgotPassword}>
+                                                    Ok
+                                                </button>
                                             </div>
-                                            <button
-                                                className="forgot__send"
-                                                onClick={handelForgotPassword}>
-                                                Ok
-                                            </button>
                                         </Box>
                                     </Modal>
                                 </div>

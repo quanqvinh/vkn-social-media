@@ -1,5 +1,6 @@
 .table-wrapper {
   overflow-y: auto;
+  margin-bottom: 10px;
 }
 
 table {
@@ -32,7 +33,7 @@ tbody > tr:hover {
   width: 100%;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10px;
   user-select: none;
 }
 
