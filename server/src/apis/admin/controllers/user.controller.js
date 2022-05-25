@@ -397,7 +397,7 @@ module.exports = {
     // [POST] /v1/user/add
     async addNewAccount(req, res) {
         let { username, email, name, isAdmin } = req.body;
-        if (!(username && email && name && isAdmin))
+        if (!(username && email && name && isAdmin !== undefined))
             return res.status(400).json({
                 status: 'error',
                 message: 'Missing or wrong parameters'

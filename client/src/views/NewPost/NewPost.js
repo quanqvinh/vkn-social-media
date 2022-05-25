@@ -86,13 +86,13 @@ const NewPost = props => {
             try {
                 let res = await postApi.add(formData);
                 console.log(res);
+                handelClickNewPost();
+                window.location.reload();
             } catch (error) {
                 console.log(error.message);
             }
         };
         addPost();
-        handelClickNewPost();
-        window.location.reload();
     };
 
     return (
