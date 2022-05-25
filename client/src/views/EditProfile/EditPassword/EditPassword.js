@@ -3,12 +3,12 @@ import Header from '../../Header/Header';
 import Footer from '../../Footer/Footer';
 import LeftNav from '../LeftNav/LeftNav';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import userApi from '../../../apis/userApi';
 const EditPassword = () => {
     const user = useSelector(state => state.user);
-    const [notify, setNotify] = useState('');
+    const notifyRef = useRef(null);
     const [formInfos, setFormInfos] = useState({
         password: '',
         newPassword: '',
@@ -18,7 +18,7 @@ const EditPassword = () => {
     const handelSubmit = e => {
         e.preventDefault();
         if (!(formInfos.newPassword === formInfos.passwordConfirm)) {
-            setNotify("Password confirm doesn't match");
+            notifyRef.current.innerHTML = "Password confirm doesn't match";
             return;
         }
 
@@ -26,10 +26,11 @@ const EditPassword = () => {
             try {
                 let res = await userApi.editPassword(formInfos);
                 console.log(res);
-                setNotify('Change password successful');
+                notifyRef.current.innerHTML = 'Change password successful';
+                notifyRef.current.style.color = 'green';
             } catch (error) {
                 console.log(error.message);
-                setNotify('Your old password is incorrect');
+                notifyRef.current.innerHTML = 'Your old password is incorrect';
             }
         };
         editPassword();
@@ -49,7 +50,7 @@ const EditPassword = () => {
                             iconSize="medium"
                             captionSize="small"
                         />
-                        <p className="body__right-notify">{notify}</p>
+                        <p className="body__right-notify" ref={notifyRef}></p>
                         <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__password">
                                 <span className="form__password-label">Old Password</span>

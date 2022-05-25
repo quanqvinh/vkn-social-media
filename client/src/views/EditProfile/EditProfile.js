@@ -1,7 +1,7 @@
 import './editProfile.scss';
 import Header from '../Header/Header';
 import Footer from '../Footer/Footer';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ProfilePreview from '../Profile/ProfilePreview/ProfilePreview';
 import { useSelector, useDispatch } from 'react-redux';
 import TextField from '@mui/material/TextField';
@@ -23,6 +23,7 @@ const EditProfile = () => {
         dob: user.dob,
         gender: user.gender || 'Male'
     });
+    const notiRef = useRef(null);
 
     const handelSubmit = e => {
         e.preventDefault();
@@ -34,9 +35,13 @@ const EditProfile = () => {
                     let action = editUser(formInfos);
                     dispatch(action);
                     setIsEdit(!isEdit);
+                    notiRef.current.innerHTML = 'Edit profile successful';
+                    notiRef.current.style.color = 'green';
                 }
             } catch (error) {
                 console.log(error.message);
+                notiRef.current.innerHTML = 'Edit profile failed';
+                notiRef.current.style.color = 'red';
             }
         };
         editProfile();
@@ -58,6 +63,9 @@ const EditProfile = () => {
                             iconSize="medium"
                             captionSize="small"
                         />
+                        <span
+                            style={{ fontSize: '0.87rem', marginLeft: '-25px', marginTop: '-10px' }}
+                            ref={notiRef}></span>
                         <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__name">
                                 <span className="form__name-label">Name</span>

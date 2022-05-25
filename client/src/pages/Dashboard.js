@@ -8,43 +8,8 @@ import StatusCard from '../components/status-card/StatusCard';
 
 import Table from '../components/table/Table';
 
-import { useHistory } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { userApiAdmin } from '../apis/userApiAdmin';
-
-const chartOptions = {
-    series: [
-        {
-            name: 'New Users',
-            data: [40, 70, 20, 90, 36, 80, 30, 91, 60]
-        },
-        {
-            name: 'New Posts',
-            data: [40, 10, 30, 80, 60, 90, 60, 40, 60]
-        }
-    ],
-    options: {
-        color: ['#6ab04c', '#2980b9'],
-        chart: {
-            background: 'transparent'
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
-        },
-        legend: {
-            position: 'top'
-        },
-        grid: {
-            show: false
-        }
-    }
-};
 
 const renderCusomerHead = (item, index) => <th key={index}>{item}</th>;
 
@@ -84,7 +49,7 @@ const Dashboard = () => {
 
         for (let i = users.length - 12; i < users.length; i++) {
             newUsers.push(users[i].amountNewUsers);
-            newPosts.push(posts[i].amountNewUsers);
+            newPosts.push(posts[i].amountNewPosts);
         }
 
         return {
@@ -137,11 +102,11 @@ const Dashboard = () => {
     };
 
     console.log(analytics);
-    console.log('char', chartOptions);
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
                 let res = await userApiAdmin.analytics();
+                console.log(res);
                 setAnalytics({
                     ...formatAnalytics(res.newUserByMonth, res.newPostByMonth)
                 });
@@ -280,9 +245,6 @@ const Dashboard = () => {
                                         />
                                     )}
                                 </div>
-                                {/* <div className="card-admin__footer">
-                            <Link to="/">view all</Link>
-                        </div> */}
                             </div>
                         </div>
                     </div>

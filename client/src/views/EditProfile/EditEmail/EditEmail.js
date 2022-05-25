@@ -3,13 +3,13 @@ import Header from '../../Header/Header';
 import Footer from '../../Footer/Footer';
 import LeftNav from '../LeftNav/LeftNav';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import userApi from '../../../apis/userApi';
 
 const EditEmail = () => {
     const user = useSelector(state => state.user);
-    const [notify, setNotify] = useState('');
+    const notifyRef = useRef(null);
     const [formInfos, setFormInfos] = useState({
         email: user.email,
         newEmail: ''
@@ -25,9 +25,11 @@ const EditEmail = () => {
                 };
                 let res = await userApi.requestEditEmail(data);
                 console.log(res);
-                setNotify('Verify email has been sent to your email');
+                notifyRef.current.innerHTML = 'Verify email has been sent to your email';
+                notifyRef.current.style.color = 'green';
             } catch (error) {
                 console.log(error.message);
+                notifyRef.current.innerHTML = 'Change email failed';
             }
         };
         requestEditEmail();
@@ -47,9 +49,10 @@ const EditEmail = () => {
                             iconSize="medium"
                             captionSize="small"
                         />
-                        <p className="body__right-notify" style={{ marginLeft: 95 }}>
-                            {notify}
-                        </p>
+                        <p
+                            ref={notifyRef}
+                            className="body__right-notify"
+                            style={{ marginLeft: 130 }}></p>
                         <form className="right__form" onSubmit={e => handelSubmit(e)}>
                             <div className="form__email">
                                 <span className="form__email-label">Old Email</span>
