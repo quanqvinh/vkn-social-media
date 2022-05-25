@@ -224,18 +224,18 @@ a.navLink--active {
         }
 
         .profile {
-          gap: 35px;
           width: 300px;
-          div {
-            margin-right: 25px;
-          }
 
           .textContainer {
-            flex-direction: row;
-            align-items: center;
+            display: block;
             font-size: 13px;
 
+            .accountName {
+              display: inline;
+            }
+
             .name {
+              display: inline;
               margin-top: 0;
               margin-left: 4px;
               font-weight: 300;

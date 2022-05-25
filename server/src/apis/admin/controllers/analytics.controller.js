@@ -66,7 +66,8 @@ module.exports = {
                     .addFields({
                         popularity: { $add: ['$totalNumberOfLikes', '$totalNumberOfComments'] }
                     })
-                    .sort('-popularity -numberOfFriends -joinedAt'),
+                    .sort('-popularity -numberOfFriends -joinedAt')
+                    .limit(6),
                 Post.aggregate()
                     .lookup({
                         from: 'users',
@@ -132,7 +133,8 @@ module.exports = {
                     .sort({
                         popularity: -1,
                         createdAt: -1
-                    }),
+                    })
+                    .limit(6),
                 User.countDocuments(),
                 Post.countDocuments(),
                 Comment.countDocuments(),
@@ -173,7 +175,7 @@ module.exports = {
                     .project({
                         year: '$_id.year',
                         month: '$_id.month',
-                        amountNewUsers: { $size: '$newUsers' },
+                        amountNewPosts: { $size: '$newUsers' },
                         _id: 0
                     })
                     .sort('year month')

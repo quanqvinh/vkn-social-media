@@ -69,7 +69,9 @@ const userApi = {
     edit: data => {
         const url = `/user/edit/info`;
         let accessToken = getCookie('accessToken');
+        console.log(accessToken);
         return axiosClient.patch(url, {
+            accessToken,
             headers: {
                 'access-token': accessToken
             },
@@ -79,18 +81,22 @@ const userApi = {
 
     editPassword: data => {
         const url = `/user/edit/password`;
-        return axiosClient.patch(url, { ...data });
+        let accessToken = getCookie('accessToken');
+        return axiosClient.patch(url, { accessToken, ...data });
     },
 
     requestEditEmail: data => {
         const url = `/user/edit/email/request`;
-        return axiosClient.post(url, { ...data });
+        let accessToken = getCookie('accessToken');
+
+        return axiosClient.post(url, { accessToken, ...data });
     },
 
     editEmail: token => {
         let accessToken = getCookie('accessToken');
         const url = `/user/edit/email`;
         return axiosClient.patch(url, {
+            accessToken,
             headers: {
                 'access-token': accessToken
             },
