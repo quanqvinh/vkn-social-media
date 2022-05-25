@@ -187,14 +187,14 @@ a.navLink--active {
       right: 0;
       width: 490px;
       height: 380px;
-      overflow-y: scroll;
+      overflow-y: auto;
       overflow-x: hidden;
       box-shadow: 0px 1px 4px #888;
       border-radius: 4px;
       background-color: #fff;
 
       &::-webkit-scrollbar {
-        background-color: #fafafa;
+        background-color: #fff;
         width: 5px;
         border-radius: 4px;
       }
@@ -205,9 +205,11 @@ a.navLink--active {
 
       &-item {
         display: flex;
+        flex-wrap: wrap;
         padding: 10px 15px;
         cursor: pointer;
         transition: 0.2s ease;
+        gap: 10px;
 
         &:hover {
           background-color: #fafafa;
@@ -224,6 +226,10 @@ a.navLink--active {
         .profile {
           gap: 35px;
           width: 300px;
+          div {
+            margin-right: 25px;
+          }
+
           .textContainer {
             flex-direction: row;
             align-items: center;
