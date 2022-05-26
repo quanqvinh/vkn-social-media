@@ -1,8 +1,8 @@
 # vkn-social-media
 
-Hello everybody, welcome to our project: Build social-media using MERN stack
+# Hello everybody, welcome to our project: Build social-media using MERN stack
 
-# I. What we do in this app
+# What we do in this app
 - Authen using jwt.
 - Limit time token jwt and refresh using refresh token.
 - Permission admin and user when login.
