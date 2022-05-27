@@ -2,7 +2,6 @@ const userRouter = require('./user.router');
 const postRouter = require('./post.router');
 const authRouter = require('./auth.router');
 const roomRouter = require('./room.router');
-const devRouter = require('./dev.router');
 
 const authenJwtMiddleware = require('../middlewares/authenJwt.middleware').api;
 
