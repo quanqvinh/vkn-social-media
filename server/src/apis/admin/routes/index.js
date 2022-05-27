@@ -3,7 +3,6 @@ const usersRouter = require('./users.router');
 const postsRouter = require('./posts.router');
 const userRouter = require('./user.router');
 const postRouter = require('./post.router');
-const generateRouter = require('./generate.router');
 const authenJwtMiddleware = require('../middlewares/authenJwt.middleware');
 
 module.exports = app => {
@@ -12,5 +11,4 @@ module.exports = app => {
     app.use('/v1/posts', authenJwtMiddleware, postsRouter);
     app.use('/v1/user', authenJwtMiddleware, userRouter);
     app.use('/v1/post', authenJwtMiddleware, postRouter);
-    app.use('/v1/generate', generateRouter);
 };
