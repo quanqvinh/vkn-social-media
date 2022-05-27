@@ -1,1 +1,1 @@
-api-user: npm run api-user
+web: npm run api-user
