@@ -11,5 +11,4 @@ module.exports = app => {
     app.use('/v1/user', authenJwtMiddleware, userRouter);
     app.use('/v1/post', authenJwtMiddleware, postRouter);
     app.use('/v1/room', authenJwtMiddleware, roomRouter);
-    app.use('/', (req, res) => res.send('Welcome to VKN API'));
 };
