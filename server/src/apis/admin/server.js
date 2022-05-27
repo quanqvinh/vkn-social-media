@@ -17,5 +17,5 @@ route(app);
 const port = process.env.PORT || 7071;
 const host = '0.0.0.0';
 app.listen(port, host, () => {
-    console.log(`Admin server is listening at https://${host}:${port}/v1`);
+    console.log(`Admin server is running in port ${port}`);
 });

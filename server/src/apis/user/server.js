@@ -29,5 +29,5 @@ socketHandler(io);
 const port = process.env.PORT || 7070;
 const host = '0.0.0.0';
 server.listen(port, host, () => {
-    console.log(`User server is listening at https://${host}:${port}`);
+    console.log(`User server is running in port ${port}`);
 });
