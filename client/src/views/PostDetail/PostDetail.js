@@ -102,12 +102,12 @@ const PostDetail = props => {
 
     const handelSendCmt = () => {
         if (cmtContent && !socket) return;
-
+        let replyIndex = cmtContent.indexOf(' ');
         if (JSON.stringify(receiverReply) !== '{}') {
             console.log(receiverReply);
             socket.emit('post:reply_comment', {
                 ...receiverReply,
-                content: cmtContent.split(' ')[1]
+                content: cmtContent.slice(replyIndex + 1)
             });
 
             const newListCmts = listCmts.map(cmt => {
@@ -120,7 +120,7 @@ const PostDetail = props => {
                                 _id: receiverReply.replyUserId,
                                 username: receiverReply.commentOwnerUsername
                             },
-                            content: cmtContent.split(' ')[1],
+                            content: cmtContent.slice(replyIndex + 1),
                             createdAt: new Date().toLocaleString(),
                             _id: Date.now()
                         }
