@@ -30,7 +30,7 @@ const io = require('socket.io')(server, {
 const socketHandler = require('./listeners');
 
 socketHandler(io);
-const port = process.env.USER_PORT || process.env.PORT || 7070;
+const port = process.env.PORT || process.env.USER_PORT || 7070;
 const host = '0.0.0.0';
 server.listen(port, host, () => {
     console.log(`User server is listening at http://localhost:${port}/v1`);
