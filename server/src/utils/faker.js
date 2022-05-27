@@ -34,6 +34,16 @@ function randomImageType() {
     return imageType[Math.floor(Math.random() * imageType.length)];
 }
 
+function splitArray(arr, size = 250) {
+    let start = 0;
+    let result = [];
+    for (let end; start < arr.length; start += size) {
+        end = start + size <= arr.length ? start + size : arr.length;
+        result.push(arr.slice(start, end));
+    }
+    return result;
+}
+
 module.exports = {
     async clearAllData() {
         await mongodbHelper.executeTransactionWithRetry({
