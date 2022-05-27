@@ -6,7 +6,6 @@
     "scripts": {
         "test-user": "nodemon --inspect src/apis/user/server.js",
         "test-admin": "nodemon --inspect src/apis/admin/server.js",
-        "postinstall": "npm run build",
         "start-user": "node src/apis/user/server.js",
         "start-admin": "node src/apis/admin/server.js",
         "prettier": "prettier --write .",

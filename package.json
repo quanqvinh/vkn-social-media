@@ -10,7 +10,7 @@
         "api-admin": "cd server && npm run start-admin",
         "test-api-user": "cd server && npm run test-user",
         "test-api-admin": "cd server && npm run test-admin",
-        "postinstall": "cd server && npm install --force && cd ../client && npm install --force",
+        "postinstall": "cd server && npm install --force",
         "prepare": "husky install",
         "prettier": "prettier --write .",
         "pretty-quick": "pretty-quick --staged"
