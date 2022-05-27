@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-
+console.log(process.env);
 const db = require('../../config/database');
 db.connect(process.env.STRING_CONNECTION);
 
