@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-
+console.log(process.env.NODE_ENV);
 const db = require('../../config/database');
 db.connect(process.env.STRING_CONNECTION);
 
@@ -30,8 +30,7 @@ const io = require('socket.io')(server, {
 const socketHandler = require('./listeners');
 
 socketHandler(io);
-const port = process.env.USER_PORT;
-const host = process.env.HOST;
-server.listen(port, host, () => {
-    console.log(`User server is listening at http://${host}:${port}/v1`);
+const port = process.env.USER_PORT || 7070;
+server.listen(port, () => {
+    console.log(`User server is listening at http://localhost:${port}/v1`);
 });

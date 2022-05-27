@@ -18,8 +18,7 @@ app.use(morgan('tiny'));
 
 route(app);
 
-const port = process.env.ADMIN_PORT;
-const host = process.env.HOST;
-app.listen(port, host, () => {
-    console.log(`Admin server is listening at http://${host}:${port}/v1`);
+const port = process.env.ADMIN_PORT || 7071;
+app.listen(port, () => {
+    console.log(`Admin server is listening at http://localhost:${port}/v1`);
 });
