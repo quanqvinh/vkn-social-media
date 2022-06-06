@@ -2,11 +2,11 @@
 
 Hello everybody, welcome to our project: Build a social-media using MERN stack
 # What technologies we use to build this project
-- Mongodb: 
-- Expressjs
-- Reactjs: A library of javascript which has a strong effectiveness support to build UI in website. 
-- Nodejs
-- Socket io
+- ReactJS
+- NodeJS
+- ExpressJS
+- SocketIO
+- Mongoose/MongoDB 
 # What we do in this app
 - Authen using jwt.
 - Limit time token jwt and refresh using refresh token.
