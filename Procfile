@@ -1,1 +1,1 @@
-web: npm run api-admin
+web: npm run api-user
