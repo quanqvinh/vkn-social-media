@@ -20,7 +20,8 @@ async function sendVerify({ to, username, token }) {
             subject: 'VKN verification email',
             html: await hbs.render('./src/templates/verify.mail.hbs', {
                 token,
-                username
+                username,
+                clientDomain: process.env.CLIENT_DOMAIN
             }),
             attachments: [
                 {
@@ -47,7 +48,8 @@ async function sendResetPassword({ to, username, token }) {
             subject: 'VKN reset password email',
             html: await hbs.render('./src/templates/resetPassword.mail.hbs', {
                 token,
-                username
+                username,
+                clientDomain: process.env.CLIENT_DOMAIN
             }),
             attachments: [
                 {
@@ -76,7 +78,8 @@ async function sendWelcomeToNewAccount({ to, username, name, password, isAdmin }
                 username,
                 password,
                 name,
-                role: isAdmin ? 'admin' : 'user'
+                role: isAdmin ? 'admin' : 'user',
+                clientDomain: process.env.CLIENT_DOMAIN
             }),
             attachments: [
                 {

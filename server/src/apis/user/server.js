@@ -1,10 +1,7 @@
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-
 const db = require('../../config/database');
 db.connect(process.env.STRING_CONNECTION);
 
 const express = require('express');
-const morgan = require('morgan');
 const cors = require('cors');
 
 // ExpressJS
@@ -15,7 +12,6 @@ app.use(cors());
 app.use(express.static(__dirname + '/../../../resources'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(morgan('tiny'));
 route(app);
 
 // Socket.IO
@@ -30,8 +26,8 @@ const io = require('socket.io')(server, {
 const socketHandler = require('./listeners');
 
 socketHandler(io);
-const port = process.env.USER_PORT;
-const host = process.env.HOST;
+const port = process.env.PORT || 7070;
+const host = '0.0.0.0';
 server.listen(port, host, () => {
-    console.log(`User server is listening at http://${host}:${port}/v1`);
+    console.log(`User server is running in port ${port}`);
 });
