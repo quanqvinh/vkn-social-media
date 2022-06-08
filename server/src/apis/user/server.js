@@ -8,7 +8,12 @@ const cors = require('cors');
 const app = express();
 const route = require('./routes');
 
-app.use(cors());
+app.use(
+    cors({
+        origin: 'https://vkn.netlify.app',
+        optionsSuccessStatus: 200
+    })
+);
 app.use(express.static(__dirname + '/../../../resources'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
