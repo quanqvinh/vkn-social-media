@@ -14,7 +14,7 @@ Password: **Laron_Turner**\
 - SocketIO
 - Mongoose/MongoDB 
 ## Deployment
-Front-end: Netlify
+Front-end: Netlify\
 Back-end: Heroku
 ## What we do in this app
 - Authen using jwt.
