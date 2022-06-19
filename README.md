@@ -1,13 +1,22 @@
 # vkn-social-media
+Hello everybody, welcome to our project: Build a social-media using MERN stack.
+Access our website here: [VKN](https://vkn.netlify.app)
 
-Hello everybody, welcome to our project: Build a social-media using MERN stack
-# What technologies we use to build this project
+For testing, you can sign up new username or use account below:
+Username: **Laron_Turner**
+Password: **Laron_Turner**
+; or you can login with any users searched in VKN with password matches username (like Laron_Turner).
+
+## What technologies we use to build this project
 - ReactJS
 - NodeJS
 - ExpressJS
 - SocketIO
 - Mongoose/MongoDB 
-# What we do in this app
+## Deployment
+Front-end: Netlify
+Back-end: Heroku
+## What we do in this app
 - Authen using jwt.
 - Limit time token jwt and refresh using refresh token.
 - Permission admin and user when login.
