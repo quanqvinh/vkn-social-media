@@ -1,10 +1,10 @@
 # vkn-social-media
-Hello everybody, welcome to our project: Build a social-media using MERN stack.
-Access our website here: [VKN](https://vkn.netlify.app)
-
-For testing, you can sign up new username or use account below:
-Username: **Laron_Turner**
-Password: **Laron_Turner**
+Hello everybody, welcome to our project: Build a social-media using MERN stack.\
+Click [here](https://vkn.netlify.app) to visit deployed website!\
+\
+For testing, you can sign up new username or use account below:\
+Username: **Laron_Turner**\
+Password: **Laron_Turner**\
 ; or you can login with any users searched in VKN with password matches username (like Laron_Turner).
 
 ## What technologies we use to build this project
