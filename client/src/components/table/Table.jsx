@@ -13,7 +13,7 @@ const Table = props => {
   };
 
   return (
-    <div>
+    <div className="flex">
       <div className="table-wrapper">
         <table>
           {props.headData && props.renderHead ? (

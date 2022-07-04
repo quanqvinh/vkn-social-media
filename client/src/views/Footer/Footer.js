@@ -16,7 +16,7 @@ function Footer() {
                 <li>Hashtags</li>
                 <li>Language</li>
             </ul>
-            <div className="copyright">@ 2020 INSTAGRAM FROM FACEBOOK</div>
+            <div className="copyright">@ 2022 VKN</div>
         </div>
     );
 }

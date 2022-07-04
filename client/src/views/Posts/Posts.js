@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import postApi from '../../apis/postApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotificationsRequest } from '../../actions/notification';
+import env from 'react-dotenv';
 
 function Posts(props) {
     const user = useSelector(state => state.user);
@@ -15,10 +16,8 @@ function Posts(props) {
         const fetchPost = async () => {
             try {
                 const res = await postApi.newFeeds();
-
                 res?.status === 'success' && setPosts([...res.posts]);
 
-                console.log(res);
                 dispatch(fetchNotificationsRequest(res.uncheckedNotifications));
             } catch (error) {
                 console.log(error.message);

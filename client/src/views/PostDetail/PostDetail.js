@@ -14,6 +14,7 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { SOCKET } from '../../App';
 import postApi from '../../apis/postApi';
+import env from 'react-dotenv';
 
 let checkLoopCmts = false;
 const PostDetail = props => {
@@ -105,9 +106,10 @@ const PostDetail = props => {
 
         if (JSON.stringify(receiverReply) !== '{}') {
             console.log(receiverReply);
+            let indexReply = cmtContent.indexOf(' ');
             socket.emit('post:reply_comment', {
                 ...receiverReply,
-                content: cmtContent.split(' ')[1]
+                content: cmtContent.slice(indexReply + 1)
             });
 
             const newListCmts = listCmts.map(cmt => {
@@ -120,7 +122,7 @@ const PostDetail = props => {
                                 _id: receiverReply.replyUserId,
                                 username: receiverReply.commentOwnerUsername
                             },
-                            content: cmtContent.split(' ')[1],
+                            content: cmtContent.slice(indexReply + 1),
                             createdAt: new Date().toLocaleString(),
                             _id: Date.now()
                         }

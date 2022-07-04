@@ -11,6 +11,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import userApi from '../../apis/userApi';
 import { editUser } from '../../actions/user';
 import LeftNav from './LeftNav/LeftNav';
+import env from 'react-dotenv';
 
 const EditProfile = () => {
     const dispatch = useDispatch();

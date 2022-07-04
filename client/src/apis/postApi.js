@@ -14,8 +14,6 @@ const postApi = {
     newFeeds: () => {
         const url = '/post/new-feed';
         let accessToken = getCookie('accessToken');
-        console.log('accesstoken new-ffeed', accessToken);
-        console.log('');
         return axiosClient.get(url, {
             headers: { 'access-token': accessToken }
         });

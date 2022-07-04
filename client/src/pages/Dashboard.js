@@ -48,8 +48,9 @@ const Dashboard = () => {
         if (!users || !posts) return;
 
         for (let i = users.length - 12; i < users.length; i++) {
+            console.log(users[i]);
             newUsers.push(users[i].amountNewUsers);
-            newPosts.push(posts[i].amountNewPosts);
+            newPosts.push(posts[i]?.amountNewPosts);
         }
 
         return {

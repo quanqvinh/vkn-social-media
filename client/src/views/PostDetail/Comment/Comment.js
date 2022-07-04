@@ -4,6 +4,7 @@ import avatar from '../../../assets/images/profile.jpg';
 import './comment.scss';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useSelector } from 'react-redux';
+import env from 'react-dotenv';
 
 const Comment = props => {
     const { handelReply, caption, cmt, disableReply, postOwner } = props;

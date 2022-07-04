@@ -5,6 +5,7 @@ import ListsOnline from './ListsOnline/ListsOnline';
 import Footer from '../Footer/Footer';
 import image from '../../assets/images/profile.jpg';
 import { useSelector } from 'react-redux';
+import env from 'react-dotenv';
 
 function Sidebar({ listOnline }) {
     const user = useSelector(state => state.user);
@@ -16,7 +17,6 @@ function Sidebar({ listOnline }) {
                     userId={user._id}
                     username={user.username}
                     name={user.name || 'null'}
-                    urlText="Switch"
                     iconSize="big"
                     image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
                     storyBorder={true}

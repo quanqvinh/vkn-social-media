@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import ProfilePreview from '../Profile/ProfilePreview/ProfilePreview';
 import userApi from '../../apis/userApi';
+import env from 'react-dotenv';
 
 const $ = document.querySelector.bind(document);
 
@@ -93,7 +94,7 @@ function Header() {
                                         userId={user._id}
                                         image={
                                             process.env.REACT_APP_STATIC_URL +
-                                            `/avatars/${user._id}.png`
+                                            `/avatars/${user?._id}.png`
                                         }
                                         iconSize="medium"
                                         username={user.username}

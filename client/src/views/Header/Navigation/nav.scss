@@ -45,6 +45,7 @@ a.navLink--active {
 
   .profileIcon {
     margin-top: -3px;
+    object-fit: cover;
   }
 
   .profile__option {
@@ -246,6 +247,7 @@ a.navLink--active {
           .profileIcon {
             width: 45px;
             height: 45px;
+            object-fit: cover;
           }
         }
 

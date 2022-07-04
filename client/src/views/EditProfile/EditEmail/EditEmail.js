@@ -6,6 +6,7 @@ import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
 import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import userApi from '../../../apis/userApi';
+import env from 'react-dotenv';
 
 const EditEmail = () => {
     const user = useSelector(state => state.user);

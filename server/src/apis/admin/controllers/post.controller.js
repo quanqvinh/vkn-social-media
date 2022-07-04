@@ -36,7 +36,7 @@ module.exports = {
                     'createdAt'
                 ].includes(sortBy)
             )
-                sortBy = 'createdAt';
+                sortBy = 'numberOfReports';
             if (order !== 'asc' && order !== 'desc') order = 'asc';
 
             let [posts, count] = await Promise.all([

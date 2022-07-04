@@ -6,6 +6,8 @@ import './sidebar.css';
 
 import sidebar_items from '../../assets/JsonData/sidebar_routes.json';
 
+import env from 'react-dotenv';
+
 import { useSelector } from 'react-redux';
 const SidebarItem = props => {
   const active = props.active ? 'active' : '';

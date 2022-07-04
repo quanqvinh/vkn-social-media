@@ -2,7 +2,6 @@ import axios from 'axios';
 import queryString from 'query-string';
 import Qs from 'qs';
 
-console.log(process.env.REACT_APP_API_URL_ADMIN);
 const axiosAdmin = axios.create({
     baseURL: process.env.REACT_APP_API_URL_ADMIN,
     headers: {

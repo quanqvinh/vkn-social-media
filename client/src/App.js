@@ -32,7 +32,10 @@ function App() {
     const [listOnlineInit, setListOnlineInit] = useState([]);
 
     useEffect(() => {
-        if (sessionStorage.getItem('USER_INFO') === null) return;
+        if (sessionStorage.getItem('USER_INFO') === null) {
+            console.log('null');
+            return;
+        }
 
         const socket = io('http://localhost:7070', {
             auth: {

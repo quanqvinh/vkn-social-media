@@ -5,7 +5,6 @@ const userApi = {
     get: params => {
         const url = `/user/me/profile`;
         let accessToken = getCookie('accessToken');
-        console.log('token get', accessToken);
         return axiosClient.get(url, {
             params,
             headers: { 'access-token': accessToken }
@@ -57,7 +56,6 @@ const userApi = {
     changeAvatar: data => {
         const url = '/user/upload/avatar';
         let accessToken = getCookie('accessToken');
-        console.log('token in userapi', accessToken);
         return axiosClient.post(url, data, {
             headers: {
                 'content-type': 'multipart/form-data',

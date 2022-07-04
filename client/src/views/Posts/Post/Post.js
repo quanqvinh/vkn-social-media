@@ -10,6 +10,7 @@ import { useRef, useState, useContext, useCallback } from 'react';
 import PostDetail from '../../PostDetail/PostDetail';
 import { SOCKET } from '../../../App';
 import postApi from '../../../apis/postApi';
+import env from 'react-dotenv';
 
 const $ = document.querySelector.bind(document);
 const dataReport = [

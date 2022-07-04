@@ -8,6 +8,7 @@ import authApi from '../../apis/authApi';
 
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
+import env from 'react-dotenv';
 
 export default function Signup() {
     const [resMessage, setResMessage] = useState('');
@@ -79,7 +80,12 @@ export default function Signup() {
                     <div className="form__area">
                         <div className="form">
                             <div className="form__logo">
-                                <img src={logo} alt="" />
+                                <img
+                                    src={
+                                        process.env.REACT_APP_STATIC_URL + `/defaults/logo_dark.png`
+                                    }
+                                    alt=""
+                                />
                             </div>
                             <h4>Sign up to see photos and videos from your friends.</h4>
                             <form onSubmit={handleSubmit(onSubmit)}>

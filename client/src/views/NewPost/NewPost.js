@@ -9,6 +9,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 import postApi from '../../apis/postApi';
 import { useSelector } from 'react-redux';
+import env from 'react-dotenv';
 
 const NewPost = props => {
     const { iconSize, handelClickNewPost } = props;

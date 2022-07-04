@@ -1,5 +1,6 @@
 import './listsOnline.scss';
 import ProfilePreview from '../../Profile/ProfilePreview/ProfilePreview';
+import env from 'react-dotenv';
 
 function ListsOnline({ listOnline }) {
     return (

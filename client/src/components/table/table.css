@@ -28,6 +28,12 @@ tbody > tr:hover {
   color: var(--txt-white);
 }
 
+.flex {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .table__pagination {
   display: flex;
   width: 100%;
@@ -35,6 +41,7 @@ tbody > tr:hover {
   align-items: center;
   margin-top: 10px;
   user-select: none;
+  margin-top: 20px;
 }
 
 .table__pagination-item ~ .table__pagination-item {

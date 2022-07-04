@@ -23,6 +23,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import friendApi from '../../../apis/friendApi';
 import { checkNotifications, formatNotifications } from '../../../actions/notification';
 import PostDetail from '../../PostDetail/PostDetail';
+import env from 'react-dotenv';
 
 const clickOutsideRef = (content_ref, toggle_ref) => {
     document.addEventListener('mousedown', e => {
@@ -235,7 +236,7 @@ function Nav() {
                                         iconSize="medium"
                                         image={
                                             process.env.REACT_APP_STATIC_URL +
-                                            `/avatars/${noti.requestedUserId}.png`
+                                            `/avatars/${noti?.requestedUserId}.png`
                                         }
                                     />
                                     {noti.type.includes('add_friend') && (
@@ -274,7 +275,7 @@ function Nav() {
                 <div className="profile" onClick={() => setIsDropDown(!isDropDown)}>
                     <ProfileIcon
                         iconSize="small"
-                        image={process.env.REACT_APP_STATIC_URL + `/avatars/${user._id}.png`}
+                        image={process.env.REACT_APP_STATIC_URL + `/avatars/${user?._id}.png`}
                     />
                 </div>
 

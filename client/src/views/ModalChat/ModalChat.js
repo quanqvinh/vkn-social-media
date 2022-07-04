@@ -6,6 +6,8 @@ import ProfilePreview from '../Profile/ProfilePreview/ProfilePreview';
 import './modalchat.scss';
 import { useState, useRef } from 'react';
 import userApi from '../../apis/userApi';
+import env from 'react-dotenv';
+
 const style = {
     position: 'absolute',
     top: '50%',

@@ -200,7 +200,7 @@ module.exports = {
                         [
                             {
                                 _id,
-                                userId: req.auth.userId,
+                                user: req.auth.userId,
                                 tag: postId,
                                 content
                             }

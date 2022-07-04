@@ -11,6 +11,8 @@ import userApi from '../../apis/userApi';
 import avatarDefault from '../../assets/images/avatar_default.png';
 import { SOCKET } from '../../App';
 import friendApi from '../../apis/friendApi';
+import env from 'react-dotenv';
+
 const $ = document.querySelector.bind(document);
 
 const ProfilePage = () => {
@@ -190,7 +192,7 @@ const ProfilePage = () => {
                             postSelected.isSelected ? 'profile__body--open-post' : ''
                         }`}>
                         <div className="list-posts">
-                            {posts?.length &&
+                            {posts?.length > 0 &&
                                 posts.map(post => (
                                     <div
                                         className="post"

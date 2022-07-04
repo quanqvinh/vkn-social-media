@@ -75,7 +75,7 @@ const Posts = () => {
                         ...res.data.map(post => {
                             return {
                                 _id: post._id,
-                                author: post.user.username,
+                                author: post.user,
                                 caption: post.caption,
                                 likes: post.numberOfLikes,
                                 comments: post.numberOfComments,
@@ -107,6 +107,7 @@ const Posts = () => {
                     numberRowPerPage: 5,
                     pageNumber: currentPage
                 });
+
                 console.log(res);
                 setPosts({
                     head: [...posts.head],
@@ -114,7 +115,7 @@ const Posts = () => {
                         ...res.data.map(post => {
                             return {
                                 _id: post._id,
-                                author: post.user.username,
+                                author: post.user,
                                 caption: post.caption,
                                 likes: post.numberOfLikes,
                                 comments: post.numberOfComments,

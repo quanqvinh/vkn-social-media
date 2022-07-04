@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { getCookie } from '../Global/cookie';
+import env from 'react-dotenv';
 
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
@@ -80,7 +81,6 @@ export default function Login() {
                 setCookie('refreshToken', refreshToken, 3);
                 sessionStorage.setItem('STATE_PAGE', 'home');
 
-                console.log(res);
                 if (res.data.isAdmin) {
                     sessionStorage.setItem('USER_INFO', JSON.stringify({ ...res.data }));
 
@@ -152,7 +152,12 @@ export default function Login() {
                     <div className="form__area">
                         <div className="form">
                             <div className="form__logo">
-                                <img src={logo} alt="" />
+                                <img
+                                    src={
+                                        process.env.REACT_APP_STATIC_URL + `/defaults/logo_dark.png`
+                                    }
+                                    alt=""
+                                />
                             </div>
                             <form onSubmit={handelLogin}>
                                 <div className="form__field">

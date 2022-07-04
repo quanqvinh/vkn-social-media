@@ -8,6 +8,7 @@ import Table from '../table/Table';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Popup from '../popup/Popup';
+import env from 'react-dotenv';
 
 const Profile = ({ userId, element }) => {
     const [user, setUser] = useState(null);

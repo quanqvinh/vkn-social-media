@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { memo } from 'react';
 import { useRef } from 'react';
 import userApi from '../../../apis/userApi';
+import env from 'react-dotenv';
 
 const ChatRoom = props => {
     const user = useSelector(state => state.user);

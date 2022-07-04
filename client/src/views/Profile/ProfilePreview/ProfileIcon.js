@@ -4,8 +4,7 @@ import avatarDefault from '../../../assets/images/avatar_default.png';
 
 function ProfileIcon(props) {
     const { iconSize, storyBorder, image } = props;
-
-    let profileImage = image ? image : avatarDefault;
+    let profileImage = !image.includes('undefined') ? image : avatarDefault;
 
     const setDefault = e => {
         // console.clear();
